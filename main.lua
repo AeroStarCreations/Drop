@@ -1,7 +1,5 @@
 --require "CiderDebugger";
 
--- TEST
-
 display.setStatusBar(display.HiddenStatusBar)
 
 local cp = require( "composer" )
