@@ -147,15 +147,14 @@ if g.first.useA == nil then --First release!! Add a new function for each releas
     g.stats:save()
     g.achievement:save()
     g.leaderboard:save()
-    --parse:logEvent( "Downloads", { ["screen"] = g.platformType } )
 end
 
 audio.setVolume (g.gameSettings.volume )
 
-local gn = require( "gameNetworks" ) --This is down here because "gameNetworks" 
---uses "g." variables which are not created until above
+local gn = require( "gameNetworks" ) -- This is down here because "gameNetworks" 
+--------------------------------------- uses "g." variables which are not created until above
 
-----------------------The following creates and organizes the background images.
+-- The following creates and organizes the background images.
 local bgImages = {
     [1] = "images/bg.png",
     [2] = "images/bg2.png",
@@ -179,7 +178,7 @@ for i = 1,7 do
 end
 
 g.bg[1].alpha = 1
--------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 -- counts when the next ad should be displayed
 g.getsReward = false
@@ -191,6 +190,12 @@ g.adDone = false
 gn.login()
 
 --------------------------------------------------------------------------------
+
+testText = display.newText( "...", display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight, native.systemFont, 30)
+testText.toFront();
+
+--------------------------------------------------------------------------------
+
 
 ----------------------The following takes the user to the first "scene", center.
 cp.recycleOnSceneChange = false
