@@ -191,7 +191,7 @@ gn.login()
 
 --------------------------------------------------------------------------------
 
-testText = display.newText( "...", display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight, native.systemFont, 30)
+testText = display.newText( "NIRAO;VBAIRUO;VBAOR;", display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight, native.systemFont, 30)
 testText.toFront();
 
 --------------------------------------------------------------------------------

@@ -218,7 +218,7 @@ function scene:create( event )
     group:insert( extras )
     extras.anchorX = 0; extras.anchorY = 1
     -------------------------------------------------------------
-    
+
 end
 
 function scene:show( event )
