@@ -1,69 +1,96 @@
---Center
-
 local cp = require( "composer" )
 local scene = cp.newScene()
-local g = require( "globalVariables" )
 local widget = require( "widget" )
+local g = require( "globalVariables" )
 local t = require( "transitions" )
 local GGTwitter = require( "GGTwitter" )
 
--------Precalls 
-local asc
+
+--Precalls
 local drop
-local arrow
+local backArrow
+local asc
+local lineTop
+local lineBottom
+local bio
 local fb
 local twit
-local settings
-local extras
-local rotate
-------- 
+----------
 
 
 function scene:create( event )
+
     local group = self.view
     
     g.create()
     
-    --------------------------------------------Aero Star Creations
-    asc = display.newText( "Aero Star Creations", display.contentCenterX, display.contentHeight+50, g.comBold, 30)
-    asc:setFillColor( unpack(g.purple) )
-    group:insert(asc)
-    ---------------------------------------------------------------
-    
-    --------------------------------------------Drop Logo
+    ------------------------------------------Logo
     drop = display.newImageRect( "images/name.png", 1020, 390 )
     local dropRatio = drop.height/drop.width
     drop.width = 0.77*display.contentWidth; drop.height = drop.width*dropRatio
-    drop.x, drop.y = display.contentCenterX, -drop.height
+    drop.x, drop.y = display.contentCenterX, 0.06*display.contentHeight+1
+    drop.xScale, drop.yScale = 0.47, 0.47
     group:insert(drop)
-    -----------------------------------------------------
+    ----------------------------------------------
     
-    --------------------------------------------Arrow
-    local arrowW, arrowH = 352, 457
-    g.arrowRatio = arrowW/arrowH
-    
-    local function arrowFunction( event )
-        g.goingToGame = true
-        Runtime:removeEventListener( "accelerometer", rotate )
-        t.transOutCenter( asc, drop, arrow, fb, twit, extras, settings )
+    ------------------------------------Back Arrow
+    local function baf( event )
+        t.transOutAboutASC( ascLogo, lineTop, lineBottom, asc, bio, fb, twit )
+        print( "Arrow Pressed" )
     end
     
-    arrow = widget.newButton {
-        id = "arrow",
-        x = display.contentCenterX+17,
-        y = display.contentCenterY,
-        width = arrowW,
-        height = arrowH,
+    backArrow = widget.newButton{
+        id = "backArrow",
+        x = 90,
+        y = 0,
+        width = 100*g.arrowRatio,
+        height = 100,
         defaultFile = "images/arrow.png",
         overFile = "images/arrowD.png",
-        onRelease = arrowFunction,
+        onRelease = baf,
     }
-    group:insert(arrow)
-    arrow.xScale, arrow.yScale = 0.01, 0.01
-    -------------------------------------------------
-    
-    --------------------------------------------Social Buttons
-    --MAKE A NEW FILE FOR OFFICIAL FACEBOOK AND TWITTER FUNCTIONS
+    backArrow.rotation = 180
+    backArrow.x = drop.x-0.5*drop.width
+    backArrow.y = drop.y - 7
+    group:insert(backArrow)
+    ----------------------------------------------
+
+    --------------------------------------ASC Logo
+    ascLogo = display.newImageRect( group, "images/ASClogo.png", 266, 266 )
+    ascLogo.width, ascLogo.height = 0.53*drop.height, 0.53*drop.height
+    ascLogo.x = display.contentWidth + 0.5*ascLogo.width
+    ascLogo.y = backArrow.y + 10
+    ascLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
+    ----------------------------------------------
+
+    -------------------------"Aero Star Creations"
+    asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, g.comBold, 70, "center")
+    asc:setFillColor( unpack(g.purple) )
+    asc.y = 2*drop.y + 0.5*asc.height
+    asc.alpha = 0
+    ----------------------------------------------
+
+    -----------------------------------------Lines
+    lineTop = display.newLine( group, 0, drop.y*2, display.contentWidth, drop.y*2 )
+    lineTop:setStrokeColor( unpack( g.purple ) )
+    lineTop.strokeWidth = 2
+    lineTop.x = -display.contentWidth
+
+    lineBottom = display.newLine( group, 0, lineTop.y+2*(asc.y-lineTop.y), display.contentWidth, lineTop.y+2*(asc.y-lineTop.y) )
+    lineBottom:setStrokeColor( unpack( g.purple ) )
+    lineBottom.strokeWidth = 2
+    lineBottom.x = display.contentWidth
+    ----------------------------------------------
+
+    ------------------------------------------Text
+    bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, g.comRegular, 26, "center")
+    bio:setFillColor( 0, 0, 0 )
+    bio.anchorY = 0
+    bio.text = "\n\nHello!  I'm Nathan Balli, the little man behind Aero Star Creations.  I hope you've enjoyed Drop so far!  I had an incredible time developing the game.  Now here's a bit about myself:\n\nWhen I was 15 (5 years ago) I began teaching myself how to develop mobile applications using Corona Labs.  I have quite a few hobbies, including soccer and ukulele, and app developing is one of my favorites.  I originally planned on pursuing a future in aeronautical engineering, but my little big randevu with app developing changed my mind.  Now I'm a second-year Computer Science and Engineering undergrad at The Ohio State University.  No regrets!  I have a long way to go, but I'm loving it thus far.  Mobile app development is completely separate from my schooling, so I have to make time for both. However, I won't be stopping either any time soon!  Like my page on Facebook or follow me on Twitter to stay up-to-date on the latest ASC news such as upcoming updates and apps.  Also feel free to contact me with suggestions!  I love hearing back from users.  It's the best way to make the best apps. \n\n\t\tThank you!\n\t\t\tNathan Balli"
+    bio.alpha = 0
+    ----------------------------------------------
+
+    --------------------------------Social Buttons
     local function fbFunction (event)
         if event.phase == "began" then
             fb.xScale = 1.4; fb.yScale = 1.4
@@ -157,7 +184,7 @@ function scene:create( event )
     fb = widget.newButton {
         id = "fb",
         x = -120,
-        y = 0.8*display.contentHeight,
+        y = bio.y + bio.height + 0.5*(display.contentHeight - (bio.y + bio.height)),
         width = 120,
         height = 120,
         defaultFile = "images/facebook.png",
@@ -177,113 +204,55 @@ function scene:create( event )
         onEvent = twitFunction,
     }
     group:insert(twit)
-    -------------------------------------------------------------
-    
-    -----------------------------------------------------Settings
-    local function settingsFunction (event)
-        g.goingToSettings = true
-        t.transOutCenter(asc, drop, arrow, fb, twit, extras, settings)
-    end
-    
-    settings = widget.newButton {
-        id = "settings",
-        x = display.contentWidth + 200,
-        y = display.contentHeight + 200,
-        width = 120,
-        height = 120,
-        defaultFile = "images/settings.png",
-        overFile = "images/settingsD.png",
-        onRelease = settingsFunction,
-    }
-    group:insert( settings )
-    settings.anchorX = 1; settings.anchorY = 1
-    -------------------------------------------------------------
-    
-    ---------------------------------------------------------More
-    local function extrasFunction (event)
-        g.goingToExtras = true
-        t.transOutCenter( asc, drop, arrow, fb, twit, extras, settings )
-    end
-    
-    extras = widget.newButton {
-        id = "extras",
-        x = - 200,
-        y = display.contentHeight + 200,
-        width = 120,
-        height = 120,
-        defaultFile = "images/info.png",
-        overFile = "images/infoD.png",
-        onRelease = extrasFunction,
-    }
-    group:insert( extras )
-    extras.anchorX = 0; extras.anchorY = 1
-    -------------------------------------------------------------
-
+    ----------------------------------------------
 end
 
+
 function scene:show( event )
+
     local group = self.view
     local phase = event.phase
-    
-    if phase == "will" then
+
+    if ( phase == "will" ) then
         
-    elseif phase == "did" then
+    elseif ( phase == "did" ) then
         
         g.show()
         
-        cp.loadScene( "game" )
-        
-        -----------------------------------------Creates the accelerometer rotations
-        function rotate( event )
-            local r = -event.xGravity*90
-            fb.rotation = r
-            twit.rotation = r
-            drop.rotation = -event.xGravity*25--r*0.25
-            return true
-        end
-        local function transDone( )
-            Runtime:addEventListener( "accelerometer", rotate )
-        end
-        -----------------------------------------------------------------------------
-        
-        t.transInCenter( asc, drop, arrow, fb, twit, extras, settings, transDone )
-        
+        t.transInAboutASC( ascLogo, ascLogoX, lineTop, lineBottom, asc, bio, fb, twit )
+
     end
 end
 
+
 function scene:hide( event )
+
     local group = self.view
     local phase = event.phase
-    
-    if phase == "will" then
+
+    if ( phase == "will" ) then
         
-        g.justOpened = false
-        
-    elseif phase == "did" then
+    elseif ( phase == "did" ) then
         
         g.hide()
         
     end
-    
 end
 
+
 function scene:destroy( event )
+
+    local group = self.view
     
     g.destroy()
     
 end
 
----------------------------------------------------------------------------------
--- END OF IMPLEMENTATION
----------------------------------------------------------------------------------
 
 scene:addEventListener( "create", scene )
-
 scene:addEventListener( "show", scene )
-
 scene:addEventListener( "hide", scene )
-
 scene:addEventListener( "destroy", scene )
 
+
 return scene
----------------------------------------------------------------------------------

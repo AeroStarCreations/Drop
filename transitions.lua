@@ -181,9 +181,11 @@ end
 --------------------------------------------------------------------------Extras
 --------------------------------------------------------------------------------
 v.transInExtras = function( arrow, logo, r1, r2, r3, r4, r5, r6, listener )
+    
     local function finish()
         listener()
     end
+    
     transition.to( arrow, { time=300, x=(logo.x-0.5*logo.width), transition=easing.outQuad } )
     transition.to( r1, { time=400, xScale=1, yScale=1, transition=easing.outBack, onComplete=finish } )
     transition.to( r2, { time=400, xScale=1, yScale=1, transition=easing.outBack } )
@@ -191,6 +193,20 @@ v.transInExtras = function( arrow, logo, r1, r2, r3, r4, r5, r6, listener )
     transition.to( r4, { time=400, xScale=1, yScale=1, transition=easing.outBack } )
     transition.to( r5, { time=400, xScale=1, yScale=1, transition=easing.outBack } )
     transition.to( r6, { time=400, xScale=1, yScale=1, transition=easing.outBack } )
+end
+--------------------------------------------------------------------------------
+v.transInExtrasFromOther = function( r1, r2, r3, r4, r5, r6, coordinate, listener )
+
+    local function finish()
+        listener()
+    end
+    
+    transition.to( r1, { time=400, x=coordinate, transition=easing.outSine, onComplete=listener } )
+    transition.to( r3, { time=400, x=coordinate, transition=easing.outSine } )
+    transition.to( r5, { time=400, x=coordinate, transition=easing.outSine } )
+    transition.to( r2, { time=400, x=display.contentWidth - coordinate,transition=easing.outSine } )
+    transition.to( r4, { time=400, x=display.contentWidth - coordinate, transition=easing.outSine } )
+    transition.to( r6, { time=400, x=display.contentWidth - coordinate, transition=easing.outSine } )
 end
 --------------------------------------------------------------------------------
 v.transOutExtras = function( arrow, r1, r2, r3, r4, r5, r6 )
@@ -206,6 +222,71 @@ v.transOutExtras = function( arrow, r1, r2, r3, r4, r5, r6 )
     transition.to( r4, { time=400, xScale=0.001, yScale=0.001, transition=easing.inBack } )
     transition.to( r5, { time=400, xScale=0.001, yScale=0.001, transition=easing.inBack } )
     transition.to( r6, { time=400, xScale=0.001, yScale=0.001, transition=easing.inBack } )
+end
+--------------------------------------------------------------------------------
+v.transOutExtrasOther = function( scene, r1, r2, r3, r4, r5, r6 )
+
+    local function listener( event )
+        cp.gotoScene( scene )
+    end
+
+    transition.to( r1, { time=400, x=-0.51*r1.width, transition=easing.inSine, onComplete=listener } )
+    transition.to( r3, { time=400, x=-0.51*r3.width, transition=easing.inSine } )
+    transition.to( r5, { time=400, x=-0.51*r5.width, transition=easing.inSine } )
+    transition.to( r2, { time=400, x=display.contentWidth + 0.51*r2.width,transition=easing.inSine } )
+    transition.to( r4, { time=400, x=display.contentWidth + 0.51*r4.width, transition=easing.inSine } )
+    transition.to( r6, { time=400, x=display.contentWidth + 0.51*r6.width, transition=easing.inSine } )
+end
+--------------------------------------------------------------------------------
+v.transInAboutASC = function( logo, logoX, line1, line2, asc, text, fb, twit )
+
+    transition.to( logo, {time=500, x=logoX, transition=easing.outSine})
+    transition.to( line1, {time=600, x=0, transition=easing.outSine})
+    transition.to( line2, {time=600, x=0})
+    transition.to( asc, {time=500, alpha=1})
+    transition.to( text, {time=500, alpha=1})
+    transition.to( fb, { time=600, x=display.contentCenterX - 80, transition=easing.outQuad } )
+    transition.to( twit, { time=600, x=display.contentCenterX + 80, transition=easing.outQuad } )
+
+end
+--------------------------------------------------------------------------------
+v.transOutAboutASC = function( logo, line1, line2, asc, text, fb, twit )
+
+    local function listener( event )
+        cp.gotoScene( "extras" )
+    end
+
+    transition.to( logo, {time=500, x=display.contentWidth+0.5*logo.width, transition=easing.inSine})
+    transition.to( line1, {time=600, x=display.contentWidth, onComplete=listener})
+    transition.to( line2, {time=600, x=-display.contentWidth})
+    transition.to( asc, {time=500, alpha=0})
+    transition.to( text, {time=500, alpha=0})
+    transition.to( fb, { time=600, x=-120, transition=easing.outQuad } )
+    transition.to( twit, { time=600, x=display.contentWidth+twit.width, transition=easing.outQuad } )
+
+end
+--------------------------------------------------------------------------------
+v.transInAboutMusic = function( logo, logoX, line1, line2, jeg, text )
+
+    transition.to( logo, {time=500, x=logoX, transition=easing.outSine})
+    transition.to( line1, {time=600, x=0})
+    transition.to( line2, {time=600, x=0})
+    transition.to( jeg, {time=500, alpha=1})
+    transition.to( text, {time=500, alpha=1})
+
+end
+--------------------------------------------------------------------------------
+v.transOutAboutMusic = function( logo, line1, line2, jeg, text )
+
+    local function listener( event )
+        cp.gotoScene( "extras" )
+    end
+
+    transition.to( logo, {time=500, x=display.contentWidth+0.5*logo.width, transition=easing.inSine})
+    transition.to( line1, {time=600, x=display.contentWidth, onComplete=listener})
+    transition.to( line2, {time=600, x=-display.contentWidth})
+    transition.to( jeg, {time=500, alpha=0})
+    transition.to( text, {time=500, alpha=0})
 end
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------

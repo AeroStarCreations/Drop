@@ -63,6 +63,7 @@ function scene:create( event )
     backArrow.rotation = 180
     backArrow.x = -backArrow.width
     backArrow.y = drop.y - 7
+    group:insert(backArrow)
     ----------------------------------------------
     
     ----------------------------------------------------------------------------
@@ -118,18 +119,15 @@ function scene:create( event )
         { gap + 0.5*w, focal + 2*gap + 2.5*h },
         { display.contentWidth - gap - 0.5*w, focal + 2*gap + 2.5*h },
     }
+    xPos = unpack( coordinate[1], 1, 1 )
     
     function squareListener( event )-------------------------
         local a = tonumber( event.target.id )
         
         if event.phase == "began" then
             
-            if a ~= 5 then --This if/then statement prevents the Ad button from shrinking when it's not enabled
+            if a ~=5 or isEnabled then
                 transition.to( buttonGroup[ a ], { time=40, xScale=0.7, yScale=0.7 } )
-            elseif a == 5 then
-                if isEnabled == true then
-                    transition.to( buttonGroup[ a ], { time=40, xScale=0.7, yScale=0.7 } )
-                end
             end
             display.getCurrentStage():setFocus( event.target )
             
@@ -141,6 +139,10 @@ function scene:create( event )
                 print(event.target.id.." was pressed.")
                 if a == 1 then                          -- Game Center
                     gameNetwork.show( "leaderboards" )
+                elseif a == 3 then                      -- About ASC
+                    t.transOutExtrasOther( "aboutASC", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
+                elseif a == 4 then
+                    t.transOutExtrasOther( "aboutMusic", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 5 then                      -- Watch Ad
                     if isEnabled == true then
                         ad.buttonColor = "yellow"
@@ -279,8 +281,12 @@ function scene:show( event )
         adTimer = timer.performWithDelay( 1000, listener, -1 )
         ------------------------------------------------------------------------
         
-        t.transInExtras( backArrow, drop, buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6], addListeners )
-        
+        if cp.getSceneName( "previous" ) == "center" then
+            t.transInExtras( backArrow, drop, buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6], addListeners )
+        else
+            t.transInExtrasFromOther( buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6], xPos, addListeners )
+        end
+
     end
 end
 

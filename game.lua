@@ -87,8 +87,8 @@ function scene:create( event )
     arrowShapeSmall = { 32.54,-8.35, 36.4,-0.236, 32.54,8.194, -24.503,53.576, -36.4,49.084, -36.4,-49.16, -24.50,-53.497 }
     arrowShapeLarge = { 50.06,-12.85, 56,-0.3636, 50.06,12.606, -37.697,82.42, -56,75.515, -56,-75.636, -37.697,-82.303 }
     arrowShape = arrowShapeRegular
-    g.arrowWidth = 68   --Largest number in "arrowShape" table. Used for arrow 
-    --teleportation. Change when scale changes.
+    g.arrowWidth = 68   -- Largest number in "arrowShape" table. Used for arrow 
+    ---------------------- teleportation. Change when scale changes.
     
     
     ------------------------------------------------------------Opaque Rectangle
@@ -429,7 +429,9 @@ function scene:create( event )
     local function redListener( event )-------------------------------
         print( "Red pressed" )
         ad.buttonColor = "red"
-        ad.showAd()
+        if not g.buy.ads then
+            ad.showAd()
+        end
         --while( not g.adDone ) do end
         --g.adDone = false
         cp.gotoScene( "center" )
@@ -437,7 +439,9 @@ function scene:create( event )
     local function blueListener( event )------------------------------
         print( "Blue pressed" )
         ad.buttonColor = "blue"
-        ad.showAd()
+        if not g.buy.ads then
+            ad.showAd()
+        end
         --while( not g.adDone ) do end
         --g.adDone = false
         --g.restart()
@@ -887,7 +891,7 @@ function scene:show( event )
                 if event.phase == "moved" then
                     local dy = event.yStart - event.y
                     if dy > 200 and invincibility == false and g.buy.invincibility > 0 then
-                        invincibilityFunction()
+                        invincibilityFunction( 5000 )
                         g.buy.invincibility = g.buy.invincibility - 1
                         g.buy:save()
                         g.iconInvinceText.text = g.buy.invincibility
@@ -924,7 +928,7 @@ function scene:show( event )
         Runtime:addEventListener( "enterFrame", scaler )
         
         -----------------------------------------------------------Invincibility
-        function invincibilityFunction()
+        function invincibilityFunction( time )
             invincibility = true
             arrow.alpha = 0.5
             if invincibilityTimer then
@@ -935,7 +939,7 @@ function scene:show( event )
                 arrow.alpha = 1
                 timerIndex[1] = nil
             end
-            invincibilityTimer = timer.performWithDelay( 10000, listener )
+            invincibilityTimer = timer.performWithDelay( time, listener )
             timerIndex[1] = invincibilityTimer
             g.stats.invinces = g.stats.invinces + 1
             g.stats:save()
@@ -1200,7 +1204,7 @@ function scene:show( event )
                             elseif p == "2" then
                                 score = score - 3000 * multiplier
                             elseif p == "3" then
-                                invincibilityFunction()
+                                invincibilityFunction( 10000 )
                             elseif p == "4" then
                                 if scaleTimer then
                                     timer.cancel( scaleTimer )

@@ -50,6 +50,7 @@ v.comBold = v.fontManager:get("Comfortaa Bold")
 --The following are specified app colors
 v.purple = { 0.4, 0.176, 0.569 }
 v.lightBlue = { 0.047, 0.894, 0.918 }
+v.regBlue = { 0.118, 0.565, 1 }
 v.orange = { 0.965, 0.537, 0.231 }
 ----------------------------------------
 

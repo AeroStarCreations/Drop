@@ -29,8 +29,7 @@ function v.checkAndRecord() -------------------------Check if leaderboard stats 
                 normalAchievementsUpdated = true
             end
         end 
-        if normalAchievementsUpdated == true then --decreases parse mod calls
-            --sc.updateNormalAchievements()
+        if normalAchievementsUpdated == true then
             normalAchievementsUpdated = false
         end -------------------------------------------------------------------/
         
@@ -55,10 +54,15 @@ function v.checkAndRecord() -------------------------Check if leaderboard stats 
                         showsCompletionBanner = true
                     }
                 } )
-                --sc.updateProgressAchievements()
             end
         end -------------------------------------------------------------------/
         
+        local function leaderboardCallback( event )
+            if event.type == "setHighScore" then
+                testText.text = testText.text .. " - high score set"
+            end
+        end
+
         for i=1,#g.leaderboard.lb do ------------------------------------------\
             gameNetwork.request( "setHighScore",
             {
@@ -66,7 +70,8 @@ function v.checkAndRecord() -------------------------Check if leaderboard stats 
                 { 
                     category = g.leaderboard.lb[i].id, 
                     value = g.leaderboard.lb[i].value
-                }
+                },
+                listener = leaderboardCallback
             }
             )
         end ----------------------------------------------------------/
@@ -81,21 +86,25 @@ local function loadPlayerRequestCallback( event )
     local playerID = event.data.playerID
     local playerAlias = event.data.alias
     print( playerID, playerAlias )
+    testText.text = testText.text .. " - " .. playerID .. " - " .. playerAlias
 end
 
 local function gameCenterLoginCallback( event )
     if event.data then
+        testText.text = testText.text .. " - login success"
         loggedIntoGC = true
         gameNetwork.request( "loadLocalPlayer", { listener=loadPlayerRequestCallback } )
         v.checkAndRecord()
         print("*************************************************")
     else
+        testText.text = testText.text .. " - login fail"
         loggedIntoGC = false
     end
     return true
 end
 
 function v.login()
+    testText.text = testText.text .. " - login called"
     gameNetwork.init( g.networkType, gameCenterLoginCallback )
 end
 

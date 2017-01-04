@@ -137,10 +137,12 @@ if g.first.useA == nil then --First release!! Add a new function for each releas
     g.stats.lightBlue3 = 0
     g.stats.darkBlue3 = 0
     g.stats.pink3 = 0
+
     g.stats.numGames = 0
     g.stats.deaths = 0
     g.stats.invinces = 0
     g.stats.revives = 0
+    
     g.first:save()
     g.gameSettings:save()
     g.buy:save()
@@ -187,15 +189,16 @@ g.adDone = false
 
 --------------------------------------------------------------------------------
 
+testText = display.newText( "", display.contentCenterX, display.contentCenterY, display.contentWidth-10, display.contentHeight-10, native.systemFont, 30)
+testText:toFront();
+testText:setFillColor(0,0,0)
+testText.alpha = 0
+
+--------------------------------------------------------------------------------
+
 gn.login()
 
 --------------------------------------------------------------------------------
-
-testText = display.newText( "NIRAO;VBAIRUO;VBAOR;", display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight, native.systemFont, 30)
-testText.toFront();
-
---------------------------------------------------------------------------------
-
 
 ----------------------The following takes the user to the first "scene", center.
 cp.recycleOnSceneChange = false
