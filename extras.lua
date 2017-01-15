@@ -139,6 +139,8 @@ function scene:create( event )
                 print(event.target.id.." was pressed.")
                 if a == 1 then                          -- Game Center
                     gameNetwork.show( "leaderboards" )
+                elseif a == 2 then                      -- Store / Market
+                    t.transOutExtrasOther( "market", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 3 then                      -- About ASC
                     t.transOutExtrasOther( "aboutASC", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 4 then
