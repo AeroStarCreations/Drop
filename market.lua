@@ -121,7 +121,7 @@ function scene:create( event )
     
     ------------------------------------Back Arrow
     local function baf( event )
-        --t.transOutAboutASC( ascLogo, lineTop, lineBottom, asc, bio, fb, twit )
+        t.transOutMarket( storeLogo, lineTop )
         print( "Arrow Pressed" )
     end
     
@@ -141,11 +141,18 @@ function scene:create( event )
     group:insert(backArrow)
     ----------------------------------------------
 
+    ------------------------------------Store Logo
+    storeLogo = display.newImageRect( group, "images/logoStore.png", 66, 66 )
+    storeLogo.width, storeLogo.height = 0.45*drop.height, 0.45*drop.height
+    storeLogo.x = display.contentWidth + 0.5*storeLogo.width
+    storeLogo.y = backArrow.y + 10
+    storeLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
+    ----------------------------------------------
+
     -----------------------------------------Line
     lineTop = display.newLine( group, 0, drop.y*2, display.contentWidth, drop.y*2 )
     lineTop:setStrokeColor( unpack( g.purple ) )
-    lineTop.strokeWidth = 10
-    --lineTop.x = -display.contentWidth
+    lineTop.strokeWidth = 0
     ----------------------------------------------
 
     -----------------------------------Scroll View
@@ -174,6 +181,8 @@ function scene:show( event )
     elseif ( phase == "did" ) then
         
         g.show()
+
+        t.transInMarket( storeLogo, storeLogoX, lineTop )
         
     end
 end

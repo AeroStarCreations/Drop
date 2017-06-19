@@ -289,6 +289,24 @@ v.transOutAboutMusic = function( logo, line1, line2, jeg, text )
     transition.to( text, {time=500, alpha=0})
 end
 --------------------------------------------------------------------------------
+v.transInMarket = function( logo, logoX, topLine )
+
+    transition.to( topLine, {time=500, strokeWidth=10})
+    transition.to( logo, {time=500, x=logoX, transition=easing.outSine})
+
+end
+--------------------------------------------------------------------------------
+v.transOutMarket = function( logo, topLine )
+
+    local function listener( event )
+        cp.gotoScene( "extras" )
+    end
+
+    transition.to( logo, {time=500, x=display.contentWidth+0.5*logo.width, transition=easing.inSine})
+    transition.to( topLine, {time=500, strokeWidth=0, onComplete=listener})
+
+end
+--------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 

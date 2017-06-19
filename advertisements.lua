@@ -1,6 +1,6 @@
 -- advertisements.lua
 
--- Ads order: Vungle > RevMob > AdMob
+-- Ads order: Vungle -> RevMob -> AdMob
 
 local g = require("globalVariables")
 local ads = require( "ads" )
