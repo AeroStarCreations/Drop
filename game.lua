@@ -1,4 +1,4 @@
---Game
+-- Game
 
 local cp = require( "composer" )
 local scene = cp.newScene()
@@ -6,12 +6,15 @@ local g = require( "globalVariables" )
 local t = require( "transitions" )
 local widget = require( "widget" )
 local physics = require( "physics" )
-local GGData = require( "GGData" )
 local ad = require( "advertisements" )
 local gn = require( "gameNetworks" )
 local chartboost = require( "plugin.chartboost" )
+local gf = require( "gameFunctions" )
+local bg = require( "backgrounds" )
+local ld = require( "localData" )
+local Drop = require( "Drop" )
 
-local arrowIsWorking = true
+local arrowIsWorking = false
 
 local arrow
 local arrowShapeRegular
@@ -74,7 +77,6 @@ local facebook
 function scene:create( event )
     local group = self.view
     
-    
     -----------------------------------------------------------------Arrow Setup
     arrow = display.newImageRect(group, "images/arrow.png", 352, 457)
     arrow.id = "arrow"
@@ -87,117 +89,39 @@ function scene:create( event )
     arrowShapeSmall = { 32.54,-8.35, 36.4,-0.236, 32.54,8.194, -24.503,53.576, -36.4,49.084, -36.4,-49.16, -24.50,-53.497 }
     arrowShapeLarge = { 50.06,-12.85, 56,-0.3636, 50.06,12.606, -37.697,82.42, -56,75.515, -56,-75.636, -37.697,-82.303 }
     arrowShape = arrowShapeRegular
-    g.arrowWidth = 68   -- Largest number in "arrowShape" table. Used for arrow 
-    ---------------------- teleportation. Change when scale changes.
+    --g.arrowWidth = 68   -- Largest number in "arrowShape" table. Used for arrow 
+    g.arrowWidth = math.max( unpack(arrowShape)) -- teleportation. Change when scale changes.
+    ----------------------------------------------------------------------------
     
     
-    ------------------------------------------------------------Opaque Rectangle
+    -----------------------------------------Opaque Rectangle for touch controls
     transparentRect = display.newRect( group, display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight )
     transparentRect.alpha = 0.5
-    
+    ----------------------------------------------------------------------------
+
     
     -------------------------------------------------------------------Countdown
-    local y1 = display.newImageRect( group, "images/dropletYellow.png", 220, 330 )
-    local y2 = display.newImageRect( group, "images/dropletYellow.png", 220, 330 )
-    local y3 = display.newImageRect( group, "images/dropletGreen.png", 220, 330 )
+    local countdownImage1 = display.newImageRect( group, "images/dropletYellow.png", 220, 330 )
+    local countdownImage2 = display.newImageRect( group, "images/dropletYellow.png", 220, 330 )
+    local countdownImage3 = display.newImageRect( group, "images/dropletGreen.png", 220, 330 )
     
-    local c = display.contentCenterX
-    y1.x, y2.x, y3.x = c, c, c
+    countdownImage1.x = display.contentCenterX
+    countdownImage2.x = countdownImage1.x
+    countdownImage3.x = countdownImage1.x
     
-    y2.y = display.contentCenterY
-    y1.y = y2.y - y1.height + 40
-    y3.y = y2.y + y3.height - 40
+    countdownImage2.y = display.contentCenterY
+    countdownImage1.y = countdownImage2.y - countdownImage1.height + 40
+    countdownImage3.y = countdownImage2.y + countdownImage3.height - 40
     
-    y1.alpha, y2.alpha, y3.alpha = 0, 0, 0
-    
-    --------------------------------------------------------------Record Records
-    
-    --High score and time
-    function records()
-        if g.gameSettings.specials == true then -- this function sets high scores and times
-            if score > g.leaderboard.lb[1].value then
-                g.leaderboard.lb[1].value = score
-                g.leaderboard:save()
-            end
-            if totalTime > g.leaderboard.lb[2].value then
-                g.leaderboard.lb[2].value = totalTime
-                g.leaderboard:save()
-            end
-        else
-            if score > g.leaderboard.lb[3].value then
-                g.leaderboard.lb[3].value = score
-                g.leaderboard:save()
-            end
-            if totalTime > g.leaderboard.lb[4].value then
-                g.leaderboard.lb[4].value = totalTime
-                g.leaderboard:save()
-            end
-        end
-        if hurricaneTime > 0 then -- this function / loop watches for hurricane achievements
-            for i=1,3 do
-                if hurricaneTime >= i then
-                    g.achievement.normalAchievements[24+i].isComplete = true
-                    g.achievement:save()
-                    print("hurricanehurricanehurricanehurricanehurricane")
-                end
-            end
-        end
-        for i=0,2 do -- this loop watches for shield achievements
-            if shield >= 2.5*(i^2+i+2) then--simplified quadratic formula ax^2+bx+c
-                g.achievement.normalAchievements[28+i].isComplete = true
-                g.achievement:save()
-            end
-        end
-        for i=0,2 do -- this loop watches for revive achievements
-            if revive >= 0.5*(i^2+7*i+2) then
-                g.achievement.normalAchievements[31+i].isComplete = true
-                g.achievement:save()
-            end
-        end
-        for i=1,5 do -- this loop adjusts the number-of-games-played achievements
-            if g.achievement.progressAchievements[i].isComplete == false then
-                g.achievement.progressAchievements[i].number = g.stats.numGames
-                g.achievement:save()
-            end
-        end
-        local colorDeathsTable = {
-            [6] = g.stats.redD,
-            [7] = g.stats.orangeD,
-            [8] = g.stats.yellowD,
-            [9] = g.stats.lightGreenD,
-            [10] = g.stats.darkGreenD,
-            [11] = g.stats.lightBlueD,
-            [12] = g.stats.darkBlueD,
-            [13] = g.stats.pinkD,
-        }
-        for i=6,13 do -- this loop adjusts the death-by-color achievements
-            if g.achievement.progressAchievements[i].isComplete == false then
-                g.achievement.progressAchievements[i].number = colorDeathsTable[i]
-                g.achievement:save()
-            end
-        end
-        
-        gn.checkAndRecord()
-    end
-    ---------------------
+    countdownImage1.alpha, countdownImage2.alpha, countdownImage3.alpha = 0, 0, 0
+    ----------------------------------------------------------------------------
     
     ----------------------------------------------------Massive Header Functions
-    local function clearDrops()
-        local function listener( obj ) --remove drops
-            display.remove( obj )
-            obj = nil
-        end
-        for i = 1, dropsGroup.numChildren do
-            transition.to( dropsGroup[i], { 
-                time = 80, 
-                alpha = 0, 
-                width = dropsGroup[i].width*2,
-                height = dropsGroup[i].height*2,
-                onComplete = listener,
-            } )
-        end
-    end
     
+    -------------------------------------------------------------
+    -- Called when the user chooses to restart the game.       --
+    -- Resets all necessary variables to their original values --
+    -------------------------------------------------------------
     function g.restart( event )
         
         header2:setEnabled( false )
@@ -205,20 +129,17 @@ function scene:create( event )
         lvlParams = g.level1AParams
         scoreText.text = "0"
         playTime.text = "0:00"
-        records()
+        gf.records( score, totalTime, hurricaneTime, shield, revive, colorDeathsTable )
         
         for i = 1, #timersPaused do --cancel timers
             timer.cancel( timerIndex[ timersPaused[i] ] )
             timerIndex[i] = nil
         end
-        if g.gameSettings.bgChange == true then --fade background
-            for i = 2, #g.bg do
-                if g.bg[i].alpha > 0 then
-                    transition.fadeOut( g.bg[i], { time=2500 } )
-                end
-            end
+        if ld.getChangingBackgroundsEnabled() then --fade background
+            bg.fadeOutToDefault()
         end
-        clearDrops()
+
+        gf.clearDrops( dropsGroup )
         
         local function restart2()
             
@@ -247,7 +168,7 @@ function scene:create( event )
             scoreTimerFunction()
             
         end
-        t.countDown( y1, y2, y3, transparentRect, restart2 )
+        t.countDown( countdownImage1, countdownImage2, countdownImage3, transparentRect, restart2 )
         t.buttonsOut( green, red, blue, message )
         t.gameOverStatsOut( statsBG, sText1, sText2, tText1, tText2, statsLine1, statsLine2, statsLine3, scoreText, playTime, sHighText, tHighText, twitter, facebook )
     end
@@ -271,12 +192,12 @@ function scene:create( event )
             end
             
         end
-        t.countDown( y1, y2, y3, transparentRect, listener )
+        t.countDown( countdownImage1, countdownImage2, countdownImage3, transparentRect, listener )
         t.buttonsOut( green, red, blue, message )
         t.gameOverStatsOut( statsBG, sText1, sText2, tText1, tText2, statsLine1, statsLine2, statsLine3, scoreText, playTime, sHighText, tHighText, twitter, facebook )
         
         if gameOver == true then
-            clearDrops()
+            gf.clearDrops( dropsGroup )
             gameOver = false
         end
         
@@ -291,9 +212,9 @@ function scene:create( event )
         transparentRect.alpha = 0.5
         transparentRect.isVisible = true
         physics.pause()
-        transition.cancel( y1 )
-        transition.cancel( y2 )
-        transition.cancel( y3 )
+        transition.cancel( countdownImage1 )
+        transition.cancel( countdownImage2 )
+        transition.cancel( countdownImage3 )
         transition.cancel( g )
         transition.pause( )
         
@@ -321,18 +242,19 @@ function scene:create( event )
     header1 = widget.newButton {
         id = "header",
         width = 1000,
-        height = 130,
+        height = 260,
         defaultFile = "images/header.png",
         onPress = pause,
     }
-    header1.x = display.contentCenterX; header1.y = 0.5*header1.height
+    header1.x = display.contentCenterX
+    header1.y = display.topStatusBarContentHeight --0.5*header1.height
     headerGroup:insert(header1)
     header1:setEnabled( false )
     
     header2 = widget.newButton {
         id = "header2",
         width = 1000,
-        height = 130,
+        height = 260,
         defaultFile = "images/header2.png",
         onPress = play,
     }
@@ -345,7 +267,7 @@ function scene:create( event )
         parent = headerGroup,
         text = "0",
         x = 15,
-        y = 32,
+        y = display.topStatusBarContentHeight + display.actualContentHeight * 0.01,
         font = g.comRegular,
         fontSize = 38,
     }
@@ -357,7 +279,7 @@ function scene:create( event )
         parent = headerGroup,
         text = "0:00",
         x = display.contentWidth-15,
-        y = 32,
+        y = scoreText.y,
         font = g.comRegular,
         fontSize = 38,
     }
@@ -366,32 +288,34 @@ function scene:create( event )
     -----------------------------------------------------------------------Lives
     local iconLives = display.newImageRect( headerGroup, "images/lives.png", 53, 53 )
     iconLives.x = display.contentWidth*0.3
-    iconLives.anchorX, iconLives.anchorY = 1, 0
+    iconLives.y = scoreText.y
+    iconLives.anchorX = 1 
     
     g.iconLivesText = display.newText {
         parent = headerGroup,
-        text = g.buy.lives,
+        text = ld.getLives(),
         x = iconLives.x,
-        y = iconLives.y+0.5*iconLives.height+4,
+        y = iconLives.y,
         font = g.comLight,
         fontSize = 32,
     }
-    g.iconLivesText.anchorX, g.iconLivesText.anchorY = 0, 0.5
+    g.iconLivesText.anchorX = 0
     
     -------------------------------------------------------------Invincibilities
     local iconInvince = display.newImageRect( headerGroup, "images/invincibility.png", 53, 53 )
     iconInvince.x = display.contentWidth*0.7
-    iconInvince.anchorX, iconInvince.anchorY = 0, 0
+    iconInvince.y = scoreText.y
+    iconInvince.anchorX = 0
     
     g.iconInvinceText = display.newText {
         parent = headerGroup,
-        text = g.buy.invincibility,
+        text = ld.getInvincibility(),
         x = iconInvince.x,
-        y = iconInvince.y+0.5*iconInvince.height+4,
+        y = iconInvince.y,
         font = g.comLight,
         fontSize = 32,
     }
-    g.iconInvinceText.anchorX, g.iconInvinceText.anchorY = 1, 0.5
+    g.iconInvinceText.anchorX = 1
     
     ------------------------------
     headerGroup.y = -header1.height
@@ -411,11 +335,9 @@ function scene:create( event )
             green:setLabel( "Are you sure?" )
             checkIfGameIsOver = 2
         elseif checkIfGameIsOver == 2 then
-            g.buy.lives = g.buy.lives - 1
-            g.buy:save()
-            g.stats.revives = g.stats.revives + 1
-            g.stats:save()
-            g.iconLivesText.text = g.buy.lives
+            ld.addLives( -1 )
+            ld.incrementLifeUses()
+            g.iconLivesText.text = ld.getLives()
             revive = revive + 1
             play()
             checkIfGameIsOver = 0
@@ -429,7 +351,7 @@ function scene:create( event )
     local function redListener( event )-------------------------------
         print( "Red pressed" )
         ad.buttonColor = "red"
-        if not g.buy.ads then
+        if not ld.getAdsEnabled() then
             ad.showAd()
         end
         --while( not g.adDone ) do end
@@ -439,7 +361,7 @@ function scene:create( event )
     local function blueListener( event )------------------------------
         print( "Blue pressed" )
         ad.buttonColor = "blue"
-        if not g.buy.ads then
+        if not ld.getAdsEnabled() then
             ad.showAd()
         end
         --while( not g.adDone ) do end
@@ -497,8 +419,6 @@ function scene:create( event )
     group:insert(blue)
     blue.x, blue.y = display.contentWidth+blue.width, red.y
     blue.anchorX, blue.anchorY = 1, 0
-    
-    
     
     ----------------------------------------------------------------------------
     ----------------------------------------------------------------------------
@@ -624,38 +544,6 @@ function scene:create( event )
     tHighText.anchorY = sHighText.anchorY
     
     ----------------------------------------------------------------------------
-    local function socialListener( event )
-        
-        local serviceName = event.target.id
-        
-        local isAvailable = native.canShowPopup( "social", serviceName )
-        
-        if isAvailable then
-            
-            native.showPopup( "social", 
-            {
-                service = serviceName,
-                message = "I just dropped"..sText2.text.." points with a time of"..tText2.text.." in Drop - The Vertical Challenge! Check it out on the App Store!",
-                --url = ,
-            })
-            
-        else
-            
-            local bob
-            if serviceName == "twitter" then
-                bob = "Twitter"
-            else
-                bob = "Facebook"
-            end
-            
-            native.showAlert(
-                "Could not send "..bob.." message.",
-                "Please setup your "..bob.." account or check your network connection.",
-                { "OK" } )
-            
-        end
-        
-    end
     
     twitter = widget.newButton{
         id = "twitter",
@@ -665,7 +553,7 @@ function scene:create( event )
         height = wh,
         defaultFile = "images/twitter.png",
         overFile = "images/twitterD.png",
-        onRelease = socialListener,
+        onRelease = gf.socialListener,
     } 
     group:insert( twitter )
     twitter.anchorY = 0
@@ -678,7 +566,7 @@ function scene:create( event )
         height = wh,
         defaultFile = "images/facebook.png",
         overFile = "images/facebookD.png",
-        onRelease = socialListener
+        onRelease = gf.socialListener
     } 
     group:insert( facebook )
     facebook.anchorY = 1
@@ -741,9 +629,8 @@ function scene:show( event )
             transparentRect.isVisible = false
             transparentRect.fill = { 0, 0.65, 1 }
             gameOver = false
-            g.stats.numGames = g.stats.numGames + 1
-            g.stats:save()
-            if g.gameSettings.specials == true then
+            ld.incrementGamesPlayed()
+            if ld.getSpecialDropsEnabled() then
                 tHighText.text = "High Time\n• • •\n"..g.timeFormat( g.leaderboard.lb[2].value )
                 sHighText.text = "High Score\n• • •\n"..g.commas( g.leaderboard.lb[1].value )
             else
@@ -826,14 +713,16 @@ function scene:show( event )
         touchPad.anchorY = 0
         
         ----------------------------------------------------------------Movement
-        if g.gameSettings.tilt == true then --Tilt On
-            local aw = 68--Largest # in "arrowShape" table
+        --Tilt On
+        if ld.getTiltControlEnabled() then 
+            local aw = math.max( unpack(arrowShape)) --Largest # in "arrowShape" table
             local w = display.contentWidth
+            local x, accelGravity, t
             function acc( event )
-                if gameIsActive == true then
-                    local x = arrow.x
-                    local accelGravity = (35+10*(g.gameSettings.sensitivity-1))*event.xGravity
-                    local t = x+accelGravity
+                if gameIsActive then
+                    x = arrow.x
+                    accelGravity = (45*(ld.getMovementSensitivity()-1))*event.xGravity
+                    t = x+accelGravity
                     if x < -aw+1 then
                         t = w+aw-1
                     elseif x > w+aw-1 then
@@ -849,17 +738,17 @@ function scene:show( event )
             Runtime:addEventListener( "accelerometer", acc )
         end
         --Touch On
-        local aw = 68 --Arrow Width
+        local aw = math.max( unpack(arrowShape)) --Arrow Width
         local w = display.contentWidth
         local X1 = -aw+2
         local X2 = w+aw-2
         local locationBegan
         local locationMoved
-        local S = 1/(0.4*g.gameSettings.sensitivity)
+        local S = 1/(0.4*ld.getMovementSensitivity())
         
-        if g.gameSettings.tilt == false then
+        if not ld.getTiltControlEnabled() then
             local function arrowPortal( event )
-                if gameIsActive == true then
+                if gameIsActive then
                     local x = arrow.x
                     if x <= X1 then
                         arrow.x = X2-1
@@ -875,7 +764,7 @@ function scene:show( event )
         end
         function touchPad:touch( event )
             if gameIsActive == true then
-                if g.gameSettings.tilt == false then
+                if not ld.getTiltControlEnabled() then
                     if event.phase == "began" then
                         if event.x < display.contentCenterX then
                             lcoationBegan = "left"
@@ -890,11 +779,10 @@ function scene:show( event )
                 end
                 if event.phase == "moved" then
                     local dy = event.yStart - event.y
-                    if dy > 200 and invincibility == false and g.buy.invincibility > 0 then
+                    if dy > 200 and invincibility == false and ld.getInvincibility() > 0 then
                         invincibilityFunction( 5000 )
-                        g.buy.invincibility = g.buy.invincibility - 1
-                        g.buy:save()
-                        g.iconInvinceText.text = g.buy.invincibility
+                        ld.addInvincibility( -1 )
+                        g.iconInvinceText.text = ld.getInvincibility()
                         shield = shield + 1
                     end
                 end
@@ -941,26 +829,25 @@ function scene:show( event )
             end
             invincibilityTimer = timer.performWithDelay( time, listener )
             timerIndex[1] = invincibilityTimer
-            g.stats.invinces = g.stats.invinces + 1
-            g.stats:save()
+            ld.incrementInvincibilityUses()
         end
         
         
         ------------------------------------------------------------------------
         ----------------------------------------------------------------Droplets
         ------------------------------------------------------------------------
-        local sheetOptions = {
-            width = 110,
-            height = 165,
-            numFrames = 8,
-            sheetContentWidth = 440,
-            sheetContentHeight = 330,
-        }
-        local sheetNormal = graphics.newImageSheet( "images/dropletNormalSheet.png", sheetOptions )
-        local sheetPower = graphics.newImageSheet( "images/dropletPowerSheet.png", sheetOptions)
+        -- local sheetOptions = {
+        --     width = 110,
+        --     height = 165,
+        --     numFrames = 8,
+        --     sheetContentWidth = 440,
+        --     sheetContentHeight = 330,
+        -- }
+        -- local sheetNormal = graphics.newImageSheet( "images/dropletNormalSheet.png", sheetOptions )
+        -- local sheetPower = graphics.newImageSheet( "images/dropletPowerSheet.png", sheetOptions)
         
-        local dropRadius = 40
-        local dropTriangle = { 0,-56, 28,-28, -28,-28 }
+        -- local dropRadius = 40
+        -- local dropTriangle = { 0,-56, 28,-28, -28,-28 }
         
         ------------------------------------------------------------------------
         ------------------------------------------------------------------------
@@ -970,60 +857,71 @@ function scene:show( event )
         ------------------------------------------------------------------------
         ----------------------------------------------------------------Spawning
         ------------------------------------------------------------------------
-        local lastXValue1 = 0
-        local lastXValue2 = 0
-        local sheet
-        local frame
-        local dropName
+        -- local lastXValue1 = 0
+        -- local lastXValue2 = 0
+        -- local sheet
+        -- local frame
+        -- local dropName
         
         ------------------------------------------------------Spawning Functions
-        local numOfDropLocations = math.floor( display.contentWidth/80 ) + 1
-        print( "There are "..numOfDropLocations.." drop locations for this device." )
+        -- local numOfDropLocations = math.floor( display.contentWidth/80 ) + 1
+        -- print( "There are "..numOfDropLocations.." drop locations for this device." )
         
-        local dropCoordinates = {}
-        for i = 1, numOfDropLocations do
-            dropCoordinates[i] = (i-1)*80
-        end
+        -- local dropCoordinates = {}
+        -- for i = 1, numOfDropLocations do
+        --     dropCoordinates[i] = (i-1)*80
+        -- end
         
-        local function randomDropImage()
-            local n
-            if g.gameSettings.specials == true then
-                local r = math.random()
-                if r <= 0.1 then ----------------------
-                    sheet = sheetPower
-                    n = 2
-                else
-                    sheet = sheetNormal
-                    n = 1
-                end
-            else
-                sheet = sheetNormal
-                n = 1
-            end
-            frame = math.random( 1, 8 )
-            dropName = n.."."..frame..":"..dropsSpawned+1
-        end
+        -- local function randomDropImage()
+        --     local n
+        --     if ld.getSpecialDropsEnabled() then
+        --         local r = math.random()
+        --         if r <= 0.1 then ----------------------
+        --             sheet = sheetPower
+        --             n = 2
+        --         else
+        --             sheet = sheetNormal
+        --             n = 1
+        --         end
+        --     else
+        --         sheet = sheetNormal
+        --         n = 1
+        --     end
+        --     frame = math.random( 1, 8 )
+        --     dropName = n.."."..frame..":"..dropsSpawned+1
+        -- end
         
         local function spawn( event )
+            -- for i = 1, lvlParams.mode do
+            --     dropsSpawned = dropsSpawned + 1
+            --     dropsSpawned = s
+            --     --Random x-values that don't repeat within 3 spawns
+            --     local x
+            --     repeat
+            --         x = math.random( 1, numOfDropLocations )
+            --     until x ~= lastXValue1 and x ~= lastXValue2
+            --     lastXValue2 = lastXValue1
+            --     lastXValue1 = x
+            --     --Spawn drop, add physics, add to dropsTable table
+            --     randomDropImage()
+            --     local drop = display.newImageRect( sheet, frame, 110, 165 )
+            --     drop.x, drop.y = dropCoordinates[x], -0.5*drop.height
+            --     dropsGroup:insert( drop )
+            --     drop.myName = dropName
+            --     dropsTable[s] = drop
+            --     physics.addBody( drop, "dynamic", { radius=dropRadius, bounce=0.4 } )
+            --     if lvlParams.phase >= 9 then
+            --         drop:setLinearVelocity( 0, 100 )
+            --     end
+            -- end
+
             for i = 1, lvlParams.mode do
-                dropsSpawned = dropsSpawned + 1
-                dropsSpawned = s
-                --Random x-values that don't repeat within 3 spawns
-                local x
-                repeat
-                    x = math.random( 1, numOfDropLocations )
-                until x ~= lastXValue1 and x ~= lastXValue2
-                lastXValue2 = lastXValue1
-                lastXValue1 = x
-                --Spawn drop, add physics, add to dropsTable table
-                randomDropImage()
-                local drop = display.newImageRect( sheet, frame, 110, 165 )
-                drop.x, drop.y = dropCoordinates[x], -0.5*drop.height
-                dropsGroup:insert( drop )
-                drop.myName = dropName
-                dropsTable[s] = drop
-                physics.addBody( drop, "dynamic", { radius=dropRadius, bounce=0.4 } )
-                if lvlParams.phase >= 9 then
+                local newDrop = Drop:new()
+                physics.addBody( drop, "dynamic", {
+                    radius = Drop.radius,
+                    bounce = 0.4,
+                })
+                if lvlParam.phase >= 9 then
                     drop:setLinearVelocity( 0, 100 )
                 end
             end
@@ -1074,13 +972,8 @@ function scene:show( event )
                 --Adjust gravity
                 gravityY()
                 --Switch background
-                if g.gameSettings.bgChange == true then
-                    g.m = (lvlParams.phase + 1)*0.5
-                    local function listener()
-                        g.bg[g.m-1].alpha = 0
-                        g.bg[1].alpha = 1
-                    end
-                    transition.fadeIn( g.bg[g.m], { time=3500, onComplete=listener } )
+                if ld.getChangingBackgroundsEnabled() then
+                    bg.fadeInNext()
                 end
             end
             storm.text = lvlParams.stormName
@@ -1139,7 +1032,13 @@ function scene:show( event )
         ------------------------------------------------------------------------
         
         ------------------------------------------------------------Drop Removal
-        rect = display.newRect( group, display.contentCenterX, display.contentHeight+sheetOptions.height, 4*display.contentWidth, 10 )
+        rect = display.newRect( 
+            group, 
+            display.contentCenterX, 
+            display.contentHeight + 3 * Drop.radius, 
+            4 * display.actualContentWidth, 
+            10 
+        )
         physics.addBody( rect, "static", { bounce=1 } )
         rect.myName = "rect"
         local joe = 0
@@ -1158,17 +1057,16 @@ function scene:show( event )
         
         ---------------------------------------------------------Arrow Collision
         local function arrowListener( self, event )
-            if arrowIsWorking == true then
-                if gameIsActive == true then
+            if gameIsActive and arrowIsWorking then
                     if event.phase == "began" then
                         
                         local p = string.sub( event.other.myName, 3, 3 )
                         
-                        if string.sub( event.other.myName, 1, 1 ) == "1" then
+                        if string.sub( event.other.myName, 1, 1 ) == "1" then -- normal drop
                             
-                            if invincibility == false then
+                            if not invincibility then
                                 gameOver = true
-                                if g.buy.lives > 0 then
+                                if ld.getLives() > 0 then
                                     checkIfGameIsOver = 1
                                     green:setLabel( "Revive with a life" )
                                 else
@@ -1181,12 +1079,11 @@ function scene:show( event )
                                 header2.alpha = 0.5
                                 transparentRect.fill = { 1, 0, 0.15 }
                                 pause()
-                                g.stats.deaths = g.stats.deaths + 1
-                                g.stats:save()
+                                ld.incrementDeaths()
                                 t.gameOverStatsIn( statsBG, sText1, sText2, tText1, tText2, statsLine1, statsLine2, statsLine3, scoreText, playTime, sHighText, tHighText, twitter, facebook )
                             end
                             
-                        else
+                        else -- special drop
                             
                             if p == "1" then
                                 gravityPower = 2
@@ -1284,7 +1181,6 @@ function scene:show( event )
                         end
                         g.dropletStats( event.other.myName, "arrow" ) --record stats about drops and their respective colors
                     end
-                end
             end
         end
         arrow.collision = arrowListener
@@ -1318,8 +1214,7 @@ function scene:hide( event )
         transition.cancel()
         physics.stop()
         
-        
-        records()
+        gf.records( score, totalTime, hurricaneTime, shield, revive, colorDeathsTable )
         
         cp.removeScene( "game" )
         

@@ -10,6 +10,7 @@ local ads = require( "ads" )
 local ad = require( "advertisements" )
 local GGTwitter = require( "GGTwitter" )
 local chartboost = require( "plugin.chartboost" )
+local ld = require( "localData" )
 
 --Precalls
 local drop
@@ -34,12 +35,14 @@ function scene:create( event )
     local group = self.view
     
     g.create()
-    
+
     ------------------------------------------Logo
     drop = display.newImageRect( "images/name.png", 1020, 390 )
     local dropRatio = drop.height/drop.width
-    drop.width = 0.77*display.contentWidth; drop.height = drop.width*dropRatio
-    drop.x, drop.y = display.contentCenterX, 0.06*display.contentHeight+1
+    drop.width = 0.77*display.contentWidth
+    drop.height = drop.width*dropRatio
+    drop.x = display.contentCenterX
+    drop.y = display.topStatusBarContentHeight + 0.4 * drop.height
     drop.xScale, drop.yScale = 0.47, 0.47
     group:insert(drop)
     ----------------------------------------------
@@ -70,7 +73,7 @@ function scene:create( event )
     --------------------------------------------------------------Square Buttons
     ----------------------------------------------------------------------------
     
-    local focal = 2*drop.y
+    local focal = drop.y + 0.4 * drop.height
     local gap = math.round( 0.03333*display.contentWidth )
     local w = math.round((display.contentWidth-3*gap)*0.5)
     local h = math.round((display.contentHeight-focal-3*gap)/3)
@@ -162,7 +165,7 @@ function scene:create( event )
         buttonGroup[i] = display.newGroup()
         group:insert( buttonGroup[i] )
         
-        squares[i] = display.newRoundedRect( buttonGroup[i], 0, 0, w, h, 30 )
+        squares[i] = display.newRoundedRect( buttonGroup[i], 0, 0, w, h, 0.08 * display.actualContentWidth )
         squares[i].anchorX, squares[i].anchorY = 0.5, 0.5
         squares[i].strokeWidth = 3
         squares[i]:setStrokeColor( unpack( strokeColor[i] ) )
@@ -225,7 +228,7 @@ function scene:show( event )
         local timeDifference
         local function times()
             currentTime = os.time( os.date('*t') ) --current seconds since 1970
-            timeDifference = currentTime - g.stats.videoAd.lastViewTime --Count Down Time
+            timeDifference = currentTime - ld.getVideoAdLastViewTime() --Count Down Time
         end
         times()
         
@@ -238,14 +241,13 @@ function scene:show( event )
             logo[5].alpha = 0.4
         end
         
-        if d ~= g.stats.videoAd.day then --player gets 5 views per day
-            g.stats.videoAd.views = 0
-            g.stats.videoAd.day = d
-            g.stats:save()
+        if d ~= ld.getVideoAdDay() then --player gets 5 views per day
+            ld.resetVideoAdViews()
+            ld.setVideoAdDay( d )
         end
         
         local function listener()
-            if g.stats.videoAd.views < 5 then
+            if ld.getVideoAdViews() < 5 then
                 
                 times()
                 
@@ -290,6 +292,7 @@ function scene:show( event )
         end
 
     end
+
 end
 
 

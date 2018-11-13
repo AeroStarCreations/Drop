@@ -231,7 +231,7 @@ function scene:show( event )
         
         g.show()
         
-        cp.loadScene( "game" )
+        cp.loadScene( "game2" )
         
         -----------------------------------------Creates the accelerometer rotations
         function rotate( event )

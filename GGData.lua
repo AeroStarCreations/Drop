@@ -204,7 +204,6 @@ end
 function GGData:set( name, value )
 	self[ name ] = value
 	self:storeIntegrityHash( name, value )
-        --self:save() -- I, Nathan, added this.
 end
 
 --- Gets a value from this GGData object.
@@ -372,11 +371,12 @@ function GGData:getSync( id )
 end
 
 --- Enables integrity checking.
--- @param algorithm The hashing algorithm to use, see this page for possibles - http://docs.coronalabs.com/api/library/crypto/index.html
+-- The hashing algorithm comes from this website - http://docs.coronalabs.com/api/library/crypto/index.html
 -- @param key The seed to use for the hashing algorithm.
-function GGData:enableIntegrityControl( algorithm, key )
-	self.integrityAlgorithm = algorithm
-	self.integrityKey = key
+-- In the future, set the key to the user's unique login ID. This function will also need to be run every time the app is opened
+function GGData:enableIntegrityControl()
+	self.integrityAlgorithm = crypto.sha512
+	self.integrityKey = "1a66291806559eed94757a1aaf5143740995d5e9e9df6f2c224282f9818d42f4657cc6964d171bd1efa6497a3bfc2158ee51014a413f2d70eb054d962779c460"
 	self.hash = self.hash or {}
 	self.integrityControlEnabled = true
 end

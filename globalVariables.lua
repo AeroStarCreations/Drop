@@ -4,6 +4,7 @@ local cp = require( "composer" )
 local widget = require( "widget" )
 local ads = require( "ads" )
 local GGData = require( "GGData" )
+local ld = require( "localData" )
 
 local v = {}
 
@@ -66,19 +67,30 @@ v.orange = { 0.965, 0.537, 0.231 }
 -------------------------------------------
 
 -------------------------------------------------------------------Switch WIDGET
-v.onOffSwitch = function( parent, xpos, ypos, wide, tall, label1, label2, on, listener )
+v.onOffSwitch = function( params )
+    -- params = {
+    --     parent = object,
+    --     x = int,
+    --     y = int,
+    --     width = int,
+    --     height = int,
+    --     label1 = string,
+    --     label2 = string,
+    --     isOn = bool,
+    --     listener = function
+    -- }
     local name = display.newGroup()
-    parent:insert(name)
-    local circ1 = display.newImageRect(name, "images/switchCircle.png", tall-3, tall-3)
-    local circ2 = display.newImageRect(name, "images/switchCircle.png", tall-3, tall-3)
+    params.parent:insert(name)
+    local circ1 = display.newImageRect(name, "images/switchCircle.png", params.height-3, params.height-3)
+    local circ2 = display.newImageRect(name, "images/switchCircle.png", params.height-3, params.height-3)
     circ1.x = 0
-    circ2.x = wide-tall
+    circ2.x = params.width-params.height
     local asdf = {
-        width = tall,
-        height = tall,
+        width = params.height,
+        height = params.height,
         numFrames = 9,
-        sheetContentWidth = (tall)*3,
-        sheetContentHeight = (tall)*3,
+        sheetContentWidth = 270,
+        sheetContentHeight = 270,
     }
     local sheetasdf = graphics.newImageSheet( "images/sheetSwitch.png", asdf )
     local fill1
@@ -89,37 +101,37 @@ v.onOffSwitch = function( parent, xpos, ypos, wide, tall, label1, label2, on, li
             transition.to( fill1, {time=200, alpha=0.2 } )
             transition.to( fill2, {time=200, alpha=1 } )
             mode = true
-            listener()
+            params.listener()
         elseif event.target.id == "off" and mode == true then
             transition.to( fill1, {time=200, alpha=1 } )
             transition.to( fill2, {time=200, alpha=0.2 } )
             mode = false
-            listener()
+            params.listener()
         end
     end
     fill1 = widget.newButton{
         id = "off",
         sheet = sheetasdf,
-        width = tall,
-        height = tall,
+        width = params.height,
+        height = params.height,
         defaultFrame = 8,
-        label = label1,
+        label = params.label1,
         font = v.comRegular,
         fontSize = 28,
-        labelYOffset = tall*0.06,
+        labelYOffset = params.height*0.06,
         labelColor = { default = {unpack(v.lightBlue)}},
         onRelease = bl,
     }
     fill2 = widget.newButton{
         id = "on",
         sheet = sheetasdf,
-        width = tall,
-        height = tall,
+        width = params.height,
+        height = params.height,
         defaultFrame = 4,
-        label = label2,
+        label = params.label2,
         font = v.comRegular,
         fontSize = 28,
-        labelYOffset = tall*0.06,
+        labelYOffset = params.height*0.06,
         labelColor = { default = {unpack(v.orange)}},
         onRelease = bl,
     }
@@ -127,7 +139,7 @@ v.onOffSwitch = function( parent, xpos, ypos, wide, tall, label1, label2, on, li
     name:insert(fill2)
     fill1.x, fill1.y = circ1.x, circ1.y 
     fill2.x, fill2.y = circ2.x, circ2.y
-    if on == true then
+    if params.isOn then
         fill1.alpha = 0.2
         mode = true
     else
@@ -135,7 +147,7 @@ v.onOffSwitch = function( parent, xpos, ypos, wide, tall, label1, label2, on, li
         mode = false
     end
     name.anchorX, name.anchorY = 0.5, 0.5
-    name.x, name.y = xpos, ypos
+    name.x, name.y = params.x, params.y
     name.anchorChildren = true
     return true
 end
@@ -145,6 +157,8 @@ end
 ----------------------------------------------------------------Level Parameters
 --------------------------------------------------------------------------------
 local n = 1
+-- for testing
+n = 0.3
 
 v.level1AParams = {
     phase = 1,
@@ -301,7 +315,7 @@ end
 
 function v.unlockLevelAchievements( phase )
     n = phase
-    if v.gameSettings.specials == true then
+    if ld.getSpecialDropsEnabled() then
         if n == 2 then
             v.achievement.normalAchievements[1].isComplete = true
         elseif n == 3 then
@@ -361,22 +375,33 @@ end
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
------------------------------------------Puts commas in numbers greater than 999
-function v.commas( num )
-    local bob
-    local n = tostring( num )
-    local l = string.len( num )
-    local c = l/3
-    if c <= 1 then
-        bob = n
-    elseif c > 1 and c <= 2 then
-        bob = n:sub( 1, l-3 )..","..n:sub( l-2, l )
-    elseif c > 2 and c <= 3 then
-        bob = n:sub( 1, l-6 )..","..n:sub( l-5, l-3 )..","..n:sub( l-2, l )
-    elseif c > 3 and c <= 4 then
-        bob = n:sub( 1, l-9 )..","..n:sub( l-8, l-6 )..","..n:sub( l-5, l-3 )..","..n:sub( l-2, l )
+-------------------------------------------Format a number string to have commas
+local function insertCommas( num, acc )
+    local len = string.len( num )
+    if len > 3 then
+        acc = "," .. num:sub( len-2, len ) .. acc
+        num = num:sub( 1, len-3 )
+        return insertCommas( num, acc )
+    else
+        return num .. acc
     end
-    return bob
+end
+
+function v.commas( num )
+    local numString = tostring( num )
+
+    local isNegative = num < 0
+    if isNegative then
+        numString = numString:sub( 2, string.len( num ) )
+    end
+    
+    numString = insertCommas( numString, "" )
+
+    if isNegative then
+        return "-" .. numString
+    end
+    return numString
+
 end
 --------------------------------------------------------------------------------
 
@@ -403,86 +428,86 @@ end
 
 -----------------------------------------------------------Records Droplet Stats
 function v.dropletStats( name, c )
-    local a = name:sub( 1, 1 )
-    local b = name:sub( 3, 3 )
-    if a == "1" then --normal drops
-        if c == "rect" then --survived
-            if b == "1" then
-                v.stats.red = v.stats.red + 1
-            elseif b == "2" then
-                v.stats.orange = v.stats.orange + 1
-            elseif b == "3" then
-                v.stats.yellow = v.stats.yellow + 1
-            elseif b == "4" then
-                v.stats.lightGreen = v.stats.lightGreen + 1
-            elseif b == "5" then
-                v.stats.darkGreen = v.stats.darkGreen + 1
-            elseif b == "6" then
-                v.stats.lightBlue = v.stats.lightBlue + 1
-            elseif b == "7" then
-                v.stats.darkBlue = v.stats.darkBlue + 1
-            elseif b == "8" then
-                v.stats.pink = v.stats.pink + 1
-            end
-        elseif c == "arrow" then --killed
-            if b == "1" then
-                v.stats.redD = v.stats.redD + 1
-            elseif b == "2" then
-                v.stats.orangeD = v.stats.orangeD + 1
-            elseif b == "3" then
-                v.stats.yellowD = v.stats.yellowD + 1
-            elseif b == "4" then
-                v.stats.lightGreenD = v.stats.lightGreenD + 1
-            elseif b == "5" then
-                v.stats.darkGreenD = v.stats.darkGreenD + 1
-            elseif b == "6" then
-                v.stats.lightBlueD = v.stats.lightBlueD + 1
-            elseif b == "7" then
-                v.stats.darkBlueD = v.stats.darkBlueD + 1
-            elseif b == "8" then
-                v.stats.pinkD = v.stats.pinkD + 1
-            end
-        end
-    elseif a == 2 then --special drops
-        if c == "rect" then --missed
-            if b == "1" then
-                v.stats.red3 = v.stats.red3 + 1
-            elseif b == "2" then
-                v.stats.orange3 = v.stats.orange3 + 1
-            elseif b == "3" then
-                v.stats.yellow3 = v.stats.yellow3 + 1
-            elseif b == "4" then
-                v.stats.lightGreen3 = v.stats.lightGreen3 + 1
-            elseif b == "5" then
-                v.stats.darkGreen3 = v.stats.darkGreen3 + 1
-            elseif b == "6" then
-                v.stats.lightBlue3 = v.stats.lightBlue3 + 1
-            elseif b == "7" then
-                v.stats.darkBlue3 = v.stats.darkBlue3 + 1
-            elseif b == "8" then
-                v.stats.pink3 = v.stats.pink3 + 1
-            end
-        elseif c == "arrow" then --collected
-            if b == "1" then
-                v.stats.red2 = v.stats.red2 + 1
-            elseif b == "2" then
-                v.stats.orange2 = v.stats.orange2 + 1
-            elseif b == "3" then
-                v.stats.yellow2 = v.stats.yellow2 + 1
-            elseif b == "4" then
-                v.stats.lightGreen2 = v.stats.lightGreen2 + 1
-            elseif b == "5" then
-                v.stats.darkGreen2 = v.stats.darkGreen2 + 1
-            elseif b == "6" then
-                v.stats.lightBlue2 = v.stats.lightBlue2 + 1
-            elseif b == "7" then
-                v.stats.darkBlue2 = v.stats.darkBlue2 + 1
-            elseif b == "8" then
-                v.stats.pink2 = v.stats.pink2 + 1
-            end
-        end
-    end
-    v.stats:save()
+    -- local a = name:sub( 1, 1 )
+    -- local b = name:sub( 3, 3 )
+    -- if a == "1" then --normal drops
+    --     if c == "rect" then --survived
+    --         if b == "1" then
+    --             v.stats.red = v.stats.red + 1
+    --         elseif b == "2" then
+    --             v.stats.orange = v.stats.orange + 1
+    --         elseif b == "3" then
+    --             v.stats.yellow = v.stats.yellow + 1
+    --         elseif b == "4" then
+    --             v.stats.lightGreen = v.stats.lightGreen + 1
+    --         elseif b == "5" then
+    --             v.stats.darkGreen = v.stats.darkGreen + 1
+    --         elseif b == "6" then
+    --             v.stats.lightBlue = v.stats.lightBlue + 1
+    --         elseif b == "7" then
+    --             v.stats.darkBlue = v.stats.darkBlue + 1
+    --         elseif b == "8" then
+    --             v.stats.pink = v.stats.pink + 1
+    --         end
+    --     elseif c == "arrow" then --killed
+    --         if b == "1" then
+    --             v.stats.redD = v.stats.redD + 1
+    --         elseif b == "2" then
+    --             v.stats.orangeD = v.stats.orangeD + 1
+    --         elseif b == "3" then
+    --             v.stats.yellowD = v.stats.yellowD + 1
+    --         elseif b == "4" then
+    --             v.stats.lightGreenD = v.stats.lightGreenD + 1
+    --         elseif b == "5" then
+    --             v.stats.darkGreenD = v.stats.darkGreenD + 1
+    --         elseif b == "6" then
+    --             v.stats.lightBlueD = v.stats.lightBlueD + 1
+    --         elseif b == "7" then
+    --             v.stats.darkBlueD = v.stats.darkBlueD + 1
+    --         elseif b == "8" then
+    --             v.stats.pinkD = v.stats.pinkD + 1
+    --         end
+    --     end
+    -- elseif a == 2 then --special drops
+    --     if c == "rect" then --missed
+    --         if b == "1" then
+    --             v.stats.red3 = v.stats.red3 + 1
+    --         elseif b == "2" then
+    --             v.stats.orange3 = v.stats.orange3 + 1
+    --         elseif b == "3" then
+    --             v.stats.yellow3 = v.stats.yellow3 + 1
+    --         elseif b == "4" then
+    --             v.stats.lightGreen3 = v.stats.lightGreen3 + 1
+    --         elseif b == "5" then
+    --             v.stats.darkGreen3 = v.stats.darkGreen3 + 1
+    --         elseif b == "6" then
+    --             v.stats.lightBlue3 = v.stats.lightBlue3 + 1
+    --         elseif b == "7" then
+    --             v.stats.darkBlue3 = v.stats.darkBlue3 + 1
+    --         elseif b == "8" then
+    --             v.stats.pink3 = v.stats.pink3 + 1
+    --         end
+    --     elseif c == "arrow" then --collected
+    --         if b == "1" then
+    --             v.stats.red2 = v.stats.red2 + 1
+    --         elseif b == "2" then
+    --             v.stats.orange2 = v.stats.orange2 + 1
+    --         elseif b == "3" then
+    --             v.stats.yellow2 = v.stats.yellow2 + 1
+    --         elseif b == "4" then
+    --             v.stats.lightGreen2 = v.stats.lightGreen2 + 1
+    --         elseif b == "5" then
+    --             v.stats.darkGreen2 = v.stats.darkGreen2 + 1
+    --         elseif b == "6" then
+    --             v.stats.lightBlue2 = v.stats.lightBlue2 + 1
+    --         elseif b == "7" then
+    --             v.stats.darkBlue2 = v.stats.darkBlue2 + 1
+    --         elseif b == "8" then
+    --             v.stats.pink2 = v.stats.pink2 + 1
+    --         end
+    --     end
+    -- end
+    -- v.stats:save()
 end
 --------------------------------------------------------------------------------
 

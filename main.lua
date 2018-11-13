@@ -9,22 +9,24 @@ local ads = require( "ads" )
 local chartboost = require( "plugin.chartboost" )
 local ad = require( "advertisements" )
 local gn = require( "gameNetworks" )
-
-
-jack = display.newText( " ", display.contentCenterX, display.contentCenterY+150, display.contentWidth, display.contentHeight, g.comBold, 70)
-jack:setFillColor( 0, 0, 0 )
-
+local json = require( "json" )
+local Drop = require( "Drop" )
+local ld = require( "localData" )
+ld.init( Drop.types )
+local bg = require( "backgrounds" )
+bg.init()
 
 system.setAccelerometerInterval( 30 )
 
 --The following variables will be stored.
 g.first = GGData:new( "first" )
-g.gameSettings = GGData:new( "settings" )
-g.buy = GGData:new( "purchases" )
-g.stats = GGData:new( "stats" )
 g.achievement = GGData:new( "achievements" ) --Game Center etc. achievements 
 g.leaderboard = GGData:new( "leaderboards" ) --Game Center etc. leaderboards
 ----------------------------------------
+
+-- Set audio volume ----------------
+audio.setVolume( ld.getVolume() )
+------------------------------------
 
 if system.getInfo( "platformName" ) == "Android" then
     g.platformType = "Android"
@@ -38,15 +40,6 @@ g.first.useA = nil
 
 if g.first.useA == nil then --First release!! Add a new function for each release!
     g.first.useA = false
-    audio.setVolume( 0.8 )
-    g.gameSettings.volume = 0.8
-    g.gameSettings.bgChange = true
-    g.gameSettings.specials = true
-    g.gameSettings.sensitivity = 3
-    g.gameSettings.tilt = true
-    g.buy.invincibility = 999999
-    g.buy.lives = 999999
-    g.buy.ads = false
     g.achievement.normalAchievements = {
         { isComplete = false, showBanner = true, id = "drop.mist" },
         { isComplete = false, showBanner = true, id = "drop.doubleMist" },
@@ -104,83 +97,13 @@ if g.first.useA == nil then --First release!! Add a new function for each releas
         { value = 0, id = "drop.scoreTrickyLeaderboardGlobal" },
         { value = 0, id = "drop.timeTrickyLeaderboardGlobal" },
     }
-    g.stats.videoAd = { day=os.date("%j"), views=0, lastViewTime=0 }
-    g.stats.red = 0 --survived read
-    g.stats.redD = 0 --dead by red
-    g.stats.orange = 0
-    g.stats.orangeD = 0
-    g.stats.yellow = 0
-    g.stats.yellowD = 0
-    g.stats.lightGreen = 0
-    g.stats.lightGreenD = 0
-    g.stats.darkGreen = 0
-    g.stats.darkGreenD = 0
-    g.stats.lightBlue = 0
-    g.stats.lightBlueD = 0
-    g.stats.darkBlue = 0
-    g.stats.darkBlueD = 0
-    g.stats.pink = 0
-    g.stats.pinkD = 0
-    g.stats.red2 = 0 --got red special
-    g.stats.orange2 = 0
-    g.stats.yellow2 = 0
-    g.stats.lightGreen2 = 0
-    g.stats.darkGreen2 = 0
-    g.stats.lightBlue2 = 0
-    g.stats.darkBlue2 = 0
-    g.stats.pink2 = 0
-    g.stats.red3 = 0 --missed red special
-    g.stats.orange3 = 0
-    g.stats.yellow3 = 0
-    g.stats.lightGreen3 = 0
-    g.stats.darkGreen3 = 0
-    g.stats.lightBlue3 = 0
-    g.stats.darkBlue3 = 0
-    g.stats.pink3 = 0
-
-    g.stats.numGames = 0
-    g.stats.deaths = 0
-    g.stats.invinces = 0
-    g.stats.revives = 0
     
     g.first:save()
-    g.gameSettings:save()
-    g.buy:save()
-    g.stats:save()
     g.achievement:save()
     g.leaderboard:save()
 end
 
-audio.setVolume (g.gameSettings.volume )
-
 local gn = require( "gameNetworks" ) -- This is down here because "gameNetworks" 
---------------------------------------- uses "g." variables which are not created until above
-
--- The following creates and organizes the background images.
-local bgImages = {
-    [1] = "images/bg.png",
-    [2] = "images/bg2.png",
-    [3] = "images/bg3.png",
-    [4] = "images/bg4.png",
-    [5] = "images/bg5.png",
-    [6] = "images/bg6.png",
-    [7] = "images/bg7.png",
-}
-
-g.bg = {}
-
-g.bgGroup = display.newGroup()
-g.bgGroup.anchorX, g.bgGroup.anchorY = 0, 0
-g.bgGroup:toBack()
-
-for i = 1,7 do 
-    g.bg[i] = display.newImageRect( g.bgGroup, bgImages[i], 1000, 1500 )
-    g.bg[i].anchorX, g.bg[i].anchorY = 0, 0
-    g.bg[i].alpha = 0
-end
-
-g.bg[1].alpha = 1
---------------------------------------------------------------------------------
 
 -- counts when the next ad should be displayed
 g.getsReward = false

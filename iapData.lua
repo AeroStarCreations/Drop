@@ -4,6 +4,8 @@
 --  your app could obtain them dynamically from your server.
 -------------------------------------------------------------------------------
 local g = require( "globalVariables" )
+local ld = require( "localData" )
+
 
 -- Create table for v library
 local v = {}
@@ -258,35 +260,34 @@ end
 ----------------------------------------Give Reward
 function v.giveReward( id )
     if id == 1 then
-        g.buy.invincibility = g.buy.invincibility + 5
+		ld.addInvincibility( 5 )
     elseif id == 2 then
-        g.buy.invincibility = g.buy.invincibility + 30
+		ld.addInvincibility( 30 )
     elseif id == 3 then
-        g.buy.invincibility = g.buy.invincibility + 65
+		ld.addInvincibility( 65 )
     elseif id == 4 then
-        g.buy.invincibility = g.buy.invincibility + 140
+		ld.addInvincibility( 140 )
     elseif id == 5 then
-        g.buy.invincibility = g.buy.invincibility + 365
+		ld.addInvincibility( 365 )
     elseif id == 6 then
-        g.buy.invincibility = g.buy.invincibility + 770
+		ld.addInvincibility( 770 )
     elseif id == 7 then
-        g.buy.lives = g.buy.lives + 3
+		ld.addLives( 3 )
     elseif id == 8 then
-        g.buy.lives = g.buy.lives + 18
+		ld.addLives( 18 )
     elseif id == 9 then
-        g.buy.lives = g.buy.lives + 40
+		ld.addLives( 40 )
     elseif id == 10 then
-        g.buy.lives = g.buy.lives + 85
+		ld.addLives( 85 )
     elseif id == 11 then
-        g.buy.lives = g.buy.lives + 220
+		ld.addLives( 220 )
     elseif id == 12 then
-        g.buy.lives = g.buy.lives + 465
+		ld.addLives( 465 )
     elseif id == 13 then
-        g.buy.ads = true
-        g.buy.invincibility = g.buy.invincibility + 5
-        g.buy.lives = g.buy.lives + 3
+		ld.setAdsEnabled( true )
+		ld.addInvincibility( 5 )
+		ld.addLives( 3 )
     end
-    g.buy:save()
 end
 ---------------------------------------------------
 -- Return product data library for external use

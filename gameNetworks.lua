@@ -105,6 +105,7 @@ end
 
 function v.login()
     testText.text = testText.text .. " - login called"
+    print("login called")
     gameNetwork.init( g.networkType, gameCenterLoginCallback )
 end
 

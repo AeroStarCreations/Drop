@@ -5,7 +5,7 @@ local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "globalVariables" )
 local t = require( "transitions" )
-local GGData = require( "GGData" )
+local ld = require( "localData" )
 
 
 --Precalls
@@ -29,8 +29,10 @@ function scene:create( event )
     ------------------------------------------Logo
     drop = display.newImageRect( "images/name.png", 1020, 390 )
     local dropRatio = drop.height/drop.width
-    drop.width = 0.77*display.contentWidth; drop.height = drop.width*dropRatio
-    drop.x, drop.y = display.contentCenterX, 0.06*display.contentHeight+1
+    drop.width = 0.77*display.contentWidth
+    drop.height = drop.width*dropRatio
+    drop.x = display.contentCenterX
+    drop.y = display.topStatusBarContentHeight + 0.4 * drop.height
     drop.xScale, drop.yScale = 0.47, 0.47
     group:insert(drop)
     ----------------------------------------------
@@ -58,11 +60,12 @@ function scene:create( event )
 
     -----------------------------------------Lines
     local numberOfSettings = 5
+    local focal = drop.y + 0.4 * drop.height
     
     local lineTable = {}
     
     for i=1, numberOfSettings do
-       local ypos = 2*drop.y + (i-1)*((display.contentHeight - 2*drop.y)/numberOfSettings)
+       local ypos = focal + (i-1)*((display.contentHeight - focal)/numberOfSettings)
        lineTable[i] = display.newLine( lineGroup, 0, ypos, display.contentWidth, ypos )
        lineTable[i]:setStrokeColor( unpack( g.purple ) )
        lineTable[i].strokeWidth = 2
@@ -71,7 +74,8 @@ function scene:create( event )
     lineGroup.alpha = 0
     ----------------------------------------------
       
-    -------------------------------------------------------The following is TEXT  
+    ------------------------------------------------------The following is TEXT
+
     -----------------------------------Volume Text
     local volTextOpt = {
         parent = groupVolume,
@@ -90,7 +94,7 @@ function scene:create( event )
     
     local volText2Opt = {
         parent = groupVolume,
-        text = math.round(g.gameSettings.volume*100).."%",
+        text = "–",
         y = volText.y-15,
         x = 0.7*display.contentWidth,
         width = 200,
@@ -102,6 +106,15 @@ function scene:create( event )
     local volText2 = display.newText(volText2Opt)
     volText2:setFillColor( unpack( g.purple ) )
     volText2.anchorX = 0.5; volText2.anchorY = 1
+
+    local function setVolumeText()
+        if ld.getVolume() < 0.1 then -- value won't be exactly 0 when mute
+            volText2.text = "mute"
+        else
+            volText2.text = math.round( ld.getVolume()*100 ).."%"
+        end
+    end
+    setVolumeText()
     ----------------------------------------------
     
     -------------------------------Background Text
@@ -169,7 +182,7 @@ function scene:create( event )
     senseText2.anchorX = 0.5; senseText2.anchorY = 1
     
     local function sensitivityLevel()
-        local w = g.gameSettings.sensitivity
+        local w = ld.getMovementSensitivity()
         if w == 1 then
             senseText2.text = "X-Low"
         elseif w == 2 then
@@ -216,23 +229,21 @@ function scene:create( event )
     
     ----------------------------------Volume Stepper
     local function volumeStepperListener( event )
-       if event.phase == "decrement" then
-          g.gameSettings.volume = event.value*0.1
-          audio.setVolume( g.gameSettings.volume )
-       elseif event.phase == "increment" then
-          g.gameSettings.volume = event.value*0.1
-          audio.setVolume( g.gameSettings.volume )
-       end
-       if event.value == 0 then
-          volText2.text = "mute"
-       else
-          volText2.text = math.round( g.gameSettings.volume*100).."%"
-       end
-       g.gameSettings:save()
-       print( "Volume = "..audio.getVolume() )
+        local newVolume = event.value * 0.1
+        if event.phase == "decrement" then
+            ld.setVolume( newVolume )
+            audio.setVolume( newVolume )
+        elseif event.phase == "increment" then
+            ld.setVolume( newVolume )
+            audio.setVolume( newVolume )
+        end
+        setVolumeText()
+        print( "Volume = "..audio.getVolume() )
     end
+
+    print("initial volume = " .. ld.getVolume())
     
-    local volumeStepper = widget.newStepper{
+    local volumeStepper = widget.newStepper {
         width = 200,
         height = 83+1/3,
         x = 0.7*display.contentWidth,
@@ -243,7 +254,7 @@ function scene:create( event )
         noPlusFrame = 3,
         minusActiveFrame = 4,
         plusActiveFrame = 5,
-        initialValue = math.round(g.gameSettings.volume*10),
+        initialValue = math.round( ld.getVolume()*10 ),
         maximumValue = 10,
         minimumValue = 0,
         timerIncrimentSpeed = 500,
@@ -256,40 +267,56 @@ function scene:create( event )
     
     -------------------------------Background Switch
     local function bgSwitchListener()
-        if g.gameSettings.bgChange == true then
+        if ld.getChangingBackgroundsEnabled() then
             print("Changing Backgrounds are OFF")
-            g.gameSettings.bgChange = false
-        elseif g.gameSettings.bgChange == false then
+            ld.setChangingBackgroundsEnabled( false )
+        else
             print("Changing Backgrounds are ON")
-            g.gameSettings.bgChange = true
+            ld.setChangingBackgroundsEnabled( true )
         end
-        g.gameSettings:save()
     end
     
-    local bgSwitch = g.onOffSwitch( groupBackground, 0.7*display.contentWidth, bgText.y, 210, 90, "OFF", "ON", g.gameSettings.bgChange, bgSwitchListener)
+    local bgSwitch = g.onOffSwitch({
+        parent = groupBackground,
+        x = 0.7 * display.actualContentWidth,
+        y = bgText.y,
+        width = 210,
+        height = 90,
+        label1 = "OFF",
+        label2 = "ON",
+        isOn = ld.getChangingBackgroundsEnabled(),
+        listener = bgSwitchListener
+    })
     ------------------------------------------------
     
     -------------------------------Special Switch
     local function specialSwitchLstener()
-        if g.gameSettings.specials == true then
+        if ld.getSpecialDropsEnabled() then
             print("Specials are OFF")
-            g.gameSettings.specials = false
-        elseif g.gameSettings.specials == false then
+            ld.setSpecialDropsEnabled( false )
+        else
             print("Specials are ON")
-            g.gameSettings.specials = true
+            ld.setSpecialDropsEnabled( true )
         end
-        g.gameSettings:save()
     end
     
-    local specialSwitch = g.onOffSwitch( groupSpecial, 0.7*display.contentWidth, specialText.y, 210, 90, "OFF", "ON", g.gameSettings.specials, specialSwitchLstener)
+    local specialSwitch = g.onOffSwitch({
+        parent = groupSpecial,
+        x = 0.7 * display.actualContentWidth,
+        y = specialText.y,
+        width = 210,
+        height = 90,
+        label1 = "OFF",
+        label2 = "ON",
+        isOn = ld.getSpecialDropsEnabled(),
+        listener = specialSwitchLstener
+    })
     ------------------------------------------------
     
     ----------------------------------Sensitivity Stepper
     local function sensitivityStepperListener( event )
-       local v = event.value
-       g.gameSettings.sensitivity = v
+       ld.setMovementSensitivity( event.value )
        sensitivityLevel()
-       g.gameSettings:save()
        print( "Tilt sensitivity = "..senseText2.text )
     end
     
@@ -304,7 +331,7 @@ function scene:create( event )
         noPlusFrame = 3,
         minusActiveFrame = 4,
         plusActiveFrame = 5,
-        initialValue = g.gameSettings.sensitivity,
+        initialValue = ld.getMovementSensitivity(),
         maximumValue = 5,
         minimumValue = 1,
         timerIncrimentSpeed = 500,
@@ -317,18 +344,27 @@ function scene:create( event )
     
     -------------------------------Method Switch
     local function methodSwitchListener()
-        if g.gameSettings.tilt == true then
+        if ld.getTiltControlEnabled() then
             print("Controls set to TAP")
-            g.gameSettings.tilt = false
-        elseif g.gameSettings.tilt == false then
+            ld.setTiltControlEnabled( false )
+        else
             print("Controls set to TILT")
-            g.gameSettings.tilt = true
+            ld.setTiltControlEnabled( true )
         end
-        g.gameSettings:save()
-        print( "Tilt method set to ",g.gameSettings.tilt )
+        print( "Tilt method set to " .. tostring(ld.getTiltControlEnabled()) )
     end
     
-    local switch3 = g.onOffSwitch( groupMethod, 0.7*display.contentWidth, methodText.y, 210, 90, "TAP", "TILT", g.gameSettings.tilt, methodSwitchListener)
+    local methodSwitch = g.onOffSwitch({
+        parent = groupMethod,
+        x = 0.7 * display.actualContentWidth,
+        y = methodText.y,
+        width = 210,
+        height = 90,
+        label1 = "TAP",
+        label2 = "TILT",
+        isOn = ld.getTiltControlEnabled(),
+        listener = methodSwitchListener
+    })
     ------------------------------------------------
     
     -----------------------------------------Insert groups and initial positions

@@ -6,6 +6,7 @@ local g = require("globalVariables")
 local ads = require( "ads" )
 local revmob = require("plugin.revmob")
 local applovin = require("plugin.applovin")
+local ld = require( "localData" )
 
 local v = {}
 
@@ -33,12 +34,11 @@ local function postAd()
         g.adDone = true
         g.restart()
     elseif v.buttonColor == "yellow" and getsReward then
-        g.buy.invincibility = g.buy.invincibility + 1
-        g.stats.videoAd.views = g.stats.videoAd.views + 1
-        g.stats.videoAd.lastViewTime = os.time( os.date('*t') )
-        g.stats.save()
+        ld.addInvincibility( 1 )
+        ld.addVideoAdView()
+        ld.setVideoAdLastViewTime( os.time( os.date('*t') ) )
         g.getsReward = true
-        native.showAlert( "You've earned 1 shield!", "You can view "..(5-g.stats.videoAd.views).." more video ads today.", { "Okay" } )
+        native.showAlert( "You've earned 1 shield!", "You can view "..(5 - ld.getVideoAdViews()).." more video ads today.", { "Okay" } )
     end
     getsReward = false
 end

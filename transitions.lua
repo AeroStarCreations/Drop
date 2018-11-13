@@ -2,6 +2,8 @@
 
 local g = require( "globalVariables" )
 local cp = require( "composer" )
+local ld = require( "localData" )
+local bg = require( "backgrounds" )
 
 local v = {}
 
@@ -13,7 +15,7 @@ local rot1, rot2
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------Center
 --------------------------------------------------------------------------------
-v.transInCenter = function( asc, logo, arrow, fb, twit, extras, settings, listener )--------
+v.transInCenter = function( asc, logo, arrow, fb, twit, extras, settings, listener )
     
     
     local function finish( event )
@@ -28,20 +30,15 @@ v.transInCenter = function( asc, logo, arrow, fb, twit, extras, settings, listen
     end
     
     transition.to( asc, { time=400, y=display.contentHeight-30, transition=easing.outQuad } )
-    
     transition.to( logo, { time=700, y=0.2*display.contentHeight, transition=easing.outQuad, xScale=1, yScale=1--[[, rotation=0--]], onComplete=finish } )
-    
     transition.to( fb, { time=700, x=display.contentCenterX - 80, transition=easing.outQuad } )
-    
     transition.to( twit, { time=700, x=display.contentCenterX + 80, transition=easing.outQuad } )
-    
     transition.to( extras, { time=600, x=0, y=display.contentHeight, transition=easing.outQuad } )
-    
     transition.to( settings, { time=600, x=display.contentWidth, y=display.contentHeight, transition=easing.outQuad } )
     
-    if g.justOpened == true then
+    if g.justOpened then
         transition.to( arrow, { time=900, xScale=1, yScale=1, transition=easing.outBack } )
-    elseif cp.getSceneName( "previous" ) == "game" then
+    elseif cp.getSceneName( "previous" ) == "game2" then
         arrow.x = g.arrowX
         transition.to( arrow, { time=1200, transition=easing.outBack, x=display.contentCenterX+17, y=display.contentCenterY, xScale=1, yScale=1, rotation=rot2 })
     else
@@ -50,23 +47,13 @@ v.transInCenter = function( asc, logo, arrow, fb, twit, extras, settings, listen
     end
 
     --Fade out the backgrounds from gameplay
-    if g.gameSettings.bgChange == true then
-        for i = 2, #g.bg do
-            if g.bg[i].alpha > 0 then
-                local function listener ()
-                    g.bg[i].isVisible = true
-                end
-                transition.fadeOut( g.bg[i], { time=2500, onComplete=listener } )
-            end
-        end
+    if ld.getChangingBackgroundsEnabled() then
+        bg.fadeOutToDefault()
     end
     
-end-----------------------------------------------------------------------------
+end
 --------------------------------------------------------------------------------
-
-
---------------------------------------------------------------------------------
-v.transOutCenter = function( asc, logo, arrow, fb, twit, extras, settings )-------
+v.transOutCenter = function( asc, logo, arrow, fb, twit, extras, settings )
     
     
     local function startListener( event )
@@ -87,7 +74,7 @@ v.transOutCenter = function( asc, logo, arrow, fb, twit, extras, settings )-----
         settings:setEnabled( true )
         
         if g.goingToGame == true then
-            cp.gotoScene( "game" )
+            cp.gotoScene( "game2" )
         elseif g.goingToExtras == true then
             cp.gotoScene( "extras" )
         elseif g.goingToSettings == true then
@@ -111,38 +98,27 @@ v.transOutCenter = function( asc, logo, arrow, fb, twit, extras, settings )-----
     if g.goingToGame == true then
         
         transition.to( asc, { time=400, delay=800, y=display.contentHeight+50, transition=easing.inQuad } )
-        
         transition.to( logo, { time=700, y=-logo.height, transition=easing.inQuad } )
-        
         transition.to( arrow, { time=2000, transition=easing.inOutBack, x=display.contentCenterX, y=display.contentHeight-49.5, xScale=0.33, yScale=0.33, rotation=rot1, onStart=startListener, onComplete=finishListener })
-        
         transition.to( fb, { time=700, delay=500, x=-fb.width, transition=easing.inQuad } )
-        
         transition.to( twit, { time=700, delay=500, x=display.contentWidth+twit.width, transition=easing.inQuad } )
-        
         transition.to( extras, { time=600, delay=800, x=-200, y=display.contentHeight+200, transition=easing.inQuad } )
-        
         transition.to( settings, { time=600, delay=800, x=display.contentWidth+200, y=display.contentHeight+200, transition=easing.inQuad } )
         
     else
         
         transition.to( asc, { time=400, delay=400, y=display.contentHeight+50, transition=easing.inQuad } )
-        
-        transition.to( logo, { time=500, delay=300, y=0.06*display.contentHeight+1, transition=easing.inQuad, xScale=0.47, yScale=0.47, rotation=0 } )
-        
+        transition.to( logo, { time=500, delay=300, y=display.topStatusBarContentHeight + 0.4 * logo.height, transition=easing.inQuad, xScale=0.47, yScale=0.47, rotation=0 } )
         transition.to( arrow, { time=800, transition=easing.inQuad, x=display.contentWidth+arrow.width, onStart=startListener, onComplete=finishListener } )
-        
         transition.to( fb, { time=700, delay=100, x=-fb.width, transition=easing.inQuad } )
-        
         transition.to( twit, { time=700, delay=100, x=display.contentWidth+twit.width, transition=easing.inQuad } )
-        
         transition.to( extras, { time=600, delay=200, x=-200, y=display.contentHeight+200, transition=easing.inQuad } )
-        
         transition.to( settings, { time=600, delay=200, x=display.contentWidth+200, y=display.contentHeight+200, transition=easing.inQuad } )
         
     end
     
-end-----------------------------------------------------------------------------
+end
+--------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 
@@ -355,24 +331,25 @@ v.countDown = function( b1, b2, b3, tr, func )
     
     local function listener2()
         func()
-        b1.xScale, b1.yScale = 1, 1
-        b2.xScale, b2.yScale = 1, 1
-        b3.xScale, b3.yScale = 1, 1
         tr.fill = { 0, 0.65, 1 }
         tr.isVisible = false
     end
     
+    b1.xScale, b1.yScale = 1, 1
+    b2.xScale, b2.yScale = 1, 1
+    b3.xScale, b3.yScale = 1, 1
+
     local function listener1()
-        transition.to( b1, { time=200, delay=550, alpha=0, xScale=0, yScale=0, transition=easing.inBack, onComplete=listener2 } )
+        transition.to( b1, { time=200, delay=550, alpha=0, xScale=0, yScale=0, transition=easing.inBack } )
         transition.to( b2, { time=200, delay=550, alpha=0, xScale=0, transition=easing.inBack, yScale=0 } )
         transition.to( b3, { time=200, delay=550, alpha=0, xScale=0, transition=easing.inBack, yScale=0 } )
-        transition.to( tr, { time=200, delay=550, alpha=0 } )
+        transition.to( tr, { time=200, delay=550, alpha=0, onComplete=listener2 } )
     end
     
     transition.to( b1, { time=50, delay=750, alpha=1 } )
     transition.to( b2, { time=50, delay=1500, alpha=1 } )
     transition.to( b3, { time=50, delay=2250, alpha=1, onComplete=listener1 } )
-    return true
+    
 end
 --------------------------------------------------------------------------------
 v.gameOverStatsIn = function( fill, t1, t2, t3, t4, l1, l2, l3, scr, tm, highs, hight, twit, fb ) 

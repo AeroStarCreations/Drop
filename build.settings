@@ -132,8 +132,6 @@ settings =
             publisherId = "com.coronalabs",
             supportedPlatforms = { iphone = true, android = true }
         },
-        -- Vungle plugin causes builds to fail because Vungle supports iOS7
-        -- but Corona only supports iOS8. Corona builds 3078+ works
         ["CoronaProvider.ads.vungle"] =
         {
             publisherId = "com.vungle"
@@ -155,6 +153,21 @@ settings =
         {
             publisherId = "com.coronalabs",
             supportedPlatforms = { iphone=true, android=true, osx=true, win32=true, appletvos=true }
+        },
+        --[[
+            The following 3 blocks are for GameSparks
+        ]]
+        ["plugin.bit"] =
+        {
+            publisherId = "com.coronalabs",
+        },
+        ["plugin.openssl"] =
+        {
+            publisherId = "com.coronalabs",
+        },
+        ["plugin.gamesparks"] =
+        {
+            publisherId = "com.gamesparks",
         },
     },
 }
