@@ -33,24 +33,24 @@ local function countdown()
             time=200, 
             delay=interval, 
             alpha=0, 
-            xScale=0, 
-            yScale=0, 
+            xScale=0.001, 
+            yScale=0.001, 
             transition=easing.inBack
         })
         transition.to( countdownImage2, { 
             time=200, 
             delay=interval, 
             alpha=0, 
-            xScale=0, 
-            yScale=0,
+            xScale=0.001, 
+            yScale=0.001,
             transition=easing.inBack
         })
         transition.to( countdownImage3, { 
             time=200, 
             delay=interval, 
             alpha=0, 
-            xScale=0, 
-            yScale=0,
+            xScale=0.001, 
+            yScale=0.001,
             transition=easing.inBack,
             onComplete = cp.hideOverlay
         })
@@ -136,7 +136,7 @@ local function resumeListener()
 end
 
 local function restartListener()
-    functionToCallOnHide = parentScene.restartGame
+    functionToCallOnHide = parentScene.startGame
     transitionOutPause()
 end
 

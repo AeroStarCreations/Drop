@@ -413,11 +413,12 @@ function scene:startGame()
     score = 0
     totalGameTime = 0
     scoreMultiplier = 1
+    headerGroup:toFront()
     dropsGroup = display.newGroup()
     storm.text = lvlParams.stormName
     transparentRect.isVisible = false
     header1.isVisible = true
-    header2.isVisible = true
+    header2.isVisible = false
     Drop:deleteAll()
     startPhysics()
     addEventListeners()
@@ -660,7 +661,6 @@ function scene:create( event )
     transparentRect.alpha = 0.5
     ---------------------------------------------------------------------------]
 
-    headerGroup:toFront()
     --  -------------------------------------------------------------[
 
     ---------------------------------------------------------------------------]
