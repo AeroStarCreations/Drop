@@ -6,12 +6,17 @@
 -- Don't set important values to true (i.e. purchases) until the server/backend confirms
 
 local GGData = require( "GGData" )
+local json = require( "json" )
+local achieve = require( "achievements" )
 
 -- GGData boxes ---------------------------------------------------------------[
 local first = GGData:new( "first" )
 local settings = GGData:new( "settings" )
 local purchases = GGData:new( "purchases" )
 local stats = GGData:new( "stats" )
+local normalAchievements = GGData:new( "normalAchievements" )
+local progressAchievements = GGData:new( "progressAchievements" )
+local social = GGData:new( "social" )
 -------------------------------------------------------------------------------]
 
 -- Default value --------------------------------------------------------------[
@@ -28,6 +33,15 @@ local purchasesDefault = {
     lives = 999,
     ads = false
 }
+
+local achievementsDefault = {
+    isComplete = false,
+    value = 0
+}
+
+local socialDefault = {
+    alias = "\n\n\n"
+}
 -------------------------------------------------------------------------------]
     
 -- Local methods and ops ------------------------------------------------------[
@@ -41,6 +55,10 @@ end
 
 local function saveStats()
     stats:save()
+end
+
+local function saveSocial()
+    social:save()
 end
 
 local function initializeAllData( dropTypes )
@@ -71,6 +89,19 @@ local function initializeAllData( dropTypes )
         })
     end
     stats:save()
+    for k,v in pairs( achieve.normalAchievementsShortCodes ) do
+        normalAchievements:set( v, achievementsDefault.isComplete )
+    end
+    normalAchievements:save()
+    for k,v in pairs( achieve.progressAchievementsShortCodes ) do
+        progressAchievements:set( k, {
+            target=v, 
+            value=achievementsDefault.value
+        } )
+    end
+    progressAchievements:save()
+    social:set( "alias", socialDefault.alias )
+    social:save()
 end
 -------------------------------------------------------------------------------]
 
@@ -81,6 +112,7 @@ local v = {}
 v.init = function( dropTypes )
     purchases:enableIntegrityControl()
     stats:enableIntegrityControl()
+    social:enableIntegrityControl()
     if not first:get( "hasBeenInitialized" ) then
         initializeAllData( dropTypes )
     end
@@ -278,6 +310,39 @@ v.incrementDropSpecialCollisions = function( dropType )
 end
 --------------------------------------]
 
+-- Achievements ----------------------[
+v.achievementSetComplete = function( shortCode )
+    normalAchievements:set( shortCode, true )
+    normalAchievements:save()
+end
+
+v.incrementAchievement = function( shortCode, amount )
+    local a = progressAchievements:get( shortCode )
+    a.value = a.value + (amount or 1)
+    progressAchievements:set( shortCode, a )
+    progressAchievements:save()
+end
+
+v.getAchievementValue = function( shortCode )
+    return progressAchievements:get( shortCode ).value
+end
+
+v.getAchievementTarget = function( shortCode )
+    return progressAchievements:get( shortCode ).target
+end
+--------------------------------------]
+
+-- Social ----------------------------[
+v.getAlias = function()
+    return social:get( "alias" )
+end
+
+v.setAlias = function( newAlias )
+    social:set( "alias", newAlias )
+    social:save()
+end
+--------------------------------------]
+
 return v
 -------------------------------------------------------------------------------]
 
@@ -324,4 +389,23 @@ return v
 --         specialCollisions = int
 --     }
 --     ... one for every drop type
+-- }
+
+-- ACHIEVEMENTS
+-- normalAchievements = {
+--     "SHORT_CODE" = isComplete:boolean
+--     ... one for every normal achievement
+-- }
+--
+-- progressAchievements = {
+--     "SHORT_CODE" = {
+--         target = int,
+--         value = int
+--     }
+--     ... one for every progress achievement
+-- }
+
+-- SOCIAL
+-- social = {
+--     alias = string
 -- }

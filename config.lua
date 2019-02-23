@@ -14,6 +14,6 @@ application = {
     },
     license = {
         google = {
-            key = "getKeyFromSomewhere"
+            key = "getKeyFromSomewhere",
         },
     },}

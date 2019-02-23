@@ -3,14 +3,16 @@
 local gameNetwork = require( "gameNetwork" )
 local g = require( "globalVariables" )
 
-local loggedIntoGC
+local loggedIntoGN
 local normalAchievementsUpdated
+
+local TAG = "gameNetworks:"
 
 local v = {}
 
 
 function v.checkAndRecord() -------------------------Check if leaderboard stats are correct
-    if loggedIntoGC == true then
+    if loggedIntoGN == true then
         for i=1,#g.achievement.normalAchievements do --------------------------\
             if g.achievement.normalAchievements[i].isComplete == true then --Is achievement complete?
                 gameNetwork.request( "unlockAchievement",
@@ -85,28 +87,29 @@ end
 local function loadPlayerRequestCallback( event )
     local playerID = event.data.playerID
     local playerAlias = event.data.alias
-    print( playerID, playerAlias )
     testText.text = testText.text .. " - " .. playerID .. " - " .. playerAlias
+    print(TAG, playerID.." : "..playerAlias)
 end
 
-local function gameCenterLoginCallback( event )
+local function gameNetworkLoginCallback( event )
     if event.data then
         testText.text = testText.text .. " - login success"
-        loggedIntoGC = true
+        print(TAG, "login success")
+        loggedIntoGN = true
         gameNetwork.request( "loadLocalPlayer", { listener=loadPlayerRequestCallback } )
         v.checkAndRecord()
-        print("*************************************************")
     else
         testText.text = testText.text .. " - login fail"
-        loggedIntoGC = false
+        print(TAG, "login failure")
+        loggedIntoGN = false
     end
     return true
 end
 
 function v.login()
+    gameNetwork.init( g.networkType, gameNetworkLoginCallback )
     testText.text = testText.text .. " - login called"
-    print("login called")
-    gameNetwork.init( g.networkType, gameCenterLoginCallback )
+    print(TAG, "login called")
 end
 
 

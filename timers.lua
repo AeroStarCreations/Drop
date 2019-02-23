@@ -49,8 +49,10 @@ end
 
 v.flushAllTimers = function()
     for i = 1, table.maxn( timers ) do
-        timer.cancel( timers[i] )
-        table.remove( timers, i )
+        if timers[i] then
+            timer.cancel( timers[i] )
+            table.remove( timers, i )
+        end
     end
 end
 

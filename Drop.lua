@@ -64,6 +64,12 @@ local function getDropSpawnX()
 
     return dropCoordinates[x]
 end
+
+local function getID()
+    local id = tostring( dropCounter )
+    dropCounter = dropCounter + 1
+    return id
+end
 -------------------------------------------------------------------------------]
 
 -- Returned values/table ------------------------------------------------------[
@@ -102,11 +108,9 @@ function Drop:new( parent )
     self.image.drop = self
     self.isSpecial = special
     self.type = Drop.types[frame]
-    self.id = tostring( dropCounter )
+    self.id = getID()
 
     dropSet[self.id] = self
-
-    dropCounter = dropCounter + 1
 
     return self
 end
@@ -124,9 +128,24 @@ end
 
 function Drop:delete()
     local drop = dropSet[self.id]
-    dropSet[self.id].image:removeSelf()
-    dropSet[self.id] = nil
+    if drop then
+        dropSet[self.id].image:removeSelf()
+        dropSet[self.id] = nil
+    end
     return drop
+end
+
+function Drop:deleteWithAnimation()
+    local function listener()
+        self:delete()
+    end
+    transition.to( self.image, { 
+        time = 80, 
+        alpha = 0, 
+        width = self.image.width*2,
+        height = self.image.height*2,
+        onComplete = listener
+    })
 end
 
 function Drop:deleteAll()
@@ -134,7 +153,15 @@ function Drop:deleteAll()
         v:delete()
     end
     dropSet = {}
-    print(json.prettify(dropSet))
+end
+
+function Drop:deleteAllWithAnimation()
+    local interval = 200
+    local delay = interval
+    for k,v in pairs(dropSet) do
+        timer.performWithDelay( delay, function() v:deleteWithAnimation() end)
+        delay = delay + interval
+    end
 end
 
 return Drop

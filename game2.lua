@@ -9,7 +9,7 @@ local bg = require( "backgrounds" )
 local timer = require( "timers" )
 local json = require( "json" )
 
-local arrowIsWorking = false
+local arrowIsWorking = true
 
 --Precalls
 local arrow
@@ -21,8 +21,7 @@ local arrowShape
 local lvlParams = g.level1AParams
 local headerGroup
 local header1
-local header2
-local transparentRect
+-- local header2
 local storm
 local gravityPower
 local windForce
@@ -47,9 +46,13 @@ local function headerGroupTransitionIn()
     local function listener()
         header1:setEnabled( true )
     end
+
+    headerGroup.y = -headerGroup.height -- starting position
+    local destinationY = display.topStatusBarContentHeight
+
     transition.to( headerGroup, {
         time = 500,
-        y = 0,
+        y = destinationY - 0.43 * headerGroup.height,
         transition = easing.outQuad,
         onComplete = listener
     })
@@ -85,6 +88,7 @@ local function addArrowPhysics()
         shape = arrowShape,
         bounce = 0
     })
+    arrow:setLinearVelocity( 0, 0 )
 end
 
 local function startPhysics()
@@ -118,8 +122,8 @@ end
 local function tiltControlMovement( event )
     local velocity = 0
     if math.abs(event.xGravity) > 0.04 then
-        local sensitivity = (ld.getMovementSensitivity() - 1) * 45
-        local vel = event.xGravity * sensitivity
+        local sensitivity = ld.getMovementSensitivity() * 2000
+        velocity = event.xGravity * sensitivity
     end
     arrow:setLinearVelocity( velocity, 0 )
 end
@@ -285,7 +289,7 @@ local function startGameTimer()
 end
 
 local function scoreTimerListener()
-    score = score + 1 * scoreMultiplier
+    score = score + scoreMultiplier
     scoreText.text = g.commas( score )
 end
 
@@ -337,7 +341,7 @@ end
 local function startScoreMultiplierTimer()
     local timeRemaining = 0
     if timer.exists(timers.multiplierTimer) then
-        scoreMultiplier = scoreMultiplier * 2--+ 3
+        scoreMultiplier = scoreMultiplier + 3
         timerRemaining = timer.pause( timers.multiplierTimer )
         timer.cancel( timers.multiplierTimer )
     else
@@ -353,28 +357,10 @@ local function startScoreMultiplierTimer()
     )
 end
 
-local function deleteSpecialDrop( drop )
-    local function listener( obj )
-        if not obj.isDeleted then
-            obj.isDeleted = true
-            -- obj:removeSelf()
-            -- obj = nil
-            obj.drop:delete()
-        end
-    end
-    transition.to( drop, { 
-        time = 80, 
-        alpha = 0, 
-        width = drop.width*2,
-        height = drop.height*2,
-        onComplete = listener,
-    })
-end
-
 local function arrowCollisionListener( self, event )
     if not arrowIsWorking then return end
 
-    local drop = event.other
+    local drop = event.other.drop
 
     if event.phase == "began" then
         if drop.isSpecial then
@@ -396,7 +382,7 @@ local function arrowCollisionListener( self, event )
             elseif drop.type == "pink" then
                 startScaleTimer( "large" )
             end
-            deleteSpecialDrop( drop )
+            drop:deleteWithAnimation()
         elseif not isInvincible then
             ld.incrementDropNormalCollisions( drop.type )
             scene:endGame()
@@ -407,19 +393,29 @@ end
 
 -- Major game function --------------------------------------------------------[
 function scene:startGame()
+    -- Set variables
     lvlParams = g.level1AParams
     gravityPower = 1
     windForce = 0
     score = 0
     totalGameTime = 0
     scoreMultiplier = 1
-    headerGroup:toFront()
-    dropsGroup = display.newGroup()
+    system.setAccelerometerInterval( 50 )
+
+    -- Set Text
     storm.text = lvlParams.stormName
-    transparentRect.isVisible = false
-    header1.isVisible = true
-    header2.isVisible = false
+    scoreText.text = "0"
+    playTime.text = "0:00"
+    iconLivesText.text = ld.getLives()
+
+    -- Set Visibility/Enabled
+    -- header1.isVisible = true
+    -- header2.isVisible = false
+    system.setIdleTimer( false )
+
+    -- Call Functions
     Drop:deleteAll()
+    timer.flushAllTimers()
     startPhysics()
     addEventListeners()
     startSpawnTimer()
@@ -427,39 +423,46 @@ function scene:startGame()
     startGameTimer()
     startScoreTimer()
     displayStormName()
-    system.setIdleTimer( false )
+    bg.fadeOutToDefault()
 end
 
 function scene:resumeGame()
     system.setIdleTimer( false )
-    header1.isVisible = true
-    header2.isVisible = false
-    transparentRect.isVisible = false
+    -- header1.isVisible = true
+    -- header2.isVisible = false
     addEventListeners()
     timer.resumeAllTimers()
     transition.resume()
     physics.start()
+    system.setAccelerometerInterval( 50 )
+end
+
+local function gameStopped( isPaused )
+    system.setIdleTimer( true )
+    -- header1.isVisible = false
+    -- header2.isVisible = true
+    system.setAccelerometerInterval( 30 )
+    removeEventListeners()
+    timer.pauseAllTimers()
+    transition.pause()
+    physics.pause()
+    cp.showOverlay( "gameStopped", {
+        isModal = true,
+        params = {
+            isPaused = isPaused,
+            scoreText = scoreText.text,
+            timeText = playTime.text
+        }
+    })
 end
 
 function scene:pauseGame()
-    system.setIdleTimer( true )
-    header1.isVisible = false
-    header2.isVisible = true
-    transparentRect.fill = transparentRect.blueFill
-    transparentRect.isVisible = true
-    removeEventListeners()
-    timer.pauseAllTimers()
-    transition.pause()
-    physics.pause()
-    cp.showOverlay( "pause", { isModal=true } )
+    gameStopped( true )
 end
 
 function scene:endGame()
-    system.setIdleTimer( true )
-    removeEventListeners()
-    timer.pauseAllTimers()
-    transition.pause()
-    physics.pause()
+    Drop:deleteAllWithAnimation()
+    gameStopped( false )
 end
 -------------------------------------------------------------------------------]
 
@@ -467,6 +470,8 @@ function scene:create( event )
     local group = self.view
     g.create()
     physics.start()
+    dropsGroup = display.newGroup()
+    group:insert( dropsGroup )
 
     -- Arrow Setup ------------------------------------------------------------[
     arrow = display.newImageRect(group, "images/arrow.png", 352, 457)
@@ -507,11 +512,11 @@ function scene:create( event )
 
     -- Header Group -----------------------------------------------------------[
     headerGroup = display.newGroup()
+    headerGroup:toFront()
     group:insert( headerGroup )
 
     -- Play/Pause buttons -----------------------------------------------------[
     header1 = widget.newButton {
-        parent = headerGroup,
         id = "header",
         width = 1000,
         height = 260,
@@ -519,21 +524,21 @@ function scene:create( event )
         onPress = scene.pauseGame,
     }
     header1.x = display.contentCenterX
-    header1.y = display.topStatusBarContentHeight --0.5*header1.height
+    header1.y = 0.5 * header1.height
     headerGroup:insert(header1)
     header1:setEnabled( false )
     
-    header2 = widget.newButton {
-        parent = headerGroup,
-        id = "header2",
-        width = 1000,
-        height = 260,
-        defaultFile = "images/header2.png",
-        onPress = scene.resumeGame,
-    }
-    header2.x, header2.y = header1.x, header1.y
-    headerGroup:insert(header2)
-    header2.isVisible = false
+    -- header2 = widget.newButton {
+    --     parent = headerGroup,
+    --     id = "header2",
+    --     width = 1000,
+    --     height = 260,
+    --     defaultFile = "images/header2.png",
+    --     onPress = scene.resumeGame,
+    -- }
+    -- header2.x, header2.y = header1.x, header1.y
+    -- headerGroup:insert(header2)
+    -- header2.isVisible = false
     ---------------------------------------------------------------------------]
 
     -- Score text -------------------------------------------------------------[
@@ -541,7 +546,7 @@ function scene:create( event )
         parent = headerGroup,
         text = "0",
         x = 15,
-        y = display.topStatusBarContentHeight + display.actualContentHeight * 0.01,
+        y = 0.55 * header1.height,
         font = g.comRegular,
         fontSize = 38,
     }
@@ -599,7 +604,6 @@ function scene:create( event )
     iconInvinceText.anchorX = 1
     ---------------------------------------------------------------------------]
 
-    headerGroup.y = -header1.height -- set to starting location (out of view)
     ---------------------------------------------------------------------------]
 
     -- Storm Name -------------------------------------------------------------[
@@ -646,21 +650,6 @@ function scene:create( event )
     collisionRect.collision = collisionRectListener
     ---------------------------------------------------------------------------]
 
-    -- Opaque Rectangle for pause/end -----------------------------------------[
-    transparentRect = display.newRect( 
-        group, 
-        display.contentCenterX, 
-        display.contentCenterY, 
-        display.actualContentWidth, 
-        display.actualContentHeight 
-    )
-    transparentRect.blueFill = { 0, 0.65, 1 }
-    -- transparentRect.redFill = { 1, 0, 0.15 }
-    transparentRect.fill = transparentRect.blueFill
-    transparentRect.isVisible = false
-    transparentRect.alpha = 0.5
-    ---------------------------------------------------------------------------]
-
     --  -------------------------------------------------------------[
 
     ---------------------------------------------------------------------------]
@@ -680,9 +669,6 @@ function scene:show( event )
         headerGroupTransitionIn()
         scene:startGame()
 
-        group:insert( dropsGroup )
-        dropsGroup:toBack()
-
     end
 end
 
@@ -700,9 +686,10 @@ function scene:hide( event )
 
         system.setIdleTimer( true )
         removeEventListeners()
-        -- timer.flushAllTimers()
+        timer.flushAllTimers()
         transition.cancel()
         physics.stop()
+        g.arrowX = arrow.x
         
     end
 end
@@ -713,6 +700,10 @@ function scene:destroy( event )
     local group = self.view
     
     g.destroy()
+    removeEventListeners()
+    timer.flushAllTimers()
+    transition.cancel()
+    physics.stop()
     
 end
 

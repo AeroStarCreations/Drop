@@ -30,8 +30,12 @@ settings =
             UIStatusBarHidden = true,
             
             NSAppTransportSecurity = { NSAllowArbitraryLoads = true },
+
+            NSMotionUsageDescription = "This app would like to access your accelerometer.",
             
             --FacebookAppID = "",
+
+            CFBundleIdentifier = "com.appledts.GKTapper", -- Apple's GameCenter test bed
             
             CFBundleURLTypes =
             {
@@ -101,12 +105,13 @@ settings =
     },
     android = 
     {
-        versionCode = "100", -- Increase with every update
+        versionCode = "100", -- Increase with every update (1.0.0)
         usesPermissions = 
         {
             "android.permission.INTERNET",
             "android.permission.ACCESS_NETWORK_STATE",
             "android.permission.ACCESS_WIFI_STATE",
+            "com.android.vending.CHECK_LICENSE",
         },
         usesFeatures =
         {
@@ -114,6 +119,7 @@ settings =
             { name = "android.hardware.location", required = false },
             { name = "android.hardware.location.gps", required = false },
         },
+        googlePlayGamesAppId = "YOUR_APPLICATION_ID", -- It might be "drop-232620"
     },
     plugins =
     {
@@ -122,23 +128,23 @@ settings =
             publisherId = "com.coronalabs",
             supportedPlatforms = { iphone=true, ["iphone-sim"]=true },
         },
+        ["plugin.gpgs"] =
+        {
+            publisherId = "com.coronalabs",
+            supportedPlatforms = { android=true }
+        },
         ["facebook"] =
         {
             publisherId = "com.coronalabs",
             supportedPlatforms = { iphone = true, ["iphone-sim"] = true, },
         },
-        ["plugin.google.play.services"] =
+        ["CoronaProvider.native.popup.social"] =
         {
             publisherId = "com.coronalabs",
-            supportedPlatforms = { iphone = true, android = true }
         },
         ["CoronaProvider.ads.vungle"] =
         {
             publisherId = "com.vungle"
-        },
-        ["CoronaProvider.native.popup.social"] =
-        {
-            publisherId = "com.coronalabs",
         },
         ["plugin.chartboost"] =
         {
@@ -154,20 +160,25 @@ settings =
             publisherId = "com.coronalabs",
             supportedPlatforms = { iphone=true, android=true, osx=true, win32=true, appletvos=true }
         },
-        --[[
-            The following 3 blocks are for GameSparks
-        ]]
+        -- The following blocks are for GameSparks
         ["plugin.bit"] =
         {
             publisherId = "com.coronalabs",
+            supportedPlatforms = { iphone=true, android=true, osx=true, win32=true }
         },
         ["plugin.openssl"] =
         {
             publisherId = "com.coronalabs",
+            supportedPlatforms = { iphone=true, android=true, osx=true, win32=true }
         },
         ["plugin.gamesparks"] =
         {
             publisherId = "com.gamesparks",
+        },
+        ["plugin.idVerifySig"] =
+        {
+            publisherId = "com.cabagomez",
+            supportedPlatforms = { iphone=true }
         },
     },
 }
