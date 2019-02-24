@@ -7,15 +7,13 @@
 
 local GGData = require( "GGData" )
 local json = require( "json" )
-local achieve = require( "achievements" )
 
 -- GGData boxes ---------------------------------------------------------------[
 local first = GGData:new( "first" )
 local settings = GGData:new( "settings" )
 local purchases = GGData:new( "purchases" )
 local stats = GGData:new( "stats" )
-local normalAchievements = GGData:new( "normalAchievements" )
-local progressAchievements = GGData:new( "progressAchievements" )
+local achievements = GGData:new( "normalAchievements" )
 local social = GGData:new( "social" )
 -------------------------------------------------------------------------------]
 
@@ -36,11 +34,71 @@ local purchasesDefault = {
 
 local achievementsDefault = {
     isComplete = false,
-    value = 0
 }
 
 local socialDefault = {
     alias = "\n\n\n"
+}
+-------------------------------------------------------------------------------]
+
+-- GameSparks Short Codes -----------------------------------------------------[
+-- This is a copy of the table in achievements.lua
+-- This had to be duplicated to avoid a requires/dependency loop
+local achievementsShortCodes = {
+    "MIST",
+    "DOUBLE_MIST",
+    "DRIZZLE",
+    "DOUBLE_DRIZZLE",
+    "SHOWER",
+    "DOUBLE_SHOWER",
+    "DOWNPOUR",
+    "DOUBLE_DOWNPOUR",
+    "THUNDERSTORM",
+    "DOUBLE_THUNDERSTORM",
+    "TROPICAL_STORM",
+    "DOUBLE_TROPICAL_STORM",
+    "MIST_TRICKY",
+    "DOUBLE_MIST_TRICKY",
+    "DRIZZLE_TRICKY",
+    "DOUBLE_DRIZZLE_TRICKY",
+    "SHOWER_TRICKY",
+    "DOUBLE_SHOWER_TRICKY",
+    "DOWNPOUR_TRICKY",
+    "DOUBLE_DOWNPOUR_TRICKY",
+    "THUNDERSTORM_TRICKY",
+    "DOUBLE_THUNDERSTORM_TRICKY",
+    "TROPICAL_STORM_TRICKY",
+    "DOUBLE_TROPICAL_STORM_TRICKY",
+    "HURRICANE_1",
+    "HURRICANE_5",
+    "HURRICANE_10",
+    "SHIELD_5",
+    "SHIELD_15",
+    "SHIELD_30",
+    "REVIVE_1",
+    "REVIVE_5",
+    "REVIVE_15",
+    "PLAY_10",
+    "PLAY_50",
+    "PLAY_100",
+    "PLAY_500",
+    "PLAY_1000",
+    "DIE_RED",
+    "DIE_ORANGE",
+    "DIE_YELLOW",
+    "DIE_LIGHT_GREEN",
+    "DIE_DARK_GREEN",
+    "DIE_LIGHT_BLUE",
+    "DIE_DARK_BLUE",
+    "DIE_PINK",
+    "SPECIAL_RED",
+    "SPECIAL_ORANGE",
+    "SPECIAL_YELLOW",
+    "SPECIAL_LIGHT_GREEN",
+    "SPECIAL_DARK_GREEN",
+    "SPECIAL_LIGHT_BLUE",
+    "SPECIAL_DARK_BLUE",
+    "SPECIAL_PINK"
 }
 -------------------------------------------------------------------------------]
     
@@ -89,17 +147,10 @@ local function initializeAllData( dropTypes )
         })
     end
     stats:save()
-    for k,v in pairs( achieve.normalAchievementsShortCodes ) do
-        normalAchievements:set( v, achievementsDefault.isComplete )
+    for k,v in pairs( achievementsShortCodes ) do
+        achievements:set( v, achievementsDefault.isComplete )
     end
-    normalAchievements:save()
-    for k,v in pairs( achieve.progressAchievementsShortCodes ) do
-        progressAchievements:set( k, {
-            target=v, 
-            value=achievementsDefault.value
-        } )
-    end
-    progressAchievements:save()
+    achievements:save()
     social:set( "alias", socialDefault.alias )
     social:save()
 end
@@ -251,9 +302,17 @@ v.incrementsDeaths = function()
     saveStats()
 end
 
+v.getInvincibilityUses = function()
+    return stats:get( "invincibilityUses" )
+end
+
 v.incrementInvincibilityUses = function()
     stats:increment( "invincibilityUses" )
     saveStats()
+end
+
+v.getLifeUses = function()
+    return stats:get( "lifeUses" )
 end
 
 v.incrementLifeUses = function()
@@ -311,24 +370,13 @@ end
 --------------------------------------]
 
 -- Achievements ----------------------[
-v.achievementSetComplete = function( shortCode )
-    normalAchievements:set( shortCode, true )
-    normalAchievements:save()
+v.setAchievementComplete = function( shortCode )
+    achievements:set( shortCode, true )
+    achievements:save()
 end
 
-v.incrementAchievement = function( shortCode, amount )
-    local a = progressAchievements:get( shortCode )
-    a.value = a.value + (amount or 1)
-    progressAchievements:set( shortCode, a )
-    progressAchievements:save()
-end
-
-v.getAchievementValue = function( shortCode )
-    return progressAchievements:get( shortCode ).value
-end
-
-v.getAchievementTarget = function( shortCode )
-    return progressAchievements:get( shortCode ).target
+v.getAchievementsComplete = function( shortCode )
+    return achievements:get( shortCode )
 end
 --------------------------------------]
 
@@ -392,17 +440,9 @@ return v
 -- }
 
 -- ACHIEVEMENTS
--- normalAchievements = {
+-- achievements = {
 --     "SHORT_CODE" = isComplete:boolean
---     ... one for every normal achievement
--- }
---
--- progressAchievements = {
---     "SHORT_CODE" = {
---         target = int,
---         value = int
---     }
---     ... one for every progress achievement
+--     ... one for every achievement
 -- }
 
 -- SOCIAL

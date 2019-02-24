@@ -15,6 +15,8 @@ local bg = require( "backgrounds" )
 bg.init()
 local sd = require( "serverData" )
 sd.init()
+local achieve = require( "achievements" )
+achieve.init()
 
 system.setAccelerometerInterval( 30 )
 

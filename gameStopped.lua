@@ -267,7 +267,7 @@ local function resumeListener()
     elseif isGameOver and canRevive then
         -- ask for confirmation?
         ld.addLives( -1 )
-        functionToCallOnHide = parentScene.startGame
+        functionToCallOnHide = parentScene.startGame --Should this be resumeGame?
         transitionOut()
     elseif isGameOver and not canRevive then
         -- purchase more lives
@@ -277,10 +277,12 @@ end
 local function restartListener()
     functionToCallOnHide = parentScene.startGame
     Drop:deleteAllWithAnimation()
+    parentScene:gameIsActuallyOver()
     transitionOut()
 end
 
 local function mainListener()
+    parentScene:gameIsActuallyOver()
     cp.gotoScene( "center" )
 end
 -------------------------------------------------------------------------------]

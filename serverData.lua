@@ -15,9 +15,11 @@ local TAG = "serverData:"
 local gs
 local platformType
 local isGamesparksAvailable
+local player
+local isLoggedIn
 -------------------------------------------------------------------------------]
 
--- Local methods and ops ------------------------------------------------------[
+-- Authentication -------------------------------------------------------------[
 local function setTypes()
     platformType = "ios"
     if system.getInfo( "platform" ) == "android" then
@@ -32,9 +34,27 @@ local function availabilityCallback( isAvailable )
     end
 end
 
+local function getPlayerDetails( callback )
+    local playerDetails = requestBuilder.createAccountDetailsRequest()
+    playerDetails:send( function(response)
+        if not response:hasErrors() then
+            player = response.data
+            if callback then callback(player) end
+        else
+            print(TAG, "Could not retrieve player")
+            for k,v in pairs(resposne:getErrors()) do
+                print(TAG, k.." : "..v)
+            end
+            if player and callback then callback(player) end
+        end
+    end)
+end
+
 local function authenticatedCallback( playerId )
     if playerId then
         print( "Player ID: " .. tostring(playerId) )
+        isLoggedIn = true;
+        getPlayerDetails()
     else
         print( "GameSparks authentication FAILED" )
     end
@@ -133,13 +153,53 @@ local function setUpGameNetwork()
 end
 -------------------------------------------------------------------------------]
 
+-- Achievements ---------------------------------------------------------------[
+local function onAchievementMessage( message )
+    print(TAG, "Earned: "..message:getAchievementName())
+    print(TAG, json.prettify(message))
+    -- update currency
+end
+
+local function setUpAchievementMessageHandler()
+    gs.getMessageHandler().setAchievementEarnedMessageHandler(onAchievementMessage)
+end
+
+local function completeAchievement( shortCode )
+    local requestBuilder = gs.getRequestBuilder()
+    local request = requestBuilder.createLogEventRequest()
+    request:setEventKey("ACHIEVEMENT")
+    request:setEventAttribute("SHORT_CODE", shortCode)
+    request:send( function( response )
+        if not response:hasErrors() then
+            print(TAG, "achievement awarded")
+        else
+            print(TAG, "could not award achievement")
+        end
+    end)
+end
+-------------------------------------------------------------------------------]
+
 -- Returned values/table ------------------------------------------------------[
 local v = {}
 
 v.init = function()
+    isLoggedIn = false
     setUpGamesparks()
     setTypes()
     setUpGameNetwork()
+    setUpAchievementMessageHandler()
+end
+
+v.completeAchievement = function( shortCode )
+    completeAchievement(shortCode)
+end
+
+v.getPlayerDetails = function( callback )
+    getPlayerDetails(callback)
+end
+
+v.isLoggedIn = function()
+    return isLoggedIn
 end
 
 return v

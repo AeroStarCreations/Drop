@@ -1,6 +1,15 @@
-local v = {}
+local ld = require( "localData" )
+local sd = require( "serverData" )
+local Drop = require( "Drop" )
 
-v.normalAchievementsShortCodes = {
+-- Local variables ------------------------------------------------------------[
+local TAG = "achievements:"
+
+-------------------------------------------------------------------------------]
+
+-- GameSparks Short Codes -----------------------------------------------------[
+-- If this table is updated, it must also be updated in localData.lua
+local normalAchievementsShortCodes = {
     "MIST",
     "DOUBLE_MIST",
     "DRIZZLE",
@@ -27,7 +36,7 @@ v.normalAchievementsShortCodes = {
     "DOUBLE_TROPICAL_STORM_TRICKY"
 }
 
-v.progressAchievementsShortCodes = {
+local progressAchievementsShortCodes = {
     ["HURRICANE_1"] = 60, -- seconds
     ["HURRICANE_5"] = 300,
     ["HURRICANE_10"] = 600,
@@ -59,5 +68,90 @@ v.progressAchievementsShortCodes = {
     ["SPECIAL_DARK_BLUE"] = 50,
     ["SPECIAL_PINK"] = 50
 }
+-------------------------------------------------------------------------------]
+    
+-- Local methods and ops ------------------------------------------------------[
+local function checkPhaseAchievements( phase )
+    local size = #normalAchievementsShortCodes / 2
+    local tricky = ld.getSpecialDropsEnabled()
+    local shortCode
+
+    for i = 1, size do
+        if phase > i then
+            if tricky then
+                shortCode = normalAchievementsShortCodes[i + size]
+            else
+                shortCode = normalAchievementsShortCodes[i]
+            end
+            if not ld.getAchievementComplete(shortCode) then
+                ld.setAchievementComplete(shortCode)
+                sd.completeAchievement(shortCode)
+            end
+        end
+    end
+end
+
+local function checkProgressAchievements( hurricaneTime)
+    for shortCode, target in pairs(progressAchievementsShortCodes) do
+        if not ld.getAchievementComplete(shortCode) then
+            if (string.find(shortCode, "HURRICANE") and hurricaneTime >= target) or
+            (string.find(shortCode, "SHIELD") and ld.getInvincibilityUses() >= target) or
+            (string.find(shortCode, "REVIVE") and ld.getLifeUses() >= target) or
+            (string.find(shortCode, "PLAY") and ld.getGamesPlayed() >= target) or
+            (string.find(shortCode, "DIE") and ld.getDropNormalCollisions(Drop.scToDt(shortCode)) >= target) or
+            (string.find(shortCode, "SPECIAL") and ld.getDropSpecialCollisions(Drop.scToDt(shortCode)) >= target) then
+                ld.setAchievementComplete(shortCode)
+                sd.completeAchievement(shortCode)
+            end
+        end
+    end
+end
+
+local function has( table, entry ) 
+    for k,v in pairs(table) do
+        if v == entry then return true end
+    end
+    return false
+end
+
+-- Pushes local achievements to backend
+local function syncToDatabase( player )
+    local a = player.achievements
+    for shortCode, t in pairs(normalAchievementsShortCodes) do
+        if ld.getAchievementComplete(shortCode) and not has(a, shortCode) then
+            sd.completeAchievement(shortCode)
+        end
+    end
+    for shortCode, t in pairs(progressAchievementsShortCodes) do
+        if ld.getAchievementComplete(shortCode) and not has(a, shortCode) then
+            sd.completeAchievement(shortCode)
+        end
+    end
+end
+
+local function syncTimerListener(event)
+    if sd.isLoggedIn() then
+        timer.cancel( event.source )
+        sd.getPlayerDetails(syncToDatabase)
+    end
+end
+-------------------------------------------------------------------------------]
+
+-- Returned values/table ------------------------------------------------------[
+local v = {}
+
+v.normalAchievementsShortCodes = normalAchievementsShortCodes
+
+v.progressAchievementsShortCodes = progressAchievementsShortCodes
+
+v.checkAchievements = function( phase, hurricaneTime )
+    checkPhaseAchievements(phase)
+    checkProgressAchievements(hurricaneTime)
+end
+
+v.init = function()
+    timer.performWithDelay(1000, syncTimerListener, -1)
+end
 
 return v
+-------------------------------------------------------------------------------]

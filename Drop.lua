@@ -164,5 +164,26 @@ function Drop:deleteAllWithAnimation()
     end
 end
 
+-- converts short code to drop type
+Drop.scToDt = function( shortCode )
+    if string.find(shortCode, "RED") then
+        return Drop.types[1]
+    elseif string.find(shortCode, "ORANGE") then
+        return Drop.types[2]
+    elseif string.find(shortCode, "YELLOW") then
+        return Drop.types[3]
+    elseif string.find(shortCode, "GREEN") and string.find(shortCode, "LIGHT") then
+        return Drop.types[4]
+    elseif string.find(shortCode, "GREEN") and string.find(shortCode, "DARK") then
+        return Drop.types[5]
+    elseif string.find(shortCode, "BLUE") and string.find(shortCode, "LIGHT") then
+        return Drop.types[6]
+    elseif string.find(shortCode, "BLUE") and string.find(shortCode, "DARK") then
+        return Drop.types[7]
+    elseif string.find(shortCode, "PINK") then
+        return Drop.types[8]
+    end
+end
+
 return Drop
 -------------------------------------------------------------------------------]

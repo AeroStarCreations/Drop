@@ -8,8 +8,9 @@ local Drop = require( "Drop" )
 local bg = require( "backgrounds" )
 local timer = require( "timers" )
 local json = require( "json" )
+local achieve = require( "achievements" )
 
-local arrowIsWorking = true
+local arrowIsWorking = false
 
 --Precalls
 local arrow
@@ -37,6 +38,7 @@ local collisionRect
 local endGame
 local iconLivesText
 local iconInvinceText
+local hurricaneTime
 
 local timers = {}
 ----------
@@ -232,7 +234,7 @@ local function startSpawnTimer()
 end
 
 local function hurricaneTimerListener()
-    -- TODO: save how long user survived in hurricane level
+    hurricaneTime = hurricaneTime + 1
 end
 
 local function startHurricaneTimer()
@@ -399,6 +401,7 @@ function scene:startGame()
     windForce = 0
     score = 0
     totalGameTime = 0
+    hurricaneTime = 0
     scoreMultiplier = 1
     system.setAccelerometerInterval( 50 )
 
@@ -463,6 +466,14 @@ end
 function scene:endGame()
     Drop:deleteAllWithAnimation()
     gameStopped( false )
+end
+
+function scene:gameIsActuallyOver()
+    -- Count games played since this is the only place where
+    -- it's known that the user played a complete game.
+    ld.incrementGamesPlayed()
+    -- Check achievements
+    achieve.checkAchievements(lvlParams, hurricaneTime)
 end
 -------------------------------------------------------------------------------]
 
