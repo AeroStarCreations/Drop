@@ -35,14 +35,16 @@ local function availabilityCallback( isAvailable )
 end
 
 local function getPlayerDetails( callback )
+    local requestBuilder = gs.getRequestBuilder()
     local playerDetails = requestBuilder.createAccountDetailsRequest()
     playerDetails:send( function(response)
         if not response:hasErrors() then
+            print(TAG, "Got player details")
             player = response.data
             if callback then callback(player) end
         else
             print(TAG, "Could not retrieve player")
-            for k,v in pairs(resposne:getErrors()) do
+            for k,v in pairs(response:getErrors()) do
                 print(TAG, k.." : "..v)
             end
             if player and callback then callback(player) end
@@ -54,7 +56,6 @@ local function authenticatedCallback( playerId )
     if playerId then
         print( "Player ID: " .. tostring(playerId) )
         isLoggedIn = true;
-        getPlayerDetails()
     else
         print( "GameSparks authentication FAILED" )
     end
@@ -79,6 +80,7 @@ local function loginWithGameSparks( sig )
     authenticationRequest:send( function( response )
         if not response:hasErrors() then
             print(TAG, response:getDisplayName().." has logged in!")
+            getPlayerDetails()
         else
             print(TAG, "ERROR: loginWithGameSparks()")
             for k,v in pairs(response:getErrors()) do
@@ -120,6 +122,7 @@ local function registerWithGameSparks( sig )
     registerRequest:send( function( response )
         if not response:hasErrors() then
             print(TAG, response:getUserName().." has registered!")
+            getPlayerDetails()
         elseif response:getErrors().USERNAME == "TAKEN" then
             print(TAG, "register: username taken")
             loginWithGameSparks( sig )
@@ -171,9 +174,9 @@ local function completeAchievement( shortCode )
     request:setEventAttribute("SHORT_CODE", shortCode)
     request:send( function( response )
         if not response:hasErrors() then
-            print(TAG, "achievement awarded")
+            print(TAG, "achievement completed")
         else
-            print(TAG, "could not award achievement")
+            print(TAG, "could not complete achievement")
         end
     end)
 end
@@ -184,6 +187,7 @@ local v = {}
 
 v.init = function()
     isLoggedIn = false
+    player = nil
     setUpGamesparks()
     setTypes()
     setUpGameNetwork()
@@ -196,6 +200,14 @@ end
 
 v.getPlayerDetails = function( callback )
     getPlayerDetails(callback)
+end
+
+v.getPlayer = function()
+    return player
+end
+
+v.hasPlayerDetails = function()
+    return not (player == nil)
 end
 
 v.isLoggedIn = function()

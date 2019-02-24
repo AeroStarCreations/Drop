@@ -375,7 +375,7 @@ v.setAchievementComplete = function( shortCode )
     achievements:save()
 end
 
-v.getAchievementsComplete = function( shortCode )
+v.getAchievementComplete = function( shortCode )
     return achievements:get( shortCode )
 end
 --------------------------------------]

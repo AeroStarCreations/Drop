@@ -1,6 +1,8 @@
-local gpgs = require( "plugin.gpgs" )
 local licensing = require( "licensing" )
 local json = require( "json" )
+if system.getInfo("platformName") == "Android" then
+    local gpgs = require( "plugin.gpgs" )
+end
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "googlePlay:"

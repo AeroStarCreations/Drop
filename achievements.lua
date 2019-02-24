@@ -73,7 +73,7 @@ local progressAchievementsShortCodes = {
 -- Local methods and ops ------------------------------------------------------[
 local function checkPhaseAchievements( phase )
     local size = #normalAchievementsShortCodes / 2
-    local tricky = ld.getSpecialDropsEnabled()
+    local tricky = not ld.getSpecialDropsEnabled()
     local shortCode
 
     for i = 1, size do
@@ -116,23 +116,30 @@ end
 
 -- Pushes local achievements to backend
 local function syncToDatabase( player )
+    print(TAG, "syncToDatabase()")
     local a = player.achievements
-    for shortCode, t in pairs(normalAchievementsShortCodes) do
+    for k, shortCode in pairs(normalAchievementsShortCodes) do
+        print(TAG, shortCode.." : "..tostring(ld.getAchievementComplete(shortCode)).." : "..tostring(not has(a, shortCode)))
         if ld.getAchievementComplete(shortCode) and not has(a, shortCode) then
+            print(TAG, "AWARDED")
             sd.completeAchievement(shortCode)
         end
     end
     for shortCode, t in pairs(progressAchievementsShortCodes) do
+    print(TAG, shortCode.." : "..t.." : "..tostring(ld.getAchievementComplete(shortCode)).." : "..tostring(not has(a, shortCode)))
         if ld.getAchievementComplete(shortCode) and not has(a, shortCode) then
+            print(TAG, "AWARDED")
             sd.completeAchievement(shortCode)
         end
     end
 end
 
 local function syncTimerListener(event)
-    if sd.isLoggedIn() then
+    print(TAG, "syncTimerListener()")
+    if sd.hasPlayerDetails() then
+        print(TAG, "has player details")
         timer.cancel( event.source )
-        sd.getPlayerDetails(syncToDatabase)
+        syncToDatabase(sd.getPlayer())
     end
 end
 -------------------------------------------------------------------------------]
@@ -150,6 +157,7 @@ v.checkAchievements = function( phase, hurricaneTime )
 end
 
 v.init = function()
+    print(TAG, "achievements init")
     timer.performWithDelay(1000, syncTimerListener, -1)
 end
 
