@@ -141,6 +141,9 @@ local function syncTimerListener(event)
         timer.cancel( event.source )
         syncToDatabase(sd.getPlayer())
     end
+    if event.count >= 60 then
+        timer.cancel( event.source )
+    end
 end
 -------------------------------------------------------------------------------]
 

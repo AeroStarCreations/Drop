@@ -42,7 +42,7 @@ local socialDefault = {
 -------------------------------------------------------------------------------]
 
 -- GameSparks Short Codes -----------------------------------------------------[
--- This is a copy of the table in achievements.lua
+-- These are copies of the tables in achievements.lua and highScores.lua
 -- This had to be duplicated to avoid a requires/dependency loop
 local achievementsShortCodes = {
     "MIST",
@@ -100,6 +100,13 @@ local achievementsShortCodes = {
     "SPECIAL_DARK_BLUE",
     "SPECIAL_PINK"
 }
+
+local scorerShortCodes = {
+    "HIGH_SCORE_SCORER",
+    "HIGH_SCORE_SCORER",
+    "HIGH_TIME_SCORER",
+    "HIGH_TIME_TRICKY_SCORER"
+}
 -------------------------------------------------------------------------------]
     
 -- Local methods and ops ------------------------------------------------------[
@@ -138,6 +145,9 @@ local function initializeAllData( dropTypes )
     stats:set( "deaths", 0 )
     stats:set( "invincibilityUses", 0 )
     stats:set( "lifeUses", 0 )
+    for k, shortCode in pairs(scorerShortCodes) do
+        stats:set( shortCode, 0 )
+    end
     for i=1,#dropTypes do
         stats:set( dropTypes[i], {
             normalDodges = 0,
@@ -145,6 +155,9 @@ local function initializeAllData( dropTypes )
             specialDodges = 0,
             specialCollisions = 0
         })
+    end
+    for k,v in pairs(scorerShortCodes) do
+        stats:set( v, 0)
     end
     stats:save()
     for k,v in pairs( achievementsShortCodes ) do
@@ -366,6 +379,24 @@ v.incrementDropSpecialCollisions = function( dropType )
     dropTable.specialCollisions = dropTable.specialCollisions + 1
     stats:set( dropType, dropTable )
     saveStats()
+end
+
+v.isHighScore = function( shortCode, value )
+    return value > (stats:get( shortCode ) or 0)
+end
+
+-- Sets if higher and returns true if higher
+v.setHighScore = function( shortCode, value )
+    if v.isHighScore(shortCode, value) then
+        stats:set(shortCode, value)
+        stats:save()
+        return true
+    end
+    return false
+end
+
+v.getHighScore = function( shortCode )
+    return stats:get( shortCode )
 end
 --------------------------------------]
 

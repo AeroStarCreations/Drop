@@ -9,6 +9,7 @@ local bg = require( "backgrounds" )
 local timer = require( "timers" )
 local json = require( "json" )
 local achieve = require( "achievements" )
+local highScores = require( "highScores" )
 
 local arrowIsWorking = false
 
@@ -474,6 +475,8 @@ function scene:gameIsActuallyOver()
     ld.incrementGamesPlayed()
     -- Check achievements
     achieve.checkAchievements(lvlParams.phase, hurricaneTime)
+    -- Check high scores
+    highScores.checkHighScore( score, totalGameTime )
 end
 -------------------------------------------------------------------------------]
 

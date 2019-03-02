@@ -176,7 +176,77 @@ local function completeAchievement( shortCode )
         if not response:hasErrors() then
             print(TAG, "achievement completed")
         else
-            print(TAG, "could not complete achievement")
+            print(TAG, "ERROR: could not complete achievement")
+            for key,value in pairs(response:getErrors()) do
+                print(key,value)
+            end
+        end
+    end)
+end
+-------------------------------------------------------------------------------]
+
+-- High Scores ----------------------------------------------------------------[
+local function onHighScoreMessage( message )
+    print(TAG, "Earned high score in: "..message:getLeaderboardName())
+    print(TAG, json.prettify(message))
+end
+
+local function setUpAchievementMessageHandler()
+    gs.getMessageHandler().setNewHighScoreMessageHandler(onHighScoreMessage)
+end
+
+local function setHighScore( shortCode, value )
+    local requestBuilder = gs.getRequestBuilder()
+    local request = requestBuilder.createLogEventRequest()
+    request:setEventKey(shortCode)
+    request:setEventAttribute("SCORE", value)
+    request:send( function( response )
+        if not response:hasErrors() then
+            print(TAG, "high score posted")
+        else
+            print(TAG, "ERROR: could not post high score")
+            for key,value in pairs(response:getErrors()) do
+                print(key,value)
+            end
+        end
+    end)
+end
+-------------------------------------------------------------------------------]
+
+-- Leaderboards ---------------------------------------------------------------[
+local function getLeaderboardShortCode(isScore, withSpecials)
+    local shortCode = "HIGH_"
+    if isScore then
+        shortCode = shortCode .. "SCORE_"
+    else
+        shortCode = shortCode .. "TIME_"
+    end
+    if not withSpecials then
+        shortCode = shortCode .. "TRICKY_"
+    end
+    return shortCode .. "LEADERBOARD"
+end
+
+local function getLeaderboardData(isScore, withSpecials, areLeaders, callback)
+    local shortCode = getLeaderboardShortCode(isScore, withSpecials)
+
+    local requestBuilder = gs.getRequestBuilder()
+    local getEntryRequest = requestBuilder.createLeaderboardDataRequest()
+    if not areLeaders then
+        getEntryRequest = requestBuilder.createAroundMeLeaderboardRequest()
+    end
+
+    getEntryRequest:setLeaderboardShortCode(shortCode)
+    getEntryRequest:setEntryCount(100)
+    getEntryRequest:send( function( response )
+        if not response:hasErrors() then
+            print(TAG, "leaderboard data retrieved")
+            callback(response:getData())
+        else
+            print(TAG, "ERROR: could not retrieve leaderboard data")
+            for key,value in pairs(response:getErrors()) do
+                print(key,value)
+            end
         end
     end)
 end
@@ -198,6 +268,10 @@ v.completeAchievement = function( shortCode )
     completeAchievement(shortCode)
 end
 
+v.setHighScore = function( shortCode, value )
+    setHighScore( shortCode, value)
+end
+
 v.getPlayerDetails = function( callback )
     getPlayerDetails(callback)
 end
@@ -212,6 +286,10 @@ end
 
 v.isLoggedIn = function()
     return isLoggedIn
+end
+
+v.getLeaderboardData = function(isScore, withSpecials, areLeaders, callback)
+    getLeaderboardData(isScore, withSpecials, areLeaders, callback)
 end
 
 return v

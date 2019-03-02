@@ -5,7 +5,6 @@ local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "globalVariables" )
 local t = require( "transitions" )
-local gameNetwork = require( "gameNetwork" )
 local ads = require( "ads" )
 local ad = require( "advertisements" )
 local GGTwitter = require( "GGTwitter" )
@@ -140,8 +139,8 @@ function scene:create( event )
             transition.to( buttonGroup[ a ], { time=40, xScale=1, yScale=1 } )
             if event.x > buttonGroup[a].x-0.5*w and event.x < buttonGroup[a].x+0.5*w and event.y > buttonGroup[a].y-0.5*h and event.y < buttonGroup[a].y+0.5*h then
                 print(event.target.id.." was pressed.")
-                if a == 1 then                          -- Game Center
-                    gameNetwork.show( "leaderboards" )
+                if a == 1 then                          -- Leaderboards
+                    t.transOutExtrasOther( "leaderboardsScene", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 2 then                      -- Store / Market
                     t.transOutExtrasOther( "market", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 3 then                      -- About ASC
