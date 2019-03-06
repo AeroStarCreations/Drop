@@ -5,30 +5,42 @@ local g = require( "globalVariables" )
 local t = require( "transitions" )
 local json = require( "json" )
 local sd = require( "serverData" )
+local colors = require( "colors" )
+local logoModule = require( "logoModule" )
 
 
 --Precalls
 local TAG = "leaderboardsScene.lua:"
 
+local drop
+local backArrow
 local scoreButton
 local timeButton
 local specialButton
 local leadersButton
 local line
 local tableView
+local rowHeight = 100
+
+local scoreRect
+local timeRect
+local specialRect
+local leadersRect
+local rectStrokeWidth = 6
 
 local isScore = true        -- isTime otherwise
 local isWithSpecials = true -- is not with specials otherwise
-local isLeaders = true      -- is "by me" otherwise
+local isLeaders = false     -- is "by me" otherwise
 ----------
 
-local function dataCallback( entries )
-    print(TAG, "dataCallback()")
+local function leaderboardDataCallback( entries )
+    print(TAG, "leaderboardDataCallback()")
     tableView:deleteAllRows()
     for k,entry in pairs(entries) do
         local data = entry.data
         tableView:insertRow({
             rowColor = { default={ 1, 0, 0, 0 }, over={ 0, 0, 0 } },
+            rowHeight = rowHeight,
             params = {
                 country = data.country,
                 rank = data.rank,
@@ -38,6 +50,13 @@ local function dataCallback( entries )
             }
         })
     end
+end
+
+local function updateButtonRectVisibilities()
+    scoreRect.isVisible = isScore
+    timeRect.isVisible = not isScore
+    specialRect.isVisible = isWithSpecials
+    leadersRect.isVisible = isLeaders
 end
 
 local function buttonListener( event )
@@ -56,7 +75,8 @@ local function buttonListener( event )
         isLeaders = not isLeaders
     end
     if shouldUpdateRows then 
-        sd.getLeaderboardData(isScore, isWithSpecials, isLeaders, dataCallback)
+        sd.getLeaderboardData(isScore, isWithSpecials, isLeaders, leaderboardDataCallback)
+        updateButtonRectVisibilities()
     end
 end
 
@@ -65,27 +85,90 @@ local function onRowRenderListener( event )
     local rowHeight = row.contentHeight
     local rowWidth = row.contentWidth
     local params = row.params
+    local cushion = 20
 
     local text = params.rank.."  "..params.name.."  "..params.value.."  "..params.country
 
-    local rank = display.newText( row, text, 0, 0, nil, 40 )
-    rank:setFillColor( 0 )
+    ------- Background
+    local bg = display.newRoundedRect(
+        row,
+        rowWidth * 0.5,
+        cushion,
+        rowWidth - 2 * cushion,
+        rowHeight - cushion,
+        20
+    )
+    bg.anchorY = 0
+    bg.strokeWidth = 7
+
+    if row.index % 2 == 0 then
+        bg:setFillColor( unpack(colors.purple_xs) )
+        bg:setStrokeColor( unpack(colors.purple) )
+    else
+        bg:setFillColor( unpack(colors.purple_s) )
+        bg:setStrokeColor( unpack(colors.purple_l) )
+    end
+
+    ----- Rank
+    local rank = display.newText({
+        parent = row,
+        text = params.rank,
+        x = bg.x - bg.width * 0.5 + 30,
+        y = bg.y + 0.5 * bg.height,
+        font = g.comBold,
+        fontSize = 40
+    })
+    rank:setFillColor( 1 )
     rank.anchorX = 0
-    rank.x = 20
-    rank.y = rowHeight * 0.5
 
-    -- local name = display.newText( row, params.name, 0, 0, nil, 40 )
-    -- name:setFillColor( 0 )
-    -- name.anchorX = 0.5
-    -- name.x = rowWidth * 0.5
-    -- name.y = rowHeight * 0.5
+    ----- Name
+    local name = display.newText({
+        parent = row,
+        text = params.name,
+        x = bg.x,
+        y = rank.y,
+        font = g.comBold,
+        fontSize = 40
+    })
+    name:setFillColor( 1 )
 
-    -- local score = display.newText( row, params.score, 0, 0, nil, 40 )
-    -- score:setFillColor( 0 )
-    -- score.anchorX = 1
-    -- score.x = rowWidth - 20
-    -- score.y = rowHeight * 0.5
+    ----- Value
+    local value = display.newText({
+        parent = row,
+        text = params.value,
+        x = bg.x + bg.width * 0.5 - 30,
+        y = rank.y,
+        font = g.comBold,
+        fontSize = 40
+    })
+    value:setFillColor( 1 )
+    value.anchorX = 1
+end
 
+local function transitionIn()
+    local buttonX = display.actualContentWidth / 4
+    transition.to( scoreButton, {time=500, x=0*buttonX, delay=200, transition=easing.outCubic} )
+    transition.to( timeButton, {time=500, x=1*buttonX, transition=easing.outCubic} )
+    transition.to( specialButton, {time=500, x=2*buttonX, transition=easing.outCubic} )
+    transition.to( leadersButton, {time=500, x=3*buttonX, delay=200, transition=easing.outCubic} )
+    transition.to( scoreRect, {time=500, x=0*buttonX+0.5*rectStrokeWidth, delay=200, transition=easing.outCubic} )
+    transition.to( timeRect, {time=500, x=1*buttonX+0.5*rectStrokeWidth, transition=easing.outCubic} )
+    transition.to( specialRect, {time=500, x=2*buttonX+0.5*rectStrokeWidth, transition=easing.outCubic} )
+    transition.to( leadersRect, {time=500, x=3*buttonX+0.5*rectStrokeWidth, delay=200, transition=easing.outCubic} )
+    tableView:scrollToY({y=0, time=500})
+end
+
+local function transitionOut( callback )
+    local buttonX = display.actualContentWidth / 4
+    transition.to( scoreButton, {time=400, x=-2*buttonX, transition=easing.inQuad} )
+    transition.to( timeButton, {time=400, delay=100, x=-buttonX, transition=easing.inQuad, onComplete=callback} )
+    transition.to( specialButton, {time=400, delay=100, x=display.actualContentWidth, transition=easing.inQuad} )
+    transition.to( leadersButton, {time=400, x=display.actualContentWidth+buttonX, transition=easing.inQuad} )
+    transition.to( scoreRect, {time=400, x=-2*buttonX, transition=easing.inQuad} )
+    transition.to( timeRect, {time=400, delay=100, x=-buttonX, transition=easing.inQuad} )
+    transition.to( specialRect, {time=400, delay=100, x=display.actualContentWidth, transition=easing.inQuad} )
+    transition.to( leadersRect, {time=400, x=display.actualContentWidth+buttonX, transition=easing.inQuad} )
+    tableView:scrollToY({y=tableView.height, time=500})
 end
 
 
@@ -96,19 +179,13 @@ function scene:create( event )
     g.create()
     
     ------------------------------------------Logo
-    drop = display.newImageRect( "images/name.png", 1020, 390 )
-    local dropRatio = drop.height/drop.width
-    drop.width = 0.77*display.contentWidth; drop.height = drop.width*dropRatio
-    drop.x, drop.y = display.contentCenterX, 0.06*display.contentHeight+1
-    drop.xScale, drop.yScale = 0.47, 0.47
-    group:insert(drop)
+    drop = logoModule.getSmallLogo(group)
     ----------------------------------------------
     
     ------------------------------------Back Arrow
     local function baf( event )
-        -- t.transOutAboutASC( ascLogo, lineTop, lineBottom, asc, bio, fb, twit )
-        cp.gotoScene("extras")
         print( "Arrow Pressed" )
+        transitionOut( function() cp.gotoScene("extras") end)
     end
     
     backArrow = widget.newButton{
@@ -122,91 +199,141 @@ function scene:create( event )
         onRelease = baf,
     }
     backArrow.rotation = 180
-    backArrow.x = drop.x-0.5*drop.width
-    backArrow.y = drop.y - 7
+    backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
+    backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
     ----------------------------------------------
 
     ---------------------------Leaderboard Buttons
+    local labelOffsetY = 7
+    local buttonWidth = display.actualContentWidth / 4
+
     scoreButton = widget.newButton({
         id = "score",
-        left = 0,
-        top = drop.y * 2,
-        width = display.actualContentWidth / 4,
-        height = 100,
+        left = -2 * buttonWidth,
+        top = logoModule.getSmallLogoBottomY(),
+        width = buttonWidth,
+        height = 125,
         label = "SCORE",
         labelAlign = "center",
-        labelColor = { default={ 0, 0, 0 }, over={ 0, 0, 0, 0.5 } },
-        labelYOffset = 7,
+        labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
+        labelYOffset = labelOffsetY,
         font = g.comRegular,
         fontSize = 40,
         defaultFile = "images/squareGreen.jpg",
         onRelease = buttonListener
     })
+    scoreButton.anchorX = 0
     group:insert(scoreButton)
 
     timeButton = widget.newButton({
         id = "time",
-        x = scoreButton.x + scoreButton.width,
+        x = -buttonWidth,
         y = scoreButton.y,
-        width = scoreButton.width,
+        width = buttonWidth,
         height = scoreButton.height,
         label = "TIME",
         labelAlign = "center",
-        labelColor = { default={ 0, 0, 0 }, over={ 0, 0, 0, 0.5 } },
-        labelYOffset = 7,
+        labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
+        labelYOffset = labelOffsetY,
         font = g.comRegular,
         fontSize = 40,
         defaultFile = "images/squareOrange.jpg",
         onRelease = buttonListener
     })
+    timeButton.anchorX = 0
     group:insert(timeButton)
 
     specialButton = widget.newButton({
         id = "special",
-        x = timeButton.x + scoreButton.width,
+        x = display.actualContentWidth,
         y = scoreButton.y,
-        width = scoreButton.width,
+        width = buttonWidth,
         height = scoreButton.height,
-        label = "   With\nSpecials",
+        label = "Specials",
         labelAlign = "center",
-        labelColor = { default={ 0, 0, 0 }, over={ 0, 0, 0, 0.5 } },
+        labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
+        labelYOffset = labelOffsetY,
         font = g.comRegular,
         fontSize = 40,
         defaultFile = "images/squareBlue.jpg",
         onRelease = buttonListener
     })
+    specialButton.anchorX = 0
     group:insert(specialButton)
 
     leadersButton = widget.newButton({
         id = "leaders",
-        x = specialButton.x + scoreButton.width,
+        x = display.actualContentWidth + buttonWidth,
         y = scoreButton.y,
-        width = scoreButton.width,
+        width = buttonWidth,
         height = scoreButton.height,
         label = "Leaders",
         labelAlign = "center",
-        labelColor = { default={ 0, 0, 0 }, over={ 0, 0, 0, 0.5 } },
-        labelYOffset = 7,
+        labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
+        labelYOffset = labelOffsetY,
         font = g.comRegular,
         fontSize = 40,
         defaultFile = "images/squareRed.jpg",
         onRelease = buttonListener
     })
+    leadersButton.anchorX = 0
     group:insert(leadersButton)
     ----------------------------------------------
 
-    ------------------------------------------Line
+    ----------------------------------Button Rects
+    local rectWidth = scoreButton.width - rectStrokeWidth
+    local rectHeight = scoreButton.height - rectStrokeWidth
+
+    scoreRect = display.newRect(scoreButton.x, scoreButton.y, rectWidth, rectHeight)
+    scoreRect.strokeWidth = rectStrokeWidth
+    scoreRect:setStrokeColor( unpack(colors.darkGreen) )
+    scoreRect:setFillColor( 0, 0, 0, 0 )
+    scoreRect.anchorX = 0
+    scoreRect.isVisible = isScore
+    group:insert(scoreRect)
+
+    timeRect = display.newRect(timeButton.x, timeButton.y, rectWidth, rectHeight)
+    timeRect.strokeWidth = rectStrokeWidth
+    timeRect:setStrokeColor( unpack(colors.darkOrange) )
+    timeRect:setFillColor( 0, 0, 0, 0 )
+    timeRect.anchorX = 0
+    timeRect.isVisible = not isScore
+    group:insert(timeRect)
+
+    specialRect = display.newRect(specialButton.x, specialButton.y, rectWidth, rectHeight)
+    specialRect.strokeWidth = rectStrokeWidth
+    specialRect:setStrokeColor( unpack(colors.darkBlue) )
+    specialRect:setFillColor( 0, 0, 0, 0 )
+    specialRect.anchorX = 0
+    specialRect.isVisible = isWithSpecials
+    group:insert(specialRect)
+
+    leadersRect = display.newRect(leadersButton.x, leadersButton.y, rectWidth, rectHeight)
+    leadersRect.strokeWidth = rectStrokeWidth
+    leadersRect:setStrokeColor( unpack(colors.darkRed) )
+    leadersRect:setFillColor( 0, 0, 0, 0 )
+    leadersRect.anchorX = 0
+    leadersRect.isVisible = isLeaders
+    group:insert(leadersRect)
+    ----------------------------------------------
+
+    -----------------------------------------Lines
     local lineStrokeWidth = 10
-    local lineY = scoreButton.y + 0.5 * scoreButton.height + 0.5 * lineStrokeWidth
+    local line1Y = scoreButton.y - 0.5 * scoreButton.height - 0.5 * lineStrokeWidth
+    local line2Y = scoreButton.y + 0.5 * scoreButton.height + 0.5 * lineStrokeWidth
         
-    line = display.newLine( group, 0, lineY, display.contentWidth, lineY )
-    line:setStrokeColor( unpack( g.purple ) )
-    line.strokeWidth = lineStrokeWidth
+    -- line1 = display.newLine( group, 0, line1Y, display.contentWidth, line1Y )
+    -- line1:setStrokeColor( unpack( g.purple ) )
+    -- line1.strokeWidth = lineStrokeWidth
+
+    -- line2 = display.newLine( group, 0, line2Y, display.contentWidth, line2Y )
+    -- line2:setStrokeColor( unpack( g.purple ) )
+    -- line2.strokeWidth = lineStrokeWidth
     ----------------------------------------------
 
     -------------------------------------Table View
-    local topY = lineY + 0.5 * lineStrokeWidth
+    local topY = line2Y - 10
 
     tableView = widget.newTableView({
         id = "table",
@@ -216,9 +343,10 @@ function scene:create( event )
         height = display.actualContentHeight - topY,
         noLines = true,
         hideBackground = true,
-        hideScrollBar = true,
+        hideScrollBar = false,
         onRowRender = onRowRenderListener,
     })
+    tableView:scrollToY({y=tableView.height, time=0})
     group:insert(tableView)
     ----------------------------------------------
 
@@ -236,8 +364,26 @@ function scene:show( event )
         
         g.show()
 
+        -- Transition into the scene
+        transitionIn()
+
         -- Load initial leaderboard entries
-        sd.getLeaderboardData(isScore, isWithSpecials, isLeaders, dataCallback)
+        sd.getLeaderboardData(isScore, isWithSpecials, isLeaders, leaderboardDataCallback)
+
+        if tableView:getNumRows() == 0 then
+            for i=1,80 do
+                tableView:insertRow({
+                    rowColor = { default={ 1, 0, 0, 0 }, over={ 0, 0, 0 } },
+                    rowHeight = rowHeight,
+                    params = {
+                        country = "US",
+                        rank = i,
+                        name = "Nathan",
+                        value = i*71
+                    }
+                })
+            end
+        end
 
     end
 end

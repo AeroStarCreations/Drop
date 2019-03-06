@@ -6,6 +6,7 @@ local g = require( "globalVariables" )
 local widget = require( "widget" )
 local t = require( "transitions" )
 local GGTwitter = require( "GGTwitter" )
+local logoModule = require( "logoModule" )
 
 -------Precalls 
 local asc
@@ -31,11 +32,7 @@ function scene:create( event )
     ---------------------------------------------------------------
     
     --------------------------------------------Drop Logo
-    drop = display.newImageRect( "images/name.png", 1020, 390 )
-    local dropRatio = drop.height/drop.width
-    drop.width = 0.77*display.contentWidth; drop.height = drop.width*dropRatio
-    drop.x, drop.y = display.contentCenterX, -drop.height
-    group:insert(drop)
+    drop = logoModule.getBigLogo(group)
     -----------------------------------------------------
     
     --------------------------------------------Arrow

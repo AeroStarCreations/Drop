@@ -10,6 +10,7 @@ local ad = require( "advertisements" )
 local GGTwitter = require( "GGTwitter" )
 local chartboost = require( "plugin.chartboost" )
 local ld = require( "localData" )
+local logoModule = require( "logoModule" )
 
 --Precalls
 local drop
@@ -35,15 +36,8 @@ function scene:create( event )
     
     g.create()
 
-    ------------------------------------------Logo
-    drop = display.newImageRect( "images/name.png", 1020, 390 )
-    local dropRatio = drop.height/drop.width
-    drop.width = 0.77*display.contentWidth
-    drop.height = drop.width*dropRatio
-    drop.x = display.contentCenterX
-    drop.y = display.topStatusBarContentHeight + 0.4 * drop.height
-    drop.xScale, drop.yScale = 0.47, 0.47
-    group:insert(drop)
+    -------------------------------------Drop Logo
+    drop = logoModule.getSmallLogo(group)
     ----------------------------------------------
     
     ------------------------------------Back Arrow
@@ -64,7 +58,7 @@ function scene:create( event )
     }
     backArrow.rotation = 180
     backArrow.x = -backArrow.width
-    backArrow.y = drop.y - 7
+    backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
     ----------------------------------------------
     
@@ -72,7 +66,7 @@ function scene:create( event )
     --------------------------------------------------------------Square Buttons
     ----------------------------------------------------------------------------
     
-    local focal = drop.y + 0.4 * drop.height
+    local focal = logoModule.getSmallLogoBottomY()
     local gap = math.round( 0.03333*display.contentWidth )
     local w = math.round((display.contentWidth-3*gap)*0.5)
     local h = math.round((display.contentHeight-focal-3*gap)/3)

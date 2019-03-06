@@ -4,6 +4,7 @@ local g = require( "globalVariables" )
 local cp = require( "composer" )
 local ld = require( "localData" )
 local bg = require( "backgrounds" )
+local logoModule = require( "logoModule" )
 
 local v = {}
 
@@ -28,9 +29,11 @@ v.transInCenter = function( asc, logo, arrow, fb, twit, extras, settings, listen
             transition.to( arrow, { time=800, transition=easing.outQuad, x=display.contentCenterX+17, onComplete=arrowCheck } )
         end
     end
+
+    local logoY = logoModule.getBigLogoY(arrow)
     
     transition.to( asc, { time=400, y=display.contentHeight-30, transition=easing.outQuad } )
-    transition.to( logo, { time=700, y=0.2*display.contentHeight, transition=easing.outQuad, xScale=1, yScale=1--[[, rotation=0--]], onComplete=finish } )
+    transition.to( logo, { time=700, y=logoY, transition=easing.outQuad, xScale=1, yScale=1--[[, rotation=0--]], onComplete=finish } )
     transition.to( fb, { time=700, x=display.contentCenterX - 80, transition=easing.outQuad } )
     transition.to( twit, { time=700, x=display.contentCenterX + 80, transition=easing.outQuad } )
     transition.to( extras, { time=600, x=0, y=display.contentHeight, transition=easing.outQuad } )
@@ -108,7 +111,7 @@ v.transOutCenter = function( asc, logo, arrow, fb, twit, extras, settings )
     else
         
         transition.to( asc, { time=400, delay=400, y=display.contentHeight+50, transition=easing.inQuad } )
-        transition.to( logo, { time=500, delay=300, y=display.topStatusBarContentHeight + 0.4 * logo.height, transition=easing.inQuad, xScale=0.47, yScale=0.47, rotation=0 } )
+        transition.to( logo, { time=500, delay=300, y=logoModule.getSmallLogoY(), transition=easing.inQuad, xScale=0.47, yScale=0.47, rotation=0 } )
         transition.to( arrow, { time=800, transition=easing.inQuad, x=display.contentWidth+arrow.width, onStart=startListener, onComplete=finishListener } )
         transition.to( fb, { time=700, delay=100, x=-fb.width, transition=easing.inQuad } )
         transition.to( twit, { time=700, delay=100, x=display.contentWidth+twit.width, transition=easing.inQuad } )
@@ -162,7 +165,7 @@ v.transInExtras = function( arrow, logo, r1, r2, r3, r4, r5, r6, listener )
         listener()
     end
     
-    transition.to( arrow, { time=300, x=(logo.x-0.5*logo.width), transition=easing.outQuad } )
+    transition.to( arrow, { time=300, x=0.4*(logo.x-0.5*logo.width), transition=easing.outQuad } )
     transition.to( r1, { time=400, xScale=1, yScale=1, transition=easing.outBack, onComplete=finish } )
     transition.to( r2, { time=400, xScale=1, yScale=1, transition=easing.outBack } )
     transition.to( r3, { time=400, xScale=1, yScale=1, transition=easing.outBack } )
