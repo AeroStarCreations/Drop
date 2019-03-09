@@ -103,7 +103,7 @@ local achievementsShortCodes = {
 
 local scorerShortCodes = {
     "HIGH_SCORE_SCORER",
-    "HIGH_SCORE_SCORER",
+    "HIGH_SCORE_TRICKY_SCORER",
     "HIGH_TIME_SCORER",
     "HIGH_TIME_TRICKY_SCORER"
 }
@@ -308,6 +308,10 @@ end
 v.incrementGamesPlayed = function()
     stats:increment( "gamesPlayed" )
     saveStats()
+end
+
+v.getDeaths = function()
+    return stats:get( "deaths" )
 end
 
 v.incrementsDeaths = function()

@@ -147,6 +147,8 @@ function scene:create( event )
                         squares[a].isEnabled = false
                         ad.showAd()
                     end
+                elseif a == 6 then
+                    t.transOutExtrasOther( "gameInfo", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 end
             end
             
@@ -282,6 +284,11 @@ function scene:show( event )
             t.transInExtras( backArrow, drop, buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6], addListeners )
         else
             t.transInExtrasFromOther( buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6], xPos, addListeners )
+        end
+
+        -- Destroy gameInfo scene so that the scores reload next time the scene is opened
+        if cp.getSceneName( "previous" ) == "gameInfo" then
+            cp.removeScene( "gameInfo" )
         end
 
     end

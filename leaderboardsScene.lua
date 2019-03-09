@@ -133,9 +133,15 @@ local function onRowRenderListener( event )
     name:setFillColor( 1 )
 
     ----- Value
+    local valueText
+    if isScore then
+        valueText = g.commas(params.value)
+    else
+        valueText = g.timeFormat(params.value)
+    end
     local value = display.newText({
         parent = row,
-        text = params.value,
+        text = valueText,
         x = bg.x + bg.width * 0.5 - 30,
         y = rank.y,
         font = g.comBold,
@@ -333,7 +339,8 @@ function scene:create( event )
     ----------------------------------------------
 
     -------------------------------------Table View
-    local topY = line2Y - 10
+    local topY = line2Y + 0.5 * lineStrokeWidth
+    topY = scoreButton.y + 0.5 * scoreButton.height
 
     tableView = widget.newTableView({
         id = "table",
@@ -347,6 +354,7 @@ function scene:create( event )
         onRowRender = onRowRenderListener,
     })
     tableView:scrollToY({y=tableView.height, time=0})
+    tableView:toBack()
     group:insert(tableView)
     ----------------------------------------------
 

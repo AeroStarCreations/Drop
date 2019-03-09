@@ -191,7 +191,7 @@ local function onHighScoreMessage( message )
     print(TAG, json.prettify(message))
 end
 
-local function setUpAchievementMessageHandler()
+local function setUpHighScoreMessageHandler()
     gs.getMessageHandler().setNewHighScoreMessageHandler(onHighScoreMessage)
 end
 
@@ -262,6 +262,7 @@ v.init = function()
     setTypes()
     setUpGameNetwork()
     setUpAchievementMessageHandler()
+    setUpHighScoreMessageHandler()
 end
 
 v.completeAchievement = function( shortCode )

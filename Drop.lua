@@ -165,7 +165,7 @@ function Drop:deleteAllWithAnimation()
 end
 
 -- converts short code to drop type
-Drop.scToDt = function( shortCode )
+function Drop.scToDt( shortCode )
     if string.find(shortCode, "RED") then
         return Drop.types[1]
     elseif string.find(shortCode, "ORANGE") then
@@ -183,6 +183,26 @@ Drop.scToDt = function( shortCode )
     elseif string.find(shortCode, "PINK") then
         return Drop.types[8]
     end
+end
+
+-- Get a single drop image
+-- 'dropType' corresponds to Drop.types
+function Drop.getDropImage(parent, height, dropType, isSpecial)
+    local image = display.newImageRect(
+        parent,
+        getSheet( isSpecial ),
+        dropType,
+        sheetOptions.width,
+        sheetOptions.height
+    )
+    local ratio = sheetOptions.width / sheetOptions.height
+    image.height = height
+    image.width = height * ratio
+    return image
+end
+
+function Drop.getNumberOfColors()
+    return numOfSheetFrames
 end
 
 return Drop
