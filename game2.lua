@@ -361,8 +361,6 @@ local function startScoreMultiplierTimer()
 end
 
 local function arrowCollisionListener( self, event )
-    if not arrowIsWorking then return end
-
     local drop = event.other.drop
 
     if event.phase == "began" then
@@ -388,7 +386,7 @@ local function arrowCollisionListener( self, event )
             drop:deleteWithAnimation()
         elseif not isInvincible then
             ld.incrementDropNormalCollisions( drop.type )
-            scene:endGame()
+            if arrowIsWorking then scene:endGame() end
         end
     end
 end

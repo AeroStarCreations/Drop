@@ -60,10 +60,10 @@ end
 
 local function createText(parent, text, x, y, horizontalSpace, color, isTitle)
     local font = g.comRegular
-    local yOffset = 10
+    local yOffset = 6
     if isTitle then 
         font = g.comBold 
-        yOffset = -3
+        yOffset = 0
     end
     local text = display.newText({
         parent = parent,
@@ -231,7 +231,7 @@ function scene:create( event )
 
     scrollView = widget.newScrollView({
         left = 0,
-        top = nextY + lineThickness,
+        top = nextY + 0.5 * lineThickness,
         width = w,
         height = h - nextY,
         horizontalScrollDisabled = true,
@@ -283,6 +283,8 @@ function scene:create( event )
             scrollView:insert(line)
         end
     end
+
+    scrollView:setScrollHeight(Drop.getNumberOfColors() * rowHeight)
     ----------------------------------------------
     
 
