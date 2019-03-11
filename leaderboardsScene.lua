@@ -378,20 +378,21 @@ function scene:show( event )
         -- Load initial leaderboard entries
         sd.getLeaderboardData(isScore, isWithSpecials, isLeaders, leaderboardDataCallback)
 
-        if tableView:getNumRows() == 0 then
-            for i=1,80 do
-                tableView:insertRow({
-                    rowColor = { default={ 1, 0, 0, 0 }, over={ 0, 0, 0 } },
-                    rowHeight = rowHeight,
-                    params = {
-                        country = "US",
-                        rank = i,
-                        name = "Nathan",
-                        value = i*71
-                    }
-                })
-            end
-        end
+        -- This is just test/sample data 
+        -- if tableView:getNumRows() == 0 then
+        --     for i=1,80 do
+        --         tableView:insertRow({
+        --             rowColor = { default={ 1, 0, 0, 0 }, over={ 0, 0, 0 } },
+        --             rowHeight = rowHeight,
+        --             params = {
+        --                 country = "US",
+        --                 rank = i,
+        --                 name = "Nathan",
+        --                 value = i*71
+        --             }
+        --         })
+        --     end
+        -- end
 
     end
 end

@@ -21,7 +21,7 @@ local imageGroup = {}
 local lineThickness = 4
 local fontSize = 55
 local nextY
-local scrollView
+local icons = {}
 local w = display.actualContentWidth
 local h = display.actualContentHeight
 ----------
@@ -90,6 +90,9 @@ local function transitionIn()
     for k,v in pairs(imageGroup) do
         transition.to(v, {time=500, xScale=1, yScale=1, transition=easing.outBack})
     end
+    for k,v in pairs(icons) do
+        transition.to(v, {time=500, xScale=1, yScale=1, transition=easing.outBack})
+    end
 end
 
 local function transitionOut( callback )
@@ -101,6 +104,9 @@ local function transitionOut( callback )
         transition.to(v, {time=500, xScale=0.001, yScale=0.001, transition=easing.inBack})
     end
     for k,v in pairs(imageGroup) do
+        transition.to(v, {time=500, xScale=0.001, yScale=0.001, transition=easing.inBack})
+    end
+    for k,v in pairs(icons) do
         transition.to(v, {time=500, xScale=0.001, yScale=0.001, transition=easing.inBack})
     end
 end
@@ -225,6 +231,22 @@ function scene:create( event )
 
     -------------------------------Scrollable View
     -- INSERT 4 IMAGES HERE --
+    y = nextY + 0.5 * rowHeight
+    local iconSize = rowHeight * 0.6
+    icons[1] = display.newImageRect( group, "images/smileIcon.png", iconSize, iconSize )
+    icons[1].x = x*3
+    icons[2] = display.newImageRect( group, "images/deathIcon.png", iconSize, iconSize )
+    icons[2].x = x*5
+    icons[3] = display.newImageRect( group, "images/checkIcon.png", iconSize, iconSize )
+    icons[3].x = x*9
+    icons[4] = display.newImageRect( group, "images/xIcon.png", iconSize, iconSize )
+    icons[4].x = x*11
+    for k,v in pairs(icons) do
+        v.y = y
+        v.xScale = 0.001
+        v.yScale = 0.001
+    end
+
     incrementNextY()
 
     createLine(group, 0, nextY, w, nextY, false)
