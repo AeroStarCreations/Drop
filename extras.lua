@@ -84,7 +84,7 @@ function scene:create( event )
     }
     logo = {}
     local logoFile = {
-        "images/logoGameCenter.png",
+        "images/logoRankings.png",
         "images/logoStore.png",
         "images/logoAboutASC.png",
         "images/logoMusic.png",
@@ -92,7 +92,7 @@ function scene:create( event )
         "images/logoGameStats.png",
     }
     local labelText = {
-        "Game Center",
+        "Rankings",
         "Store",
         "About ASC",
         "The Music",

@@ -2,6 +2,16 @@
 
 -- Ads order: Vungle -> RevMob -> AdMob
 
+-- Best paying according to Google searches
+-- 1) AdMob
+-- 2) Chartboost
+-- 3) Unity Ads
+-- 4) AppLovin
+-- 5) AdColony
+-- 6) Supersonic
+-- 7) Appnext
+-- 8) Vungle
+
 local g = require("globalVariables")
 local ads = require( "ads" )
 local revmob = require("plugin.revmob")
