@@ -2,16 +2,6 @@
 
 -- Ads order: Vungle -> RevMob -> AdMob
 
--- Best paying according to Google searches
--- 1) AdMob
--- 2) Chartboost
--- 3) Unity Ads
--- 4) AppLovin
--- 5) AdColony
--- 6) Supersonic
--- 7) Appnext
--- 8) Vungle
-
 local g = require("globalVariables")
 local ads = require( "ads" )
 local revmob = require("plugin.revmob")
@@ -63,7 +53,7 @@ end
 
 local function revmobListener( event )
     if event.isError or event.phase == "failed" then
-        native.showAlert( "Unable to show ad. Please check your network connect and try again later.", { "Okay" } )
+        native.showAlert( "Unable to show ad. Please check your network connection and try again later.", { "Okay" } )
         getsReward = false
         postAd()
     elseif event.phase == "sessionStarted" then

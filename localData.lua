@@ -272,7 +272,23 @@ v.setVideoAdDay = function( newDay )
     saveStats()
 end
 
+v.resetVideoAdViews = function()
+    local videoAd = stats:get( "videoAd" )
+    videoAd.views = 0
+    stats:set( "videoAd", videoAd )
+    saveStats()
+end
+
+local function checkAndRefreshVideoAdDay()
+    local currentDay = os.date("%j") --day of year 001-366
+    if currentDay ~= v.getVideoAdDay() then
+        v.setVideoAdDay( currentDay )
+        v.resetVideoAdViews()
+    end
+end
+
 v.getVideoAdViews = function()
+    checkAndRefreshVideoAdDay()
     return stats:get( "videoAd" ).views
 end
 
@@ -283,20 +299,13 @@ v.addVideoAdView = function()
     saveStats()
 end
 
-v.resetVideoAdViews = function()
-    local videoAd = stats:get( "videoAd" )
-    videoAd.views = 0
-    stats:set( "videoAd", videoAd )
-    saveStats()
-end
-
 v.getVideoAdLastViewTime = function()
     return stats:get( "videoAd" ).lastViewTime
 end
 
-v.setVideoAdLastViewTime = function( viewTime )
+v.setVideoAdLastViewTime = function()
     local videoAd = stats:get( "videoAd" )
-    videoAd.lastViewTime = viewTime
+    videoAd.lastViewTime = os.time( os.date('*t') )
     stats:set( "videoAd", videoAd )
     saveStats()
 end

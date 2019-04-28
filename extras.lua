@@ -5,12 +5,13 @@ local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "globalVariables" )
 local t = require( "transitions" )
-local ads = require( "ads" )
-local ad = require( "advertisements" )
+-- local ads = require( "ads" )
+-- local ad = require( "advertisements" )
 local GGTwitter = require( "GGTwitter" )
-local chartboost = require( "plugin.chartboost" )
+-- local chartboost = require( "plugin.chartboost" )
 local ld = require( "localData" )
 local logoModule = require( "logoModule" )
+local ads = require( "advertisements2" )
 
 --Precalls
 local drop
@@ -143,9 +144,10 @@ function scene:create( event )
                     t.transOutExtrasOther( "aboutMusic", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 5 then                      -- Watch Ad
                     if isEnabled == true then
-                        ad.buttonColor = "yellow"
+                        -- ad.buttonColor = "yellow"
                         squares[a].isEnabled = false
-                        ad.showAd()
+                        -- ad.showAd()
+                        ads.show( true )
                     end
                 elseif a == 6 then
                     t.transOutExtrasOther( "gameInfo", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
@@ -215,8 +217,6 @@ function scene:show( event )
         end
         
         --------------------------------------------------Watch Ad Button Config
-        local d = os.date("%j") --day of year 001-366
-        
         squares[5].isEnabled = false
 
         local currentTime
@@ -234,11 +234,6 @@ function scene:show( event )
             isEnabled = false
             squares[5].alpha = 0.4
             logo[5].alpha = 0.4
-        end
-        
-        if d ~= ld.getVideoAdDay() then --player gets 5 views per day
-            ld.resetVideoAdViews()
-            ld.setVideoAdDay( d )
         end
         
         local function listener()

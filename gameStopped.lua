@@ -5,6 +5,7 @@ local Drop = require( "Drop" )
 local json = require( "json" )
 local social = require( "socialNetworks" )
 local ld = require( "localData" )
+local ads = require( "advertisements2" )
 
 local scene = cp.newScene()
 
@@ -274,16 +275,24 @@ local function resumeListener()
     end
 end
 
-local function restartListener()
-    functionToCallOnHide = parentScene.startGame
+local function restartListenerAfterAd()
     Drop:deleteAllWithAnimation()
     parentScene:gameIsActuallyOver()
     transitionOut()
 end
 
-local function mainListener()
+local function restartListener()
+    functionToCallOnHide = parentScene.startGame
+    ads.show( false, restartListenerAfterAd )
+end
+
+local function mainListenerAfterAd()
     parentScene:gameIsActuallyOver()
     cp.gotoScene( "center" )
+end
+
+local function mainListener()
+    ads.show( false, mainListenerAfterAd )
 end
 -------------------------------------------------------------------------------]
 
