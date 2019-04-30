@@ -20,6 +20,7 @@ achieve.init()
 local highScores = require( "highScores" )
 highScores.init()
 local ads = require( "advertisements2" )
+ads.init()
 
 system.setAccelerometerInterval( 30 )
 
@@ -58,3 +59,7 @@ cp.gotoScene( "center" )
 ------------------------------------------------------------
 
 g.justOpened = true
+
+
+local Alert = require( "Alert" )
+Alert:new( "Title", "Message!", {"OK", "NO", "YES"} )

@@ -10,6 +10,8 @@
 --
 -- *has rewarded video
 
+--TODO: provide billing info on appodeal.com
+
 local appodeal = require( "plugin.appodeal" )
 local ld = require( "localData" )
 local colors = require( "colors" )
@@ -30,12 +32,11 @@ local background
 local spinners = {}
 local spinnerTransitions = {}
 
-if platform == "ios" then
-    --TODO: assign to actual iOS key
-    appKey = "iOS key"
+if platformName == "ios" then
+    --TODO: this is the Drop Testing key. Switch for the non-testing key
+    appKey = "90fd4f1ec310a6898d57032199061bbb2b34bf57c8d81c7a"
 elseif platformName == "android" then
-    --TODO: assign to actual Android key
-    appKey = "Android key"
+    appKey = "9f72f301cd38796f7996457c9cab7372ce815fa740b99cd4"
 end
 
 local function showAlert()
@@ -43,7 +44,7 @@ local function showAlert()
     if isRewarded then
         message = "Unable to show ad. Please check your network connection and try again."
     end
-    native.showAlert( "Oops", message, { "Okay" } )
+    native.showAlert( "Oops!", message, { "Okay" } )
 end
 
 local function blockTouchListener()
@@ -57,9 +58,11 @@ local function showBackground()
 end
 
 local function destroyBackground()
-    background:removeEventListener( "touch", blockTouchListener)
-    background:removeSelf()
-    background = nil
+    if background ~= nil then
+        background:removeEventListener( "touch", blockTouchListener)
+        background:removeSelf()
+        background = nil
+    end
 end
 
 local function showSpinner()
@@ -84,15 +87,20 @@ local function destroySpinner()
     end
 end
 
-local function timerListener( event )
+-- Returns true if the ad is loaded, false otherwise
+local function showRewardedVideoIfLoaded()
     --TODO: remove outer environment condition
-    if ( system.getInfo( "environment" ) == "device" ) then
-        if appodeal.isLoaded( "rewardedVideo" ) then
-            timer.cancel( adTimer )
-            appodeal.show( "rewardedVideo" )
-        end
+    if system.getInfo("environment") == "device" and appodeal.isLoaded("rewardedVideo") then
+        appodeal.show( "rewardedVideo" )
+        return true
     end
-    if event ~= nil and event.count == timerIterations then -- the timer is done
+    return false
+end
+
+local function timerListener( event )
+    if showRewardedVideoIfLoaded() then
+        timer.cancel( adTimer )
+    elseif event.count == timerIterations then
         destroySpinner()
         destroyBackground()
         showAlert()
@@ -100,10 +108,11 @@ local function timerListener( event )
 end
 
 local function startTimerForAd()
-    showSpinner()
-    showBackground()
-    timerListener()
-    adTimer = timer.performWithDelay( timerIterationDuration, timerListener, timerIterations )
+    if not showRewardedVideoIfLoaded() then
+        showSpinner()
+        showBackground()
+        adTimer = timer.performWithDelay( timerIterationDuration, timerListener, timerIterations )
+    end
 end
 
 local function handleAdCompletion( playbackEnded )
@@ -146,11 +155,10 @@ local function adListener( event )
     end
 end
 
---TODO: set testMode to false before deploying
-appodeal.init( adListener, { appKey=appKey, testMode=true } )
-
 local v = {}
 
+-- adIsRewarded indicates the an award should be given at the end of the ad
+-- listener is the function to call at the end of the process
 function v.show( adIsRewarded, listener )
     isRewarded = adIsRewarded
     onCompleteListener = listener
@@ -169,6 +177,14 @@ function v.show( adIsRewarded, listener )
     elseif listener ~= nil then
         listener()
     end
+end
+
+function v.init()
+    --TODO: set testMode to false before deploying
+    appodeal.init( adListener, {
+        appKey = appKey,
+        testMode = true
+    })
 end
 
 return v

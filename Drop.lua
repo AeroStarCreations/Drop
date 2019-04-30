@@ -162,6 +162,7 @@ function Drop:deleteAllWithAnimation()
         timer.performWithDelay( delay, function() v:deleteWithAnimation() end)
         delay = delay + interval
     end
+    dropSet = {}
 end
 
 -- converts short code to drop type

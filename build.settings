@@ -165,29 +165,26 @@ settings =
         --     supportedPlatforms = { iphone=true, android=true, osx=true, win32=true, appletvos=true }
         -- },
         -- advertisements2.lua -----------------------------------------------------
-        ["plugin.appodeal"] =
-        {
-            publisherId = "com.coronalabs"
-        },
         -- Base
-        ['plugin.appodeal.base'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.GoogleAdMob'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.StartApp'] = { publisherId = 'com.coronalabs' },
+        ['plugin.appodeal.beta.base'] = { publisherId = 'com.coronalabs' },
+        ['plugin.appodeal.beta.GoogleAdMob'] = { publisherId = 'com.coronalabs' },
+        ['plugin.appodeal.beta.StartApp'] = { publisherId = 'com.coronalabs' },
         -- Rewarded Video
-        ['plugin.appodeal.AdColony'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.AppLovin'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.Chartboost'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.FacebookAudience'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.Flurry'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.InMobi'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.IronSource'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.Mobvista'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.MyTarget'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.StartApp'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.Unity'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.Vungle'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.Tapjoy'] = { publisherId = 'com.coronalabs' },
-        ['plugin.appodeal.TwitterMoPub'] = { publisherId = 'com.coronalabs' },
+        ['plugin.appodeal.beta.AdColony'] = { publisherId = 'com.coronalabs' },
+        --TODO: Uncomment the following lines for full testing and deployment
+        -- ['plugin.appodeal.beta.AppLovin'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.Chartboost'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.FacebookAudience'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.Flurry'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.InMobi'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.IronSource'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.Mobvista'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.MyTarget'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.StartApp'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.Unity'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.Vungle'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.Tapjoy'] = { publisherId = 'com.coronalabs' },
+        -- ['plugin.appodeal.beta.TwitterMoPub'] = { publisherId = 'com.coronalabs' },
         ----------------------------------------------------------------------------
         -- The following blocks are for GameSparks
         ["plugin.bit"] =
