@@ -15,7 +15,7 @@ end
 local function createView( alert )
     local w = display.actualContentWidth / 2
     local titleHeight = 80
-    local labelMargin = 20
+    local labelMargin = 30
     local buttonHeight = 80
 
     alert.viewGroup.x = display.contentCenterX
@@ -36,6 +36,7 @@ local function createView( alert )
     local messageBoxImage = display.newImageRect(alert.viewGroup, "images/squareBlue.jpg", w, (messageBoxLabel.height + 2 * labelMargin) )
     messageBoxImage.x = 0
     messageBoxImage.y = messageBoxLabel.y
+    messageBoxImage.alha = 0.5
     messageBoxImage:toBack()
 
     local lineY = messageBoxImage.y - messageBoxImage.height/2
@@ -62,10 +63,13 @@ local function createView( alert )
     titleBoxLabel:setFillColor(0, 0, 0)
 
     -- Buttons ------------------------------------------
+    local buttonLabelOffset = 7
+
     local function buttonHandler(event)
-        local index = tonumber(event.source.id)
+        local index = tonumber(event.target.id)
         local event = { index=index }
         alert.listener(event)
+        alert:hide(true)
     end
 
     local function createButton( index, x, y, width )
@@ -78,6 +82,7 @@ local function createView( alert )
             defaultFile = "images/squareBlue.jpg",
             onRelease = buttonHandler,
             label = alert.buttonLabels[index],
+            labelYOffset = buttonLabelOffset,
             labelColor = { default={0, 0, 0}, over=colors.red },
             font = g.comRegular,
             fontSize = 30
@@ -88,10 +93,11 @@ local function createView( alert )
 
     local numOfButtons = #alert.buttonLabels
     local index = 1
+    local buttonY
     
     while index <= numOfButtons do
         local buttonX = w/4 * math.pow(-1, index)
-        local buttonY = messageBoxImage.y + messageBoxImage.height + math.floor( (index-1)/2 ) * buttonHeight
+        buttonY = messageBoxImage.y + messageBoxImage.height/2 + buttonHeight/2 + math.floor( (index-1)/2 ) * buttonHeight
 
         --Create button
         if index == numOfButtons and numOfButtons % 2 == 1 then
@@ -117,6 +123,20 @@ local function createView( alert )
         index = index + 1
     end
 
+    --Outline box
+    outlineHeight = titleBoxImage.height + messageBoxImage.height + buttonHeight * math.ceil( numOfButtons/2 )
+    outlineY = titleBoxImage.y - titleBoxImage.height/2 + outlineHeight/2
+    local outline = display.newRect(alert.viewGroup, 0, outlineY, w, outlineHeight)
+    outline.strokeWidth = 3
+    outline:setFillColor( 0, 0, 0, 0 )
+    outline:setStrokeColor( 0, 0, 0 )
+
+    --Touch-blocking background
+    local background = display.newRect(alert.viewGroup, 0, 0, display.actualContentWidth, display.actualContentHeight)
+    background.alpha = 0
+    background:toBack()
+    background:addEventListener( "touch", alert.backgroundListener )
+
     --Make hidden
     alert.viewGroup.xScale = 0.01
     alert.viewGroup.yScale = 0.01
@@ -137,6 +157,7 @@ function Alert:new( title, message, buttonLabels, listener )
     self.buttonLabels = buttonLabels
     self.listener = listener
     self.viewGroup = display.newGroup()
+    self.backgroundListener = function() return true end
 
     createView(self)
 
@@ -145,9 +166,12 @@ function Alert:new( title, message, buttonLabels, listener )
     return self
 end
 
-function Alert:hide()
+function Alert:hide( destroy )
     local function listener()
         self.viewGroup.isVisible = false
+        if destroy then
+            self:destroy()
+        end
     end
     transition.to(self.viewGroup, {
         time = 200,
@@ -159,7 +183,7 @@ function Alert:hide()
 end
 
 function Alert:show()
-    self.isVisible = true
+    self.viewGroup.isVisible = true
     transition.to(self.viewGroup, {
         time = 200,
         xScale = 1,
@@ -169,6 +193,8 @@ function Alert:show()
 end
 
 function Alert:destroy()
+    display.remove(self.viewGroup)
+    self = nil
 end
 
 return Alert
