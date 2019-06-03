@@ -126,6 +126,10 @@ local function saveSocial()
     social:save()
 end
 
+local function saveAchievements()
+    achievements:save()
+end
+
 local function initializeAllData( dropTypes )
     -- Get data from backend or set the following to default
     first:set( "hasBeenInitialized", true )
@@ -163,7 +167,8 @@ local function initializeAllData( dropTypes )
     for k,v in pairs( achievementsShortCodes ) do
         achievements:set( v, achievementsDefault.isComplete )
     end
-    achievements:save()
+    achievements:set( "unawarded", {} )
+    saveAchievements()
     social:set( "alias", socialDefault.alias )
     social:save()
 end
@@ -416,11 +421,34 @@ end
 -- Achievements ----------------------[
 v.setAchievementComplete = function( shortCode )
     achievements:set( shortCode, true )
-    achievements:save()
+    saveAchievements()
 end
 
 v.getAchievementComplete = function( shortCode )
     return achievements:get( shortCode )
+end
+
+v.addUnawardedAchievement = function( achievement )
+    local unawarded = achievements:get( "unawarded" )
+    table.insert( unawarded, achievement.reward )
+    achievements:set( "unawarded", unawarded )
+    saveAchievements()
+end
+
+v.getUnawardedAchievementReward = function()
+    local unawarded = achievements:get( "unawarded" )
+    reward = table.remove( unawarded )
+    achievements:set( "unawarded", unawarded )
+    saveAchievements()
+    return reward
+end
+
+v.hasUnawardedAchievement = function()
+    return #achievements:get( "unawarded" ) > 0
+end
+
+v.quantityUnawardedAchievements = function()
+    return #achievements:get( "unawarded" )
 end
 --------------------------------------]
 
@@ -487,6 +515,17 @@ return v
 -- achievements = {
 --     "SHORT_CODE" = isComplete:boolean
 --     ... one for every achievement
+--     unawarded = {
+--         {
+--             shortCode:string,
+--             reward = {
+--                 lives:int,
+--                 invincibilities:int,
+--                 description:string
+--             }
+--         },
+--         ... one for every unclaimed/unawarded achievement
+--     }
 -- }
 
 -- SOCIAL

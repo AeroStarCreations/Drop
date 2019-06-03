@@ -59,7 +59,3 @@ cp.gotoScene( "center" )
 ------------------------------------------------------------
 
 g.justOpened = true
-
-
-local Alert = require( "Alert" )
-Alert:new( "Title", "Message!", {"OK", "NO", "YES"}, function() print("listener") end )

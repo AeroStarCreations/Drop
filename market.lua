@@ -2,9 +2,9 @@ local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "globalVariables" )
-local t = require( "transitions" )
 local store = require( "store" )
 local iapData = require( "iapData" )
+local logoModule = require( "logoModule" )
 
 
 --Precalls
@@ -14,6 +14,22 @@ local buyThis
 local currentProduct
 local canLoad
 ----------
+
+--Functions
+local function transitionIn()
+    transition.to( lineTop, {time=500, strokeWidth=10})
+    transition.to( storeLogo, {time=500, x=storeLogoX, transition=easing.outSine})
+end
+
+local function transitionOut()
+    local function listener( event )
+        cp.gotoScene( "extras" )
+    end
+
+    transition.to( storeLogo, {time=500, x=display.contentWidth+0.5*storeLogo.width, transition=easing.inSine})
+    transition.to( lineTop, {time=500, strokeWidth=0, onComplete=listener})
+end
+-----------
 
 
 function scene:create( event )
@@ -111,18 +127,13 @@ function scene:create( event )
     ----------------------------------------------
 
     ------------------------------------------Logo
-    drop = display.newImageRect( "images/name.png", 1020, 390 )
-    local dropRatio = drop.height/drop.width
-    drop.width = 0.77*display.contentWidth; drop.height = drop.width*dropRatio
-    drop.x, drop.y = display.contentCenterX, 0.06*display.contentHeight+1
-    drop.xScale, drop.yScale = 0.47, 0.47
-    group:insert(drop)
+    drop = logoModule.getSmallLogo(group)
     ----------------------------------------------
     
     ------------------------------------Back Arrow
     local function baf( event )
-        t.transOutMarket( storeLogo, lineTop )
         print( "Arrow Pressed" )
+        transitionOut()
     end
     
     backArrow = widget.newButton{
@@ -136,21 +147,23 @@ function scene:create( event )
         onRelease = baf,
     }
     backArrow.rotation = 180
-    backArrow.x = drop.x-0.5*drop.width
-    backArrow.y = drop.y - 7
+    backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
+    backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
     ----------------------------------------------
 
     ------------------------------------Store Logo
     storeLogo = display.newImageRect( group, "images/logoStore.png", 66, 66 )
-    storeLogo.width, storeLogo.height = 0.45*drop.height, 0.45*drop.height
+    storeLogo.height = backArrow.height
+    storeLogo.width = storeLogo.height
     storeLogo.x = display.contentWidth + 0.5*storeLogo.width
-    storeLogo.y = backArrow.y + 10
+    storeLogo.y = backArrow.y
     storeLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
     ----------------------------------------------
 
     -----------------------------------------Line
-    lineTop = display.newLine( group, 0, drop.y*2, display.contentWidth, drop.y*2 )
+    lineTopY = drop.y + 1.2 * drop.height
+    lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
     lineTop:setStrokeColor( unpack( g.purple ) )
     lineTop.strokeWidth = 0
     ----------------------------------------------
@@ -182,7 +195,7 @@ function scene:show( event )
         
         g.show()
 
-        t.transInMarket( storeLogo, storeLogoX, lineTop )
+        transitionIn()
         
     end
 end
