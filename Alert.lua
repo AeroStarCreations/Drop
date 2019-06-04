@@ -5,6 +5,10 @@ local colors = require( "colors" )
 
 local TAG = "Alert.lua: "
 
+-- Local variables ------------------------------------------------------------[
+
+-------------------------------------------------------------------------------]
+
 -- Local methods and ops ------------------------------------------------------[
 local function createLine( viewGroup, x1, y1, x2, y2 )
     local messageLine = display.newLine(viewGroup, x1, y1, x2, y2)
@@ -131,9 +135,9 @@ local function createView( alert )
     outline:setFillColor( 0, 0, 0, 0 )
     outline:setStrokeColor( 0, 0, 0 )
 
-    --Touch-blocking background
+    -- Touch-blocking background ---------------------
     local background = display.newRect(alert.viewGroup, 0, 0, display.actualContentWidth, display.actualContentHeight)
-    background.alpha = 0
+    background.alpha = 0.01
     background:toBack()
     background:addEventListener( "touch", alert.backgroundListener )
 

@@ -456,6 +456,9 @@ local function gameStopped( isPaused )
             timeText = playTime.text
         }
     })
+    -- The followin is for tracking achievements
+    --TODO: save phase
+    --TODO: save hurricaneTimer
 end
 
 function scene:pauseGame()

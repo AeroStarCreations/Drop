@@ -52,7 +52,7 @@ local function syncToDatabase()
 end
 
 local function syncLeaderboardListener(event)
-    print(TAG, "syncLeaderboardListener()")
+    -- print(TAG, "syncLeaderboardListener()")
     if sd.isLoggedIn() then
         print(TAG, "is logged in")
         timer.cancel( event.source )

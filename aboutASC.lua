@@ -2,8 +2,8 @@ local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "globalVariables" )
-local t = require( "transitions" )
 local GGTwitter = require( "GGTwitter" )
+local logoModule = require( "logoModule" )
 
 
 --Precalls
@@ -17,6 +17,31 @@ local fb
 local twit
 ----------
 
+--Functions
+local function transitionIn()
+    transition.to( ascLogo, { time=500, x=ascLogoX, transition=easing.outSine } )
+    transition.to( lineTop, {time=600, x=0, transition=easing.outSine})
+    transition.to( lineBottom, {time=600, x=0})
+    transition.to( asc, {time=500, alpha=1})
+    transition.to( bio, {time=500, alpha=1})
+    transition.to( fb, { time=600, x=display.contentCenterX - 80, transition=easing.outQuad } )
+    transition.to( twit, { time=600, x=display.contentCenterX + 80, transition=easing.outQuad } )
+end
+
+local function transitionOut( callback )
+    local function listener( event )
+        cp.gotoScene( "extras" )
+    end
+
+    transition.to( ascLogo, {time=500, x=display.contentWidth+0.5*ascLogo.width, transition=easing.inSine})
+    transition.to( lineTop, {time=600, x=display.contentWidth, onComplete=listener})
+    transition.to( lineBottom, {time=600, x=-display.contentWidth})
+    transition.to( asc, {time=500, alpha=0})
+    transition.to( bio, {time=500, alpha=0})
+    transition.to( fb, { time=600, x=-120, transition=easing.outQuad } )
+    transition.to( twit, { time=600, x=display.contentWidth+twit.width, transition=easing.outQuad } )
+end
+-----------
 
 function scene:create( event )
 
@@ -25,18 +50,13 @@ function scene:create( event )
     g.create()
     
     ------------------------------------------Logo
-    drop = display.newImageRect( "images/name.png", 1020, 390 )
-    local dropRatio = drop.height/drop.width
-    drop.width = 0.77*display.contentWidth; drop.height = drop.width*dropRatio
-    drop.x, drop.y = display.contentCenterX, 0.06*display.contentHeight+1
-    drop.xScale, drop.yScale = 0.47, 0.47
-    group:insert(drop)
+    drop = logoModule.getSmallLogo(group)
     ----------------------------------------------
     
     ------------------------------------Back Arrow
     local function baf( event )
-        t.transOutAboutASC( ascLogo, lineTop, lineBottom, asc, bio, fb, twit )
         print( "Arrow Pressed" )
+        transitionOut()
     end
     
     backArrow = widget.newButton{
@@ -50,33 +70,36 @@ function scene:create( event )
         onRelease = baf,
     }
     backArrow.rotation = 180
-    backArrow.x = drop.x-0.5*drop.width
-    backArrow.y = drop.y - 7
+    backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
+    backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
     ----------------------------------------------
 
     --------------------------------------ASC Logo
     ascLogo = display.newImageRect( group, "images/ASClogo.png", 266, 266 )
-    ascLogo.width, ascLogo.height = 0.53*drop.height, 0.53*drop.height
+    ascLogo.height = 1.1 * backArrow.height
+    ascLogo.width = ascLogo.height
     ascLogo.x = display.contentWidth + 0.5*ascLogo.width
-    ascLogo.y = backArrow.y + 10
+    ascLogo.y = backArrow.y 
     ascLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
     ----------------------------------------------
 
     -------------------------"Aero Star Creations"
     asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, g.comBold, 70, "center")
     asc:setFillColor( unpack(g.purple) )
-    asc.y = 2*drop.y + 0.5*asc.height
+    asc.y = drop.y + drop.height + 0.7 * asc.height
     asc.alpha = 0
     ----------------------------------------------
 
     -----------------------------------------Lines
-    lineTop = display.newLine( group, 0, drop.y*2, display.contentWidth, drop.y*2 )
+    lineTopY = asc.y - 0.5 * asc.height
+    lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
     lineTop:setStrokeColor( unpack( g.purple ) )
     lineTop.strokeWidth = 2
     lineTop.x = -display.contentWidth
 
-    lineBottom = display.newLine( group, 0, lineTop.y+2*(asc.y-lineTop.y), display.contentWidth, lineTop.y+2*(asc.y-lineTop.y) )
+    lineBottomY = lineTopY + asc.height
+    lineBottom = display.newLine( group, 0, lineBottomY, display.contentWidth, lineBottomY )
     lineBottom:setStrokeColor( unpack( g.purple ) )
     lineBottom.strokeWidth = 2
     lineBottom.x = display.contentWidth
@@ -219,7 +242,7 @@ function scene:show( event )
         
         g.show()
         
-        t.transInAboutASC( ascLogo, ascLogoX, lineTop, lineBottom, asc, bio, fb, twit )
+        transitionIn()
 
     end
 end
