@@ -81,6 +81,7 @@ local function createText(parent, text, x, y, horizontalSpace, color, isTitle)
 end
 
 local function transitionIn()
+    transition.to( statsLogo, {time=500, x=statsLogoX, transition=easing.outSine})
     for k,v in pairs(lineGroup) do
         transition.fadeIn(v, {time=500})
     end
@@ -97,6 +98,7 @@ end
 
 local function transitionOut( callback )
     timer.performWithDelay( 500, callback )
+    transition.to( statsLogo, {time=500, x=display.contentWidth+0.5*statsLogo.width, transition=easing.inSine})
     for k,v in pairs(lineGroup) do
         transition.fadeOut(v, {time=500})
     end
@@ -142,6 +144,15 @@ function scene:create( event )
     backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
     backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
+    ----------------------------------------------
+
+    ------------------------------------Stats Logo
+    statsLogo = display.newImageRect( group, "images/logoGameStats.png", 66, 66 )
+    statsLogo.height = backArrow.height
+    statsLogo.width = statsLogo.height
+    statsLogo.x = display.contentWidth + 0.5*statsLogo.width
+    statsLogo.y = backArrow.y
+    statsLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
     ----------------------------------------------
 
     incrementNextY( logoModule.getSmallLogoBottomY() )

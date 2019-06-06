@@ -14,6 +14,8 @@ local TAG = "leaderboardsScene.lua:"
 
 local drop
 local backArrow
+local trophyLogo
+local trophyLogoX
 local scoreButton
 local timeButton
 local specialButton
@@ -153,6 +155,7 @@ end
 
 local function transitionIn()
     local buttonX = display.actualContentWidth / 4
+    transition.to( trophyLogo, {time=500, x=trophyLogoX, transition=easing.outSine})
     transition.to( scoreButton, {time=500, x=0*buttonX, delay=200, transition=easing.outCubic} )
     transition.to( timeButton, {time=500, x=1*buttonX, transition=easing.outCubic} )
     transition.to( specialButton, {time=500, x=2*buttonX, transition=easing.outCubic} )
@@ -166,6 +169,7 @@ end
 
 local function transitionOut( callback )
     local buttonX = display.actualContentWidth / 4
+    transition.to( trophyLogo, {time=500, x=display.contentWidth+0.5*trophyLogo.width, transition=easing.inSine})
     transition.to( scoreButton, {time=400, x=-2*buttonX, transition=easing.inQuad} )
     transition.to( timeButton, {time=400, delay=100, x=-buttonX, transition=easing.inQuad, onComplete=callback} )
     transition.to( specialButton, {time=400, delay=100, x=display.actualContentWidth, transition=easing.inQuad} )
@@ -208,6 +212,15 @@ function scene:create( event )
     backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
     backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
+    ----------------------------------------------
+
+    -----------------------------------Trophy Logo
+    trophyLogo = display.newImageRect( group, "images/logoRankings.png", 66, 66 )
+    trophyLogo.height = backArrow.height
+    trophyLogo.width = trophyLogo.height
+    trophyLogo.x = display.contentWidth + 0.5*trophyLogo.width
+    trophyLogo.y = backArrow.y
+    trophyLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
     ----------------------------------------------
 
     ---------------------------Leaderboard Buttons
