@@ -106,7 +106,7 @@ local function transitionOut()
     
     if g.goingToGame == true then
         transition.to( asc, { time=400, delay=800, y=display.contentHeight+50, transition=easing.inQuad } )
-        transition.to( drop, { time=700, y=-logo.height, transition=easing.inQuad } )
+        transition.to( drop, { time=700, y=-drop.height, transition=easing.inQuad } )
         transition.to( arrow, { time=2000, transition=easing.inOutBack, x=display.contentCenterX, y=display.contentHeight-49.5, xScale=0.33, yScale=0.33, rotation=rot1, onStart=startListener, onComplete=finishListener })
         transition.to( fb, { time=700, delay=500, x=-fb.width, transition=easing.inQuad } )
         transition.to( twit, { time=700, delay=500, x=display.contentWidth+twit.width, transition=easing.inQuad } )

@@ -115,6 +115,7 @@ settings =
             "android.permission.GET_ACCOUNTS",
             "android.permission.ACCESS_COARSE_LOCATION",
             "android.permission.ACCESS_FINE_LOCATION",
+            "com.android.vending.BILLING"
         },
         usesFeatures =
         {
@@ -140,6 +141,10 @@ settings =
         {
             publisherId = "com.coronalabs",
             supportedPlatforms = { iphone = true, ["iphone-sim"] = true, },
+        },
+        ["plugin.google.iap.v3"] =
+        {
+            publisherId = "com.coronalabs"
         },
         ["CoronaProvider.native.popup.social"] =
         {

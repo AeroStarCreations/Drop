@@ -2,23 +2,97 @@ local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "globalVariables" )
-local store = require( "store" )
-local iapData = require( "iapData" )
 local logoModule = require( "logoModule" )
+local marketplace = require( "Marketplace" )
 
 
 --Precalls
-local googleIAPv3
-local platform
-local buyThis
-local currentProduct
-local canLoad
+local drop
+local backArrow
+local storeLogo
+local storeLogoX
+local lineTopY
+local lineTop
+local lineTopStrokeWidth = 10
+local scrollView
+local buttons = {}
+
+-- TODO: switch to false before release
+local testing = true
+
+-- local buttonTitles = {
+--     [1] = "Drop",
+--     [2] = "Puddle",
+--     [3] = "Pond",
+--     [4] = "Lake",
+--     [5] = "Sea",
+--     [6] = "Ocean"
+-- }
+
+-- local buttonPrices = {
+--     [1] = "$0.99",
+--     [2] = "$4.99",
+--     [3] = "$9.99",
+--     [4] = "$19.99",
+--     [5] = "$49.99",
+--     [6] = "$99.99"
+-- }
+
+-- local buttonQuantities = {
+--     [1] = "2",
+--     [2] = "1",
+--     [3] = "11",
+--     [4] = "6",
+--     [5] = "23",
+--     [6] = "13",
+--     [7] = "48",
+--     [8] = "29",
+--     [9] = "125",
+--     [10] = "80",
+--     [11] = "260",
+--     [12] = "175"
+-- }
+
+-- local buttonIDs = {
+--     [1] = "ads",
+--     [2] = "shield1",
+--     [3] = "lives1",
+--     [4] = "shield5",
+--     [5] = "lives5",
+--     [6] = "shield10",
+--     [7] = "lives10",
+--     [8] = "shield20",
+--     [9] = "lives20",
+--     [10] = "shield50",
+--     [11] = "lives50",
+--     [12] = "shield100",
+--     [13] = "lives100"
+-- }
+
+local buttonFileNames = {
+    [1] = "images/iapAdsBundle.png",
+    [2] = "images/iapShields1.png",
+    [3] = "images/iapLives1.png",
+    [4] = "images/iapShields5.png",
+    [5] = "images/iapLives5.png",
+    [6] = "images/iapShields10.png",
+    [7] = "images/iapLives10.png",
+    [8] = "images/iapShields20.png",
+    [9] = "images/iapLives20.png",
+    [10] = "images/iapShields50.png",
+    [11] = "images/iapLives50.png",
+    [12] = "images/iapShields100.png",
+    [13] = "images/iapLives100.png"
+}
 ----------
 
 --Functions
 local function transitionIn()
-    transition.to( lineTop, {time=500, strokeWidth=10})
+    transition.to( lineTop, {time=500, strokeWidth=lineTopStrokeWidth})
     transition.to( storeLogo, {time=500, x=storeLogoX, transition=easing.outSine})
+    for k,v in pairs( buttons ) do
+        transition.to( v, {time=350, delay=150, xScale=1, yScale=1, transition=easing.outBack} )
+    end
 end
 
 local function transitionOut()
@@ -28,6 +102,37 @@ local function transitionOut()
 
     transition.to( storeLogo, {time=500, x=display.contentWidth+0.5*storeLogo.width, transition=easing.inSine})
     transition.to( lineTop, {time=500, strokeWidth=0, onComplete=listener})
+    for k,v in pairs( buttons ) do
+        transition.to( v, {time=350, xScale=0.01, yScale=0.01, transition=easing.inBack} )
+    end
+end
+
+local function buttonListener( event )
+    local phase = event.phase
+
+    if not marketplace.storeIsAvailable and not testing then -- buttons disabled
+        local dy = math.abs( event.y - event.yStart )
+        if dy > 1 then
+            scrollView:takeFocus( event )
+        end
+    else
+        if phase == "moved" then
+            -- https://docs.coronalabs.com/api/type/ScrollViewWidget/takeFocus.html
+            local dy = math.abs( event.y - event.yStart )
+            if dy > 10 then
+                scrollView:takeFocus( event )
+                event.target.xScale = 1
+                event.target.yScale = 1
+            end
+        elseif phase == "began" then
+            event.target.xScale = 0.9
+            event.target.yScale = 0.9
+        elseif phase == "ended" then
+            event.target.xScale = 1
+            event.target.yScale = 1
+            marketplace.purchase( event.target.id )
+        end
+    end
 end
 -----------
 
@@ -37,94 +142,6 @@ function scene:create( event )
     local group = self.view
     
     g.create()
-
-    -------------------------------Set up platform
-    googleIAPv3 = false
-    platform = system.getInfo( "platformName" )
-    
-    if platform == "Mac OS X" or platform == "Win" then
-        platform = system.getInfo( "environment" )
-    end
-
-    if ( platform == "Android" ) then
-        store = require( "plugin.google.iap.v3" )
-        googleIAPv3 = true
-    elseif store.availableStores.apple then
-    	-- iOS is supported
-    elseif ( platform == "simulator" ) then
-        native.showAlert( "Notice", "In-app purchases are not supported in the Corona Simulator.", { "OK" } )
-    else
-	    native.showAlert( "Notice", "In-app purchases are not supported on this system/device.", { "OK" } )
-    end
-
-    iapData.setProductList( platform )
-    ----------------------------------------------
-
-    -------------------------------------Functions
-    local function onLoadProducts( event )
-        iapData.setData( event )
-        canLoad = true
-    end
-
-    local function loadStoreProducts()
-        if store.isActive then
-            if store.canLoadProducts then
-                store.loadProducts( iapData.getList(), onLoadProducts )
-            else
-                native.showAlert( "Uh-oh!", "Unable to load products", { "Cancel"} )
-            end
-        end
-    end
-
-    local function transactionCallback( event )
-        if event.transaction.state == "purchased" then
-            iapData.giveReward( currentProduct )
-            native.showAlert( "Enjoy!", "Purchase complete", { "Okay" } )
-        elseif event.transaction.state == "restore" then
-            -- store this info somewhere
-        elseif event.transaction.state == "consumed" then
-            -- google only
-        elseif event.transaction.state == "refunded" then
-            -- google only
-        elseif event.transaction.state == "cancelled" then
-
-        elseif event.transaction.state == "failed" then
-
-        else
-            -- unknown event
-        end
-
-        store.finishTransaction( event.transaction )
-    end
-    ----------------------------------------------
-
-    ------------------------------Initialize Store
-    if googleIAPv3 then
-        store.init( "google", transactionCallback )
-    elseif store.availableStores.apple then
-        store.init( "apple", transactionCallback )
-    elseif platform == "simulator" then
-        print( "IAP not supported in simulator" )
-    else
-        print( "IAP not supported on this system/device" )
-    end
-    ----------------------------------------------
-
-    -----------------------------Purchase Function
-    function buyThis( productID )
-        if not store.isActive then
-            native.showAlert( "Uh-oh!", "Cannot access the store at this time, please try again later", { "Okay" } )
-        elseif not store.canMakePurchases then
-            native.showAlert( "Uh-oh!", "Store purchases are not available, please try again later", { "Okay" } )
-        elseif productID then
-            if platform == "Android" then
-                store.purchase( productID )
-            else
-                store.purchase( { productID } )
-            end
-        end
-    end
-    ----------------------------------------------
 
     ------------------------------------------Logo
     drop = logoModule.getSmallLogo(group)
@@ -169,16 +186,76 @@ function scene:create( event )
     ----------------------------------------------
 
     -----------------------------------Scroll View
-    local scrollView = widget.newScrollView( {
+    scrollView = widget.newScrollView( {
         left = 0,
-        top = lineTop.y + lineTop.width * 0.5,
+        top = lineTop.y + lineTopStrokeWidth * 0.5,
         width = display.contentWidth,
-        height = display.contentHeight - lineTop.y - lineTop.width * 0.5,
+        height = display.contentHeight - lineTop.y - lineTopStrokeWidth * 0.5,
         horizontalScrollDisabled = true,
         hideBackground = true,
         hideScrollBar = true,
     })
     group:insert(scrollView)
+    ----------------------------------------------
+
+    -----------------------------Ads Bundle Button
+    buttons[1] = widget.newButton({
+        parent = group,
+        id = marketplace.productIDs[1],
+        x = display.contentCenterX,
+        y = 0,
+        width = 643,
+        height = 201,
+        defaultFile = buttonFileNames[1],
+        onEvent = buttonListener
+    })
+    buttons[1].y = 0.6 * buttons[1].height
+    scrollView:insert(buttons[1])
+    ----------------------------------------------
+
+    -----------------------------------IAP Buttons
+    local buttonWidth = 308
+    local buttonHeight = 201
+    local margin = (display.actualContentWidth - 2 * buttonWidth) / 6
+    local buttonY = buttons[1].y + 0.5 * (buttons[1].height + buttonHeight) + margin
+    local buttonX = {
+        [1] = 2 * margin + 0.5 * buttonWidth,
+        [2] = display.contentCenterX + margin + 0.5 * buttonWidth
+    }
+
+    for i = 1,6 do
+        for j = 1,2 do
+            local index = (i-1) * 2 + j + 1
+            buttons[index] = widget.newButton({
+                parent = group,
+                id = marketplace.productIDs[index],
+                x = buttonX[j],
+                y = buttonY,
+                width = buttonWidth,
+                height = buttonHeight,
+                defaultFile = buttonFileNames[index],
+                onEvent = buttonListener
+            })
+            scrollView:insert(buttons[index])
+        end
+        buttonY = buttonY + margin + buttonHeight
+    end
+
+    -- Adjust scrollView height
+    scrollView:setScrollHeight( scrollView._view._scrollHeight + margin + 0.5 * buttonHeight)
+
+    -- Set IAP alpha
+    if not marketplace.storeIsAvailable and not testing then
+        for k,v in pairs( buttons ) do
+            v.alpha = 0.4
+        end
+    end
+
+    -- Set initial button scales
+    for k,v in pairs( buttons ) do
+        v.xScale = 0.01
+        v.yScale = 0.01
+    end
     ----------------------------------------------
 
 end

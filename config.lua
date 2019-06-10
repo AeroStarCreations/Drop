@@ -14,6 +14,6 @@ application = {
     },
     license = {
         google = {
-            key = "getKeyFromSomewhere",
+            key = "getKeyFromSomewhere", --TODO: Inside this table, the key value should be set to the corresponding per-app key obtained from the Google Play Developer Console. This key is indicated in the Licensing & In-App Billing section of Services & APIs.
         },
     },}

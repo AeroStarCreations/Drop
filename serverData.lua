@@ -252,6 +252,41 @@ local function getLeaderboardData(isScore, withSpecials, areLeaders, callback)
 end
 -------------------------------------------------------------------------------]
 
+-- In-App Purchases -----------------------------------------------------------[
+local function confirmPurchaseWithApple( receipt )
+    local requestBuilder = gs.getRequestBuilder()
+    local request = requestBuilder.createIOSBuyGoodsRequest()
+    request:setReceipt( receipt )
+    request:send( function( response )
+        if not response:hasErrors() then
+            print(TAG, "Apple purchase confirmed")
+        else
+            print(TAG, "ERROR: could not confirm Apple purchase")
+            for key,value in pairs(response:getErrors()) do
+                print(key,value)
+            end
+        end
+    end)
+end
+
+local function confirmPurchaseWithGoogle( receipt, signature )
+    local requestBuilder = gs.getRequestBuilder()
+    local request = requestBuilder.createGooglePlayBuyGoodsRequest()
+    request:setSignedData( receipt )
+    request:setSignature( signature )
+    request:send( function( response )
+        if not response:hasErrors() then
+            print(TAG, "Google purchase confirmed")
+        else
+            print(TAG, "ERROR: could not confirm Google purchase")
+            for key,value in pairs(response:getErrors()) do
+                print(key,value)
+            end
+        end
+    end)
+end
+-------------------------------------------------------------------------------]
+
 -- Returned values/table ------------------------------------------------------[
 local v = {}
 
@@ -291,6 +326,14 @@ end
 
 v.getLeaderboardData = function(isScore, withSpecials, areLeaders, callback)
     getLeaderboardData(isScore, withSpecials, areLeaders, callback)
+end
+
+v.confirmPurchaseWithApple = function( receipt )
+    confirmPurchaseWithApple( receipt )
+end
+
+v.confirmPurchaseWithGoogle = function( receipt, signature )
+    confirmPurchaseWithGoogle( receipt, signature )
 end
 
 return v

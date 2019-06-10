@@ -158,7 +158,7 @@ local function syncToDatabase( player )
     -- Sync progress achievements
     for k, achievement in pairs(achievements.progress) do
         local shortCode = achievement.shortCode
-        print(TAG, shortCode.." : "..t.." : "..tostring(ld.getAchievementComplete(shortCode)).." : "..tostring(not has(a, shortCode)))
+        print(TAG, shortCode.." : "..achievement.targetValue.." : "..tostring(ld.getAchievementComplete(shortCode)).." : "..tostring(not has(a, shortCode)))
         if ld.getAchievementComplete(shortCode) and not has(a, shortCode) then
             print(TAG, "AWARDED")
             sd.completeAchievement(shortCode)
