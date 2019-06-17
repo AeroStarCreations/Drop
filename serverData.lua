@@ -8,6 +8,7 @@ local json = require( "json" )
 local ld = require( "localData" )
 local gameCenter = require( "gameCenter" )
 local googlePlay = require( "googlePlay" )
+local Alert = require( "Alert" )
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "serverData:"
@@ -253,7 +254,7 @@ end
 -------------------------------------------------------------------------------]
 
 -- In-App Purchases -----------------------------------------------------------[
-local function confirmPurchaseWithApple( receipt )
+local function confirmPurchaseWithApple( receipt, callback )
     local requestBuilder = gs.getRequestBuilder()
     local request = requestBuilder.createIOSBuyGoodsRequest()
     request:setReceipt( receipt )
@@ -266,10 +267,11 @@ local function confirmPurchaseWithApple( receipt )
                 print(key,value)
             end
         end
+        callback( response:getBoughtItems(), response:hasErrors() )
     end)
 end
 
-local function confirmPurchaseWithGoogle( receipt, signature )
+local function confirmPurchaseWithGoogle( receipt, signature, callback )
     local requestBuilder = gs.getRequestBuilder()
     local request = requestBuilder.createGooglePlayBuyGoodsRequest()
     request:setSignedData( receipt )
@@ -277,12 +279,14 @@ local function confirmPurchaseWithGoogle( receipt, signature )
     request:send( function( response )
         if not response:hasErrors() then
             print(TAG, "Google purchase confirmed")
+            showSuccessfulPurchaseAlert( response:getBoughtItems(), callback )
         else
             print(TAG, "ERROR: could not confirm Google purchase")
             for key,value in pairs(response:getErrors()) do
                 print(key,value)
             end
         end
+        callback( response:getBoughtItems(), response:hasErrors() )
     end)
 end
 -------------------------------------------------------------------------------]
@@ -328,12 +332,12 @@ v.getLeaderboardData = function(isScore, withSpecials, areLeaders, callback)
     getLeaderboardData(isScore, withSpecials, areLeaders, callback)
 end
 
-v.confirmPurchaseWithApple = function( receipt )
-    confirmPurchaseWithApple( receipt )
+v.confirmPurchaseWithApple = function( receipt, callback )
+    confirmPurchaseWithApple( receipt, callback )
 end
 
-v.confirmPurchaseWithGoogle = function( receipt, signature )
-    confirmPurchaseWithGoogle( receipt, signature )
+v.confirmPurchaseWithGoogle = function( receipt, signature, callback )
+    confirmPurchaseWithGoogle( receipt, signature, callback )
 end
 
 return v

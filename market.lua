@@ -4,6 +4,7 @@ local widget = require( "widget" )
 local g = require( "globalVariables" )
 local logoModule = require( "logoModule" )
 local marketplace = require( "Marketplace" )
+local ld = require( "localData" )
 
 
 --Precalls
@@ -107,10 +108,30 @@ local function transitionOut()
     end
 end
 
+local function dimButtons()
+    for k,v in pairs( buttons ) do
+        v.alpha = 0.4
+    end
+end
+
+local function dimAndDisableButtons()
+    dimButtons()
+    for k,v in pairs( buttons ) do
+        v:setEnabled( false )
+    end
+end
+
+local function lightAndEnabledButtons()
+    for k,v in pairs( buttons ) do
+        v.alpha = 1
+        v:setEnabled( true )
+    end
+end
+
 local function buttonListener( event )
     local phase = event.phase
 
-    if not marketplace.storeIsAvailable and not testing then -- buttons disabled
+    if not marketplace.isStoreAvailable() and not testing then -- buttons disabled
         local dy = math.abs( event.y - event.yStart )
         if dy > 1 then
             scrollView:takeFocus( event )
@@ -130,7 +151,8 @@ local function buttonListener( event )
         elseif phase == "ended" then
             event.target.xScale = 1
             event.target.yScale = 1
-            marketplace.purchase( event.target.id )
+            dimAndDisableButtons()
+            marketplace.purchase( event.target.id, lightAndEnabledButtons )
         end
     end
 end
@@ -198,31 +220,35 @@ function scene:create( event )
     group:insert(scrollView)
     ----------------------------------------------
 
-    -----------------------------Ads Bundle Button
-    buttons[1] = widget.newButton({
-        parent = group,
-        id = marketplace.productIDs[1],
-        x = display.contentCenterX,
-        y = 0,
-        width = 643,
-        height = 201,
-        defaultFile = buttonFileNames[1],
-        onEvent = buttonListener
-    })
-    buttons[1].y = 0.6 * buttons[1].height
-    scrollView:insert(buttons[1])
-    ----------------------------------------------
-
     -----------------------------------IAP Buttons
     local buttonWidth = 308
     local buttonHeight = 201
     local margin = (display.actualContentWidth - 2 * buttonWidth) / 6
-    local buttonY = buttons[1].y + 0.5 * (buttons[1].height + buttonHeight) + margin
+    local buttonY = 0.5 * buttonHeight + margin
     local buttonX = {
         [1] = 2 * margin + 0.5 * buttonWidth,
         [2] = display.contentCenterX + margin + 0.5 * buttonWidth
     }
 
+    --Display Ads Bundle button if ads are currently enabled
+    if ld.getAdsEnabled() then
+        buttons[1] = widget.newButton({
+            parent = group,
+            id = marketplace.productIDs[1],
+            x = display.contentCenterX,
+            y = 0,
+            width = 643,
+            height = 201,
+            defaultFile = buttonFileNames[1],
+            onEvent = buttonListener
+        })
+        buttons[1].y = 0.6 * buttons[1].height
+        scrollView:insert(buttons[1])
+
+        buttonY = buttons[1].y + 0.5 * (buttons[1].height + buttonHeight) + margin
+    end
+
+    --Display life and invincibility buttons
     for i = 1,6 do
         for j = 1,2 do
             local index = (i-1) * 2 + j + 1
@@ -244,11 +270,11 @@ function scene:create( event )
     -- Adjust scrollView height
     scrollView:setScrollHeight( scrollView._view._scrollHeight + margin + 0.5 * buttonHeight)
 
+    --TODO: disable scrolling if buttons don't extend scroll area/height
+
     -- Set IAP alpha
-    if not marketplace.storeIsAvailable and not testing then
-        for k,v in pairs( buttons ) do
-            v.alpha = 0.4
-        end
+    if not marketplace.isStoreAvailable() and not testing then
+        dimButtons()
     end
 
     -- Set initial button scales

@@ -72,7 +72,9 @@ local function createView( alert )
     local function buttonHandler(event)
         local index = tonumber(event.target.id)
         local event = { index=index }
-        alert.listener(event)
+        if alert.listener ~= nil then
+            alert.listener(event)
+        end
         alert:hide(true)
     end
 
