@@ -92,8 +92,9 @@ local achievements = {
 -------------------------------------------------------------------------------]
     
 -- Local methods and ops ------------------------------------------------------[
-local function checkNormalAchievements( phase )
+local function checkNormalAchievements()
     local size = #achievements.normal / 2
+    local phase = ld.getPhase()
     local tricky = not ld.getSpecialDropsEnabled()
     local shortCode
     local achievement
@@ -116,7 +117,8 @@ local function checkNormalAchievements( phase )
     end
 end
 
-local function checkProgressAchievements( hurricaneTime)
+local function checkProgressAchievements()
+    local hurricaneTime = ld.getHurricaneTime()
     for k, achievement in pairs(achievements.progress) do
         local shortCode = achievement.shortCode
         local target = achievement.targetValue
@@ -182,9 +184,9 @@ end
 -- Returned values/table ------------------------------------------------------[
 local v = {}
 
-function v.checkAchievements( phase, hurricaneTime )
-    checkNormalAchievements(phase)
-    checkProgressAchievements(hurricaneTime)
+function v.checkAchievements()
+    checkNormalAchievements()
+    checkProgressAchievements()
 end
 
 function v.init()

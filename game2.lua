@@ -474,8 +474,11 @@ function scene:gameIsActuallyOver()
     -- Count games played since this is the only place where
     -- it's known that the user played a complete game.
     ld.incrementGamesPlayed()
+    -- Save phase and hurricaneTime for achievement checks
+    ld.setPhase( lvlParams.phase )
+    ld.setHurricaneTime( hurricaneTime )
     -- Check achievements
-    achieve.checkAchievements(lvlParams.phase, hurricaneTime)
+    achieve.checkAchievements()
     -- Check high scores
     highScores.checkHighScore( score, totalGameTime )
 end

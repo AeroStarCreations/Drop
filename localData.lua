@@ -26,6 +26,7 @@ local settingsDefault = {
     tiltControl = true
 }
 
+--TODO: update these defaults before release
 local purchasesDefault = {
     invincibility = 999,
     lives = 999,
@@ -149,6 +150,8 @@ local function initializeAllData( dropTypes )
     stats:set( "deaths", 0 )
     stats:set( "invincibilityUses", 0 )
     stats:set( "lifeUses", 0 )
+    stats:set( "phase", 0 ) --highest level the player completed/survived
+    stats:set( "hurricaneTiem", 0 ) --seconds
     for k, shortCode in pairs(scorerShortCodes) do
         stats:set( shortCode, 0 )
     end
@@ -159,9 +162,6 @@ local function initializeAllData( dropTypes )
             specialDodges = 0,
             specialCollisions = 0
         })
-    end
-    for k,v in pairs(scorerShortCodes) do
-        stats:set( v, 0)
     end
     stats:save()
     for k,v in pairs( achievementsShortCodes ) do
@@ -415,6 +415,30 @@ end
 
 v.getHighScore = function( shortCode )
     return stats:get( shortCode )
+end
+
+v.getPhase = function()
+    return stats:get( "phase" )
+end
+
+v.setPhase = function( newPhase )
+    local currentPhase = stats:get( "phase" )
+    if newPhase > currentPhase then
+        stats:set( "phase", newPhase )
+        stats:save()
+    end
+end
+
+v.getHurricaneTime = function()
+    return stats:get( "hurricaneTime" )
+end
+
+v.setHurricaneTime = function( newTime )
+    local currentTime = stats:get( "hurricaneTime" )
+    if newTime > currentTime then
+        stats:set( "hurricaneTime", newTime )
+        stats:save()
+    end
 end
 --------------------------------------]
 
