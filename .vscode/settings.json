@@ -1,3 +1,14 @@
-// Place your settings in this file to overwrite default and user settings.
 {
+    "Lua.diagnostics.globals": [
+        "transition",
+        "display",
+        "easing",
+        "unpack",
+        "native",
+        "timer",
+        "system",
+        "Runtime",
+        "graphics",
+        "audio"
+    ]
 }

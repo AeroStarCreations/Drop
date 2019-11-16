@@ -212,7 +212,7 @@ end
 
 --- Destroys the Facebook object.
 function GGFacebook:destroy()
-	 self.appID = appID
+	self.appID = appID
     self.listener = listener
     self.permissions = permissions
 end

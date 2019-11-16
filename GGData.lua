@@ -292,7 +292,7 @@ function GGData:increment( name, amount )
 	end
 	if self[ name ] and type( self[ name ] ) == "number" then
 		self[ name ] = self[ name ] + ( amount or 1 )
-		self:storeIntegrityHash( name, value )
+		self:storeIntegrityHash( name, amount )
 	end
 end
 
@@ -305,7 +305,7 @@ function GGData:decrement( name, amount )
 	end
 	if self[ name ] and type( self[ name ] ) == "number" then
 		self[ name ] = self[ name ] - ( amount or 1 )
-		self:storeIntegrityHash( name, value )
+		self:storeIntegrityHash( name, amount )
 	end
 end
 

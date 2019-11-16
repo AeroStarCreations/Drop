@@ -75,7 +75,7 @@ end
 
 local function loginWithGameSparks( sig )
     local requestBuilder = gs.getRequestBuilder()
-    authenticationRequest = requestBuilder.createAuthenticationRequest()
+    local authenticationRequest = requestBuilder.createAuthenticationRequest()
     authenticationRequest:setUserName( sig.playerId )
     authenticationRequest:setPassword( sig.playerId )
     authenticationRequest:send( function( response )
@@ -116,7 +116,7 @@ local function registerWithGameSparks( sig )
     -- end)
 
     local requestBuilder = gs.getRequestBuilder()
-    registerRequest = requestBuilder.createRegistrationRequest()
+    local registerRequest = requestBuilder.createRegistrationRequest()
     registerRequest:setDisplayName( sig.alias )
     registerRequest:setUserName( sig.playerId )
     registerRequest:setPassword( sig.playerId )
