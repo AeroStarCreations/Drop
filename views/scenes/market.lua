@@ -98,7 +98,7 @@ end
 
 local function transitionOut()
     local function listener( event )
-        cp.gotoScene( "extras" )
+        cp.gotoScene( "views/scenes/extras" )
     end
 
     transition.to( storeLogo, {time=500, x=display.contentWidth+0.5*storeLogo.width, transition=easing.inSine})

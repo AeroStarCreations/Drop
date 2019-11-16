@@ -28,7 +28,7 @@ end
 v.transOutSettings = function( arrow, lineGroup, group1, group2, group3, group4, group5 )
     
     local function finish( event )
-        cp.gotoScene( "center" )
+        cp.gotoScene( "views/scenes/center" )
     end
     
     transition.to( arrow, { time=300, x=-arrow.width, transition=easing.inQuad } )
@@ -78,7 +78,7 @@ end
 v.transOutExtras = function( arrow, r1, r2, r3, r4, r5, r6 )
     
     local function listener( event )
-        cp.gotoScene( "center" )
+        cp.gotoScene( "views/scenes/center" )
     end
     
     transition.to( arrow, { time=300, x=-arrow.width, transition=easing.inQuad } )

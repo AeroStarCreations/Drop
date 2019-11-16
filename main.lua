@@ -11,7 +11,7 @@ local json = require( "json" )
 local Drop = require( "Drop" )
 local ld = require( "localData" )
 ld.init( Drop.types )
-local bg = require( "backgrounds" )
+local bg = require( "controllers/backgroundController" )
 bg.init()
 local sd = require( "serverData" )
 sd.init()
@@ -54,8 +54,7 @@ testText:setFillColor(0,0,0)
 
 ----------------------The following takes the user to the first "scene", center.
 cp.recycleOnSceneChange = false
-cp.loadScene( "center" )
-cp.gotoScene( "center" )
+cp.gotoScene( "views/scenes/center" )
 ------------------------------------------------------------
 
 g.justOpened = true

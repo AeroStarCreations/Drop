@@ -10,7 +10,7 @@
 -- local gn = require( "gameNetworks" )
 -- local chartboost = require( "plugin.chartboost" )
 -- local gf = require( "gameFunctions" )
--- local bg = require( "backgrounds" )
+-- local bg = require( "controllers/backgroundController" )
 -- local ld = require( "localData" )
 -- local Drop = require( "Drop" )
 
@@ -356,7 +356,7 @@
 --         end
 --         --while( not g.adDone ) do end
 --         --g.adDone = false
---         cp.gotoScene( "center" )
+--         cp.gotoScene( "views/scenes/center" )
 --     end
 --     local function blueListener( event )------------------------------
 --         print( "Blue pressed" )

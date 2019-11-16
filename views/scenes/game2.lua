@@ -5,7 +5,7 @@ local g = require( "globalVariables" )
 local ld = require( "localData" )
 local physics = require( "physics" )
 local Drop = require( "Drop" )
-local bg = require( "backgrounds" )
+local bg = require( "controllers/backgroundController" )
 local timer = require( "timers" )
 local json = require( "json" )
 local achieve = require( "achievements" )
@@ -448,7 +448,7 @@ local function gameStopped( isPaused )
     timer.pauseAllTimers()
     transition.pause()
     physics.pause()
-    cp.showOverlay( "gameStopped", {
+    cp.showOverlay( "views/overlays/gameStopped", {
         isModal = true,
         params = {
             isPaused = isPaused,

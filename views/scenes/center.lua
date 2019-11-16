@@ -9,7 +9,7 @@ local GGTwitter = require( "GGTwitter" )
 local logoModule = require( "logoModule" )
 local ld = require( "localData" )
 local Alert = require( "Alert" )
-local bg = require( "backgrounds" )
+local bg = require( "controllers/backgroundController" )
 
 -------Precalls 
 local asc
@@ -85,11 +85,11 @@ local function transitionOut()
         settings:setEnabled( true )
         
         if g.goingToGame == true then
-            cp.gotoScene( "game2" )
+            cp.gotoScene( "views/scenes/game2" )
         elseif g.goingToExtras == true then
-            cp.gotoScene( "extras" )
+            cp.gotoScene( "views/scenes/extras" )
         elseif g.goingToSettings == true then
-            cp.gotoScene( "settings" )
+            cp.gotoScene( "views/scenes/settings" )
         end
         
         print( "Transitions complete" )

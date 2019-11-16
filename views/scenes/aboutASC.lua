@@ -30,7 +30,7 @@ end
 
 local function transitionOut( callback )
     local function listener( event )
-        cp.gotoScene( "extras" )
+        cp.gotoScene( "views/scenes/extras" )
     end
 
     transition.to( ascLogo, {time=500, x=display.contentWidth+0.5*ascLogo.width, transition=easing.inSine})

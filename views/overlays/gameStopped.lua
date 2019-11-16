@@ -288,7 +288,7 @@ end
 
 local function mainListenerAfterAd()
     parentScene:gameIsActuallyOver()
-    cp.gotoScene( "center" )
+    cp.gotoScene( "views/scenes/center" )
 end
 
 local function mainListener()

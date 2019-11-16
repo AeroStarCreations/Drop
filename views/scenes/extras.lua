@@ -135,13 +135,13 @@ function scene:create( event )
             if event.x > buttonGroup[a].x-0.5*w and event.x < buttonGroup[a].x+0.5*w and event.y > buttonGroup[a].y-0.5*h and event.y < buttonGroup[a].y+0.5*h then
                 print(event.target.id.." was pressed.")
                 if a == 1 then                          -- Leaderboards
-                    t.transOutExtrasOther( "leaderboardsScene", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
+                    t.transOutExtrasOther( "views/scenes/leaderboardsScene", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 2 then                      -- Store / Market
-                    t.transOutExtrasOther( "market", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
+                    t.transOutExtrasOther( "views/scenes/market", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 3 then                      -- About ASC
-                    t.transOutExtrasOther( "aboutASC", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
+                    t.transOutExtrasOther( "views/scenes/aboutASC", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 4 then
-                    t.transOutExtrasOther( "aboutMusic", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
+                    t.transOutExtrasOther( "views/scenes/aboutMusic", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 elseif a == 5 then                      -- Watch Ad
                     if isEnabled == true then
                         -- ad.buttonColor = "yellow"
@@ -150,7 +150,7 @@ function scene:create( event )
                         ads.show( true )
                     end
                 elseif a == 6 then
-                    t.transOutExtrasOther( "gameInfo", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
+                    t.transOutExtrasOther( "views/scenes/gameInfo", buttonGroup[1], buttonGroup[2], buttonGroup[3], buttonGroup[4], buttonGroup[5], buttonGroup[6] )
                 end
             end
             
