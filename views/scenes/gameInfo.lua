@@ -6,7 +6,7 @@ local ld = require( "localData" )
 local logoModule = require( "logoModule" )
 local colors = require( "colors" )
 local ld = require( "localData" )
-local Drop = require( "Drop" )
+local Drop = require( "objects.Drop" )
 
 
 --Precalls
@@ -127,7 +127,7 @@ function scene:create( event )
     ------------------------------------Back Arrow
     local function baf( event )
         print( "Arrow Pressed" )
-        transitionOut( function() cp.gotoScene("views/scenes/extras") end)
+        transitionOut( function() cp.gotoScene("views.scenes.extras") end)
     end
     
     backArrow = widget.newButton{

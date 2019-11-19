@@ -8,7 +8,7 @@ local json = require( "json" )
 local ld = require( "localData" )
 local gameCenter = require( "gameCenter" )
 local googlePlay = require( "googlePlay" )
-local Alert = require( "Alert" )
+local Alert = require( "views.other.Alert" )
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "serverData:"

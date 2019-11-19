@@ -1,7 +1,7 @@
 local ld = require( "localData" )
 local sd = require( "serverData" )
-local Drop = require( "Drop" )
-local Alert = require( "Alert" )
+local Drop = require( "objects.Drop" )
+local Alert = require( "views.other.Alert" )
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "achievements:"

@@ -1,7 +1,7 @@
 local cp = require( "composer" )
 local g = require( "globalVariables" )
 local widget = require( "widget" )
-local Drop = require( "Drop" )
+local Drop = require( "objects.Drop" )
 local json = require( "json" )
 local social = require( "socialNetworks" )
 local ld = require( "localData" )
@@ -288,7 +288,7 @@ end
 
 local function mainListenerAfterAd()
     parentScene:gameIsActuallyOver()
-    cp.gotoScene( "views/scenes/center" )
+    cp.gotoScene( "views.scenes.center" )
 end
 
 local function mainListener()

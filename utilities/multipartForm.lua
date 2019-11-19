@@ -46,7 +46,7 @@ MultipartFormData = {}
 local MultipartFormData_mt = { __index = MultipartFormData }
  
 function MultipartFormData.new()  -- The constructor
-        local newBoundary = "MPFD-"..crypto.digest( crypto.sha1, "MultipartFormData"..tostring(object)..tostring(os.time())..tostring(os.clock()), false )
+        local newBoundary = "MPFD-"..crypto.digest( crypto.sha1, "utilities.multipartFormData"..tostring(object)..tostring(os.time())..tostring(os.clock()), false )
         local object = { 
                 isClass = true,
                 boundary = newBoundary,
@@ -174,7 +174,7 @@ function MultipartFormData:addElement(element)
 end
  
 function MultipartFormData:toString()
-        return "MultipartFormData [elementCount:"..tostring(#self.elements)..", headerCount:"..tostring(#self.headers).."]" 
+        return "utilities.multipartFormData [elementCount:"..tostring(#self.elements)..", headerCount:"..tostring(#self.headers).."]" 
 end
  
 return MultipartFormData

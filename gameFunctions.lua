@@ -6,7 +6,7 @@
 -- Nathan Balli
 ------------------------------------------------------------------
 
-local GGData = require( "GGData" )
+local GGData = require( "utilities.GGData" )
 local g = require( "globalVariables" )
 local gn = require( "gameNetworks" )
 local ld = require( "localData" )

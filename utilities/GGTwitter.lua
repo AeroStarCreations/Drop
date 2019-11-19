@@ -46,7 +46,7 @@ local GGTwitter = {}
 local GGTwitter_mt = { __index = GGTwitter }
 
 local json = require( "json" )
-local oAuth = require( "oAuth" )
+local oAuth = require( "utilities.oAuth" )
 local g = require( "globalVariables" )
 local gn = require( "gameNetworks" )
 

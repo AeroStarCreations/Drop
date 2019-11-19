@@ -5,7 +5,7 @@
 --
 -- Don't set important values to true (i.e. purchases) until the server/backend confirms
 
-local GGData = require( "GGData" )
+local GGData = require( "utilities.GGData" )
 local json = require( "json" )
 
 -- GGData boxes ---------------------------------------------------------------[

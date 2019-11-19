@@ -1,17 +1,17 @@
 display.setStatusBar(display.HiddenStatusBar)
 
 local cp = require( "composer" )
-local GGData = require( "GGData" )
+local GGData = require( "utilities.GGData" )
 local g = require( "globalVariables" )
 -- local ads = require( "ads" )
 -- local chartboost = require( "plugin.chartboost" )
 -- local ad = require( "advertisements" )
 -- local gn = require( "gameNetworks" )
 local json = require( "json" )
-local Drop = require( "Drop" )
+local Drop = require( "objects.Drop" )
 local ld = require( "localData" )
 ld.init( Drop.types )
-local bg = require( "controllers/backgroundController" )
+local bg = require( "controllers.backgroundController" )
 bg.init()
 local sd = require( "serverData" )
 sd.init()
@@ -54,7 +54,7 @@ testText:setFillColor(0,0,0)
 
 ----------------------The following takes the user to the first "scene", center.
 cp.recycleOnSceneChange = false
-cp.gotoScene( "views/scenes/center" )
+cp.gotoScene( "views.scenes.center" )
 ------------------------------------------------------------
 
 g.justOpened = true

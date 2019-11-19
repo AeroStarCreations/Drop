@@ -2,7 +2,7 @@ local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "globalVariables" )
-local GGTwitter = require( "GGTwitter" )
+local GGTwitter = require( "utilities.GGTwitter" )
 local logoModule = require( "logoModule" )
 
 
@@ -30,7 +30,7 @@ end
 
 local function transitionOut( callback )
     local function listener( event )
-        cp.gotoScene( "views/scenes/extras" )
+        cp.gotoScene( "views.scenes.extras" )
     end
 
     transition.to( ascLogo, {time=500, x=display.contentWidth+0.5*ascLogo.width, transition=easing.inSine})

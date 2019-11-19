@@ -5,11 +5,11 @@ local scene = cp.newScene()
 local g = require( "globalVariables" )
 local widget = require( "widget" )
 local t = require( "transitions" )
-local GGTwitter = require( "GGTwitter" )
+local GGTwitter = require( "utilities.GGTwitter" )
 local logoModule = require( "logoModule" )
 local ld = require( "localData" )
-local Alert = require( "Alert" )
-local bg = require( "controllers/backgroundController" )
+local Alert = require( "views.other.Alert" )
+local bg = require( "controllers.backgroundController" )
 
 -------Precalls 
 local asc
@@ -52,7 +52,7 @@ local function transitionIn( onComplete )
     
     if g.justOpened then
         transition.to( arrow, { time=900, xScale=1, yScale=1, transition=easing.outBack } )
-    elseif cp.getSceneName( "previous" ) == "game2" then
+    elseif cp.getSceneName( "previous" ) == "views.scenes.game2" then
         arrow.x = g.arrowX
         transition.to( arrow, { time=1200, transition=easing.outBack, x=display.contentCenterX+17, y=display.contentCenterY, xScale=1, yScale=1, rotation=rot2 })
     else
@@ -85,11 +85,11 @@ local function transitionOut()
         settings:setEnabled( true )
         
         if g.goingToGame == true then
-            cp.gotoScene( "views/scenes/game2" )
+            cp.gotoScene( "views.scenes.game2" )
         elseif g.goingToExtras == true then
-            cp.gotoScene( "views/scenes/extras" )
+            cp.gotoScene( "views.scenes.extras" )
         elseif g.goingToSettings == true then
-            cp.gotoScene( "views/scenes/settings" )
+            cp.gotoScene( "views.scenes.settings" )
         end
         
         print( "Transitions complete" )
@@ -469,7 +469,7 @@ function scene:show( event )
         
         g.show()
         
-        cp.loadScene( "game2" )
+        cp.loadScene( "views.scenes.game2" )
         
         -----------------------------------------Creates the accelerometer rotations
         function rotate( event )

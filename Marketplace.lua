@@ -1,6 +1,6 @@
 local sd = require( "serverData" )
 local json = require( "json" )
-local Alert = require( "Alert" )
+local Alert = require( "views.other.Alert" )
 
 --Precalls
 local TAG = "Marketplace.lua: "

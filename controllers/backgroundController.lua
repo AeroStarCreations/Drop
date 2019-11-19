@@ -5,12 +5,12 @@
 -- !!! Call init() somewhere in the code before using this module !!!
 
 -- Imports --------------------------------------------------------------------[
-local model = require( "models/backgroundModel" )
+local model = require( "models.backgroundModel" )
 -------------------------------------------------------------------------------]
 
 -- Local vars and methods -----------------------------------------------------[
-local bgW = model.getFileWidth
-local bgH = model.getFileHeight
+local bgW = model.getFileWidth()
+local bgH = model.getFileHeight()
 
 local function initializeBackgroundGroup()
     local group = display.newGroup()
