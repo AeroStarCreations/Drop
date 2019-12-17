@@ -6,10 +6,10 @@
 -- Nathan Balli
 ------------------------------------------------------------------
 
-local GGData = require( "utilities.GGData" )
-local g = require( "globalVariables" )
-local gn = require( "gameNetworks" )
-local ld = require( "localData" )
+local GGData = require( "thirdParty.GGData" )
+local g = require( "other.globalVariables" )
+local gn = require( "other.gameNetworks" )
+local ld = require( "data.localData" )
 
 -- LIST OF FUNCTIONS:
 --

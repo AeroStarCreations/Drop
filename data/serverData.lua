@@ -5,13 +5,13 @@
 
 local GS = require( "plugin.gamesparks" )
 local json = require( "json" )
-local ld = require( "localData" )
-local gameCenter = require( "gameCenter" )
-local googlePlay = require( "googlePlay" )
+local ld = require( "data.localData" )
+local gameCenter = require( "other.gameCenter" )
+local googlePlay = require( "other.googlePlay" )
 local Alert = require( "views.other.Alert" )
 
 -- Local variables ------------------------------------------------------------[
-local TAG = "serverData:"
+local TAG = "data.serverData:"
 
 local gs
 local platformType

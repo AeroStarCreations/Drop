@@ -1,12 +1,12 @@
 local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
-local g = require( "globalVariables" )
-local ld = require( "localData" )
-local logoModule = require( "logoModule" )
-local colors = require( "colors" )
-local ld = require( "localData" )
-local Drop = require( "objects.Drop" )
+local g = require( "other.globalVariables" )
+local ld = require( "data.localData" )
+local logoModule = require( "other.logoModule" )
+local colors = require( "other.colors" )
+local ld = require( "data.localData" )
+local Drop = require( "views.other.Drop" )
 
 
 --Precalls

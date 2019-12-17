@@ -1,4 +1,4 @@
-local sd = require( "serverData" )
+local sd = require( "data.serverData" )
 local json = require( "json" )
 local Alert = require( "views.other.Alert" )
 

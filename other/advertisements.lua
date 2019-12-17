@@ -2,11 +2,11 @@
 
 -- Ads order: Vungle -> RevMob -> AdMob
 
-local g = require("globalVariables")
+local g = require("other.globalVariables")
 local ads = require( "ads" )
 local revmob = require("plugin.revmob")
 local applovin = require("plugin.applovin")
-local ld = require( "localData" )
+local ld = require( "data.localData" )
 
 local v = {}
 

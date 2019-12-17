@@ -13,8 +13,8 @@
 --TODO: provide billing info on appodeal.com
 
 local appodeal = require( "plugin.appodeal" )
-local ld = require( "localData" )
-local colors = require( "colors" )
+local ld = require( "data.localData" )
+local colors = require( "other.colors" )
 local platformName = system.getInfo( "platform" )
 local TAG = "advertisements2.lua: "
 local gamesBetweenAds = 2

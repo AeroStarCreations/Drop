@@ -1,7 +1,7 @@
 -- A custom alternative to native.showAlert(...)
-local g = require( "globalVariables" )
+local g = require( "other.globalVariables" )
 local widget = require( "widget" )
-local colors = require( "colors" )
+local colors = require( "other.colors" )
 
 local TAG = "Alert.lua: "
 

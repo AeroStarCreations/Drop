@@ -46,9 +46,9 @@ local GGTwitter = {}
 local GGTwitter_mt = { __index = GGTwitter }
 
 local json = require( "json" )
-local oAuth = require( "utilities.oAuth" )
-local g = require( "globalVariables" )
-local gn = require( "gameNetworks" )
+local oAuth = require( "thirdParty.oAuth" )
+local g = require( "other.globalVariables" )
+local gn = require( "other.gameNetworks" )
 
 --- Initiates a new GGTwitter object.
 -- @param consumerKey The consumer key of your app.

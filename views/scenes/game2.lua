@@ -1,17 +1,17 @@
 local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
-local g = require( "globalVariables" )
-local ld = require( "localData" )
+local g = require( "other.globalVariables" )
+local ld = require( "data.localData" )
 local physics = require( "physics" )
-local Drop = require( "objects.Drop" )
+local Drop = require( "views.other.Drop" )
 local bg = require( "controllers.backgroundController" )
-local timer = require( "timers" )
+local timer = require( "other.timers" )
 local json = require( "json" )
-local achieve = require( "achievements" )
-local highScores = require( "highScores" )
+local achieve = require( "data.achievements" )
+local highScores = require( "data.highScores" )
 
-local arrowIsWorking = false
+local arrowIsWorking = true
 
 --Precalls
 local arrow
@@ -448,7 +448,7 @@ local function gameStopped( isPaused )
     timer.pauseAllTimers()
     transition.pause()
     physics.pause()
-    cp.showOverlay( "views/overlays/gameStopped", {
+    cp.showOverlay( "views.overlays.gameStopped", {
         isModal = true,
         params = {
             isPaused = isPaused,

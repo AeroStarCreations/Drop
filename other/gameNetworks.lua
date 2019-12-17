@@ -1,7 +1,7 @@
 --gameNetworks
 
 local gameNetwork = require( "gameNetwork" )
-local g = require( "globalVariables" )
+local g = require( "other.globalVariables" )
 
 local loggedIntoGN
 local normalAchievementsUpdated

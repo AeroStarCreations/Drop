@@ -3,8 +3,8 @@
 local cp = require( "composer" )
 local widget = require( "widget" )
 local ads = require( "ads" )
-local GGData = require( "utilities.GGData" )
-local ld = require( "localData" )
+local GGData = require( "thirdParty.GGData" )
+local ld = require( "data.localData" )
 
 local v = {}
 
@@ -32,7 +32,7 @@ end
 --------------------------------------------------------------
 
 --The following is the font information
-v.GGFont = require( "utilities.GGFont" )
+v.GGFont = require( "thirdParty.GGFont" )
 v.fontManager = v.GGFont:new()
 
 v.fontManager:add( "chalkDuster", "Chalkduster", "Chalkduster.ttf" )

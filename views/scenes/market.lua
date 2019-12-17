@@ -1,10 +1,10 @@
 local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
-local g = require( "globalVariables" )
-local logoModule = require( "logoModule" )
+local g = require( "other.globalVariables" )
+local logoModule = require( "other.logoModule" )
 local marketplace = require( "Marketplace" )
-local ld = require( "localData" )
+local ld = require( "data.localData" )
 
 
 --Precalls

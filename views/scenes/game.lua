@@ -2,17 +2,17 @@
 
 -- local cp = require( "composer" )
 -- local scene = cp.newScene()
--- local g = require( "globalVariables" )
--- local t = require( "transitions" )
+-- local g = require( "other.globalVariables" )
+-- local t = require( "other.transitions" )
 -- local widget = require( "widget" )
 -- local physics = require( "physics" )
 -- local ad = require( "advertisements" )
--- local gn = require( "gameNetworks" )
+-- local gn = require( "other.gameNetworks" )
 -- local chartboost = require( "plugin.chartboost" )
 -- local gf = require( "gameFunctions" )
 -- local bg = require( controllers.backgroundController" )
--- local ld = require( "localData" )
--- local Drop = require( "objects.Drop" )
+-- local ld = require( "data.localData" )
+-- local Drop = require( "views.other.Drop" )
 
 -- local arrowIsWorking = false
 

@@ -1,8 +1,8 @@
 local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
-local g = require( "globalVariables" )
-local t = require( "transitions" )
+local g = require( "other.globalVariables" )
+local t = require( "other.transitions" )
 
 
 --Precalls

@@ -1,11 +1,7 @@
 local cp = require( "composer" )
-local g = require( "globalVariables" )
+local g = require( "other.globalVariables" )
 local widget = require( "widget" )
-local Drop = require( "objects.Drop" )
-local json = require( "json" )
-local social = require( "socialNetworks" )
-local ld = require( "localData" )
-local ads = require( "advertisements2" )
+local controller = require( "controllers.gameStoppedController" )
 
 local scene = cp.newScene()
 
@@ -15,12 +11,10 @@ local message
 local resumeButton
 local mainButton
 local restartButton
-local parentScene
 local countdownImage1
 local countdownImage2
 local countdownImage3
-local functionToCallOnHide
-local transparentRect
+local overlayBG
 local statsBG
 local categoryText
 local valuesText
@@ -34,267 +28,7 @@ local facebook
 local statsFocal
 local statsAreaH
 local wh
-local isPaused
-local isGameOver
-local score
-local canRevive
 -----------------
-
--- Local Functions ------------------------------------------------------------[
-local function countdown()
-    local interval = 750
-
-    countdownImage1.alpha = 0.2
-    countdownImage2.alpha = 0.2
-    countdownImage3.alpha = 0.2
-    countdownImage1.xScale, countdownImage1.yScale = 1, 1
-    countdownImage2.xScale, countdownImage2.yScale = 1, 1
-    countdownImage3.xScale, countdownImage3.yScale = 1, 1
-
-    local function listener()
-        transition.to( countdownImage1, { 
-            time=200, 
-            delay=interval, 
-            alpha=0, 
-            xScale=0.001, 
-            yScale=0.001, 
-            transition=easing.inBack
-        })
-        transition.to( countdownImage2, { 
-            time=200, 
-            delay=interval, 
-            alpha=0, 
-            xScale=0.001, 
-            yScale=0.001,
-            transition=easing.inBack
-        })
-        transition.to( countdownImage3, { 
-            time=200, 
-            delay=interval, 
-            alpha=0, 
-            xScale=0.001, 
-            yScale=0.001,
-            transition=easing.inBack,
-        })
-        transition.to( transparentRect, {
-            time=200,
-            delay=interval,
-            alpha=0,
-            onComplete = cp.hideOverlay
-        })
-    end
-
-    transition.to( countdownImage1, {
-        time = 50,
-        delay = 1 * interval,
-        alpha = 1
-    })
-    transition.to( countdownImage2, {
-        time = 50,
-        delay = 2 * interval,
-        alpha = 1
-    })
-    transition.to( countdownImage3, {
-        time = 50,
-        delay = 3 * interval,
-        alpha = 1,
-        onComplete = listener
-    })
-end
-
-local function transitionInPause()
-    local function listener()
-        resumeButton:setEnabled( true )
-        mainButton:setEnabled( true )
-        restartButton:setEnabled( true )
-    end
-    transition.to( message, {
-        time = 200,
-        x = display.contentCenterX,
-        transition = easing.outQuad
-    })
-    transition.to( resumeButton, {
-        time = 200,
-        y = display.contentCenterY - 0.5 * resumeButton.height,
-        transition = easing.outQuad
-    })
-    transition.to( mainButton, {
-        time = 200,
-        x = resumeButton.x - 0.5 * resumeButton.width,
-        transition = easing.outQuad
-    })
-    transition.to( restartButton, {
-        time = 200,
-        x = resumeButton.x + 0.5 * resumeButton.width,
-        transition = easing.outQuad,
-        onComplete = listener()
-    })
-    transition.to( transparentRect, {
-        time = 100,
-        alpha = 0.5
-    })
-end
-
-local function transitionOutPause()
-    resumeButton:setEnabled( false )
-    mainButton:setEnabled( false )
-    restartButton:setEnabled( false )
-    transition.to( resumeButton, { 
-        time = 200, 
-        y = 0, 
-        transition = easing.inQuad, 
-        onComplete = countdown 
-    })
-    transition.to( mainButton, { 
-        time = 200, 
-        x = -mainButton.width, 
-        transition = easing.inQuad 
-    })
-    transition.to( restartButton, { 
-        time = 200, 
-        x = display.contentWidth + restartButton.width, 
-        transition = easing.inQuad 
-    } )
-    transition.to( message, { 
-        time = 200, 
-        x = display.contentWidth + 0.5 * message.width, 
-        transition = easing.outQuad 
-    })
-end
-
-local function transitionInOver()
-    transition.to( statsBG, { 
-        time = 200, 
-        y = statsFocal, 
-        transition = easing.inQuad 
-    })
-    transition.to( categoryText, { 
-        time = 200, 
-        x = display.contentCenterX - 0.15 * wh, 
-        transition = easing.inQuad 
-    })
-    transition.to( valuesText, { 
-        time = 200, 
-        x = display.contentCenterX + 0.15 * wh, 
-        transition = easing.inQuad 
-    })
-    transition.to( statsLine1, { time=200, alpha=1 } )
-    transition.to( statsLine2, { time=200, alpha=1 } )
-    transition.to( statsLine3, { time=200, alpha=1 } )
-    transition.to( highScoreText, { 
-        time = 200, 
-        y = statsFocal + statsAreaH * 0.75, 
-        transition = easing.inQuad 
-    })
-    transition.to( highTimeText, { 
-        time = 200, 
-        y = statsFocal + statsAreaH * 0.75, 
-        transition = easing.inQuad 
-    })
-    transition.to( twitter, { 
-        time = 200, 
-        y = statsFocal + 0.5 * statsAreaH, 
-        transition = easing.inQuad } )
-    transition.to( facebook, { 
-        time = 100, 
-        y = display.actualContentHeight, 
-        transition = easing.inQuad 
-    })
-end
-
-local function transitionOutOver()
-    transition.to( statsBG, { 
-        time = 200, 
-        y = display.actualContentHeight, 
-        transition = easing.inQuad 
-    })
-    transition.to( categoryText, { 
-        time = 200, 
-        x = 0,
-        transition = easing.inQuad 
-    })
-    transition.to( valuesText, { 
-        time = 200, 
-        x = display.actualContentWidth, 
-        transition = easing.inQuad 
-    })
-    transition.to( statsLine1, { time=200, alpha=0 } )
-    transition.to( statsLine2, { time=200, alpha=0 } )
-    transition.to( statsLine3, { time=200, alpha=0 } )
-    transition.to( highScoreText, { 
-        time = 200, 
-        y = display.actualContentHeight + 0.5 * highScoreText.height, 
-        transition = easing.inQuad 
-    })
-    transition.to( highTimeText, { 
-        time = 200, 
-        y = display.actualContentHeight + 0.5 * highTimeText.height, 
-        transition = easing.inQuad 
-    })
-    transition.to( twitter, { 
-        time = 200, 
-        y = display.actualContentHeight, 
-        transition = easing.inQuad } )
-    transition.to( facebook, { 
-        time = 100, 
-        y = display.actualContentHeight + 2 * wh, 
-        transition = easing.inQuad 
-    })
-end
-
-local function socialListener( event )
-    if event.target.id == "twitter" then
-        social.shareResultsOnTwitter( score )
-    elseif event.target.id == "facebook" then
-        social.shareResultsOnFacebook( score )
-    end
-end
-
-local function transitionOut()
-    transitionOutPause()
-    if not isPaused then
-        transitionOutOver()
-    end
-end
-
-local function resumeGame()
-    functionToCallOnHide = parentScene.resumeGame
-    transitionOut()
-end
-
-local function resumeListener()
-    if isPaused then
-        resumeGame()
-    elseif isGameOver and canRevive then
-        -- ask for confirmation?
-        ld.addLives( -1 )
-        functionToCallOnHide = parentScene.startGame --Should this be resumeGame?
-        transitionOut()
-    elseif isGameOver and not canRevive then
-        -- purchase more lives
-    end
-end
-
-local function restartListenerAfterAd()
-    Drop:deleteAllWithAnimation()
-    parentScene:gameIsActuallyOver()
-    transitionOut()
-end
-
-local function restartListener()
-    functionToCallOnHide = parentScene.startGame
-    ads.show( false, restartListenerAfterAd )
-end
-
-local function mainListenerAfterAd()
-    parentScene:gameIsActuallyOver()
-    cp.gotoScene( "views.scenes.center" )
-end
-
-local function mainListener()
-    ads.show( false, mainListenerAfterAd )
-end
--------------------------------------------------------------------------------]
 
 function scene:create( event )
     local group = self.view
@@ -302,185 +36,243 @@ function scene:create( event )
     -- Message ----------------------------------------------------------------[
     local messageOptions = {
         parent = group,
-        text = "Game Paused",
-        x = 0,
-        y = 0.25 * display.actualContentHeight,
+        text = "",
         width = display.actualContentWidth,
         font = g.comLight,
         fontSize = 100,
         align = "center"
     }
     message = display.newText( messageOptions )
-    message.x = -0.5 * message.width
+    message.xIn = display.contentCenterX
+    message.xOut = -0.5 * message.width
+    message.yIn = 0.25 * display.actualContentHeight
+    message.yOut = 0.25 * display.actualContentHeight
+    message.x = message.xOut
+    message.y = message.yOut
     message:setFillColor( unpack( g.purple ) )
     message.anchorY = 0.5
+    message.id = "message"
+    controller.addGamePausedObject( message )
+    controller.linkMessageText( message )
     ---------------------------------------------------------------------------]
-    
+
     -- Buttons ----------------------------------------------------------------[
     resumeButton = widget.newButton {
         id = "resume",
         width = 550,
         height = 100,
         defaultFile = "images/buttonGreen.png",
-        label = "Resume",
         labelYOffset = 8,
         labelColor = { default={ 0, 0.5, 0.36 }, over={ 0, 0.5, 0.36, 0.7 } },
         font = g.comLight,
         fontSize = 59,
         isEnabled = false,
-        onRelease = resumeListener,
+        onRelease = controller.resumeButtonListener
     }
     group:insert( resumeButton )
-    resumeButton.x = display.contentCenterX
-    resumeButton.y = 0
+    resumeButton.xIn = display.contentCenterX
+    resumeButton.xOut = display.contentCenterX
+    resumeButton.yIn = display.contentCenterY - 0.5 * resumeButton.height
+    resumeButton.yOut = 0
+    resumeButton.x = resumeButton.xOut
+    resumeButton.y = resumeButton.yOut
     resumeButton.anchorY = 1
+    controller.addGamePausedObject( resumeButton )
+    controller.addButton( resumeButton )
 
     mainButton = widget.newButton {
         id = "main",
         width = 250,
         height = 100,
         defaultFile = "images/buttonRed.png",
-        label = "Main",
+        label = controller.getMainButtonLabel(),
         labelYOffset = 8,
         labelColor = { default={ 0.63, 0.10, 0.14 }, over={ 0.63, 0.10, 0.14, 0.7 } },
         font = g.comLight,
         fontSize = 50,
         isEnabled = false,
-        onRelease = mainListener,
+        onRelease = controller.mainButtonListener
     }
     group:insert( mainButton )
-    mainButton.x = -mainButton.width
-    mainButton.y = display.contentCenterY
-    mainButton.anchorX = 0 
+    mainButton.xIn = resumeButton.x - 0.5 * resumeButton.width
+    mainButton.xOut = -mainButton.width
+    mainButton.yIn = display.contentCenterY
+    mainButton.yOut = display.contentCenterY
+    mainButton.x = mainButton.xOut
+    mainButton.y = mainButton.yOut
+    mainButton.anchorX = 0
     mainButton.anchorY = 0
-    
+    controller.addGamePausedObject( mainButton )
+    controller.addButton( mainButton )
+
     restartButton = widget.newButton {
         id = "restart",
         width = 250,
         height = 100,
         defaultFile = "images/buttonBlue.png",
-        label = "Restart",
+        label = controller.getRestartButtonLabel(),
         labelYOffset = 8,
         labelColor = { default={ 0.11, 0.46, 0.74 }, over={ 0.11, 0.46, 0.74, 0.7 } },
         font = g.comLight,
         fontSize = 50,
         isEnabled = false,
-        onRelease = restartListener,
+        onRelease = controller.restartButtonListener,
+        xIn = resumeButton.x + 0.5 * resumeButton.width,
+        xOut = 0
     }
     group:insert( restartButton )
-    restartButton.x = display.contentWidth + restartButton.width
-    restartButton.y = mainButton.y
+    restartButton.xIn = resumeButton.x + 0.5 * resumeButton.width
+    restartButton.xOut = display.contentWidth + restartButton.width
+    restartButton.yIn = mainButton.y
+    restartButton.yOut = mainButton.y
+    restartButton.x = restartButton.xOut
+    restartButton.y = restartButton.yOut
     restartButton.anchorX = 1
     restartButton.anchorY = 0
+    controller.addGamePausedObject( restartButton )
+    controller.addButton( restartButton )
     ---------------------------------------------------------------------------]
 
     -- Countdown Images -------------------------------------------------------[
     countdownImage1 = display.newImageRect( group, "images/dropletYellow.png", 220, 330 )
     countdownImage2 = display.newImageRect( group, "images/dropletYellow.png", 220, 330 )
     countdownImage3 = display.newImageRect( group, "images/dropletGreen.png", 220, 330 )
-    
+
     countdownImage1.x = display.contentCenterX
     countdownImage2.x = countdownImage1.x
     countdownImage3.x = countdownImage1.x
-    
+
     countdownImage2.y = display.contentCenterY
     countdownImage1.y = countdownImage2.y - countdownImage1.height * 1.1
     countdownImage3.y = countdownImage2.y + countdownImage3.height * 1.1
-    
+
     countdownImage1.alpha = 0
     countdownImage2.alpha = 0
     countdownImage3.alpha = 0
+
+    controller.connectCountdownImage( countdownImage1, 1 )
+    controller.connectCountdownImage( countdownImage2, 2 )
+    controller.connectCountdownImage( countdownImage3, 3 )
     ---------------------------------------------------------------------------]
 
     -- Opaque Rectangle for pause/end -----------------------------------------[
-    transparentRect = display.newRect( 
-        group, 
-        display.contentCenterX, 
-        display.contentCenterY, 
-        display.actualContentWidth, 
-        display.actualContentHeight 
+    overlayBG = display.newRect(
+        group,
+        display.contentCenterX,
+        display.contentCenterY,
+        display.actualContentWidth,
+        display.actualContentHeight
     )
-    transparentRect.blueFill = { 0, 0.65, 1 }
-    transparentRect.redFill = { 1, 0, 0.15 }
-    transparentRect.alpha = 0
-    transparentRect:toBack()
+    overlayBG.blueFill = { 0, 0.65, 1 }
+    overlayBG.redFill = { 1, 0, 0.15 }
+    overlayBG.alpha = 0
+    overlayBG:toBack()
+    controller.connectBackgroundImage( overlayBG )
     ---------------------------------------------------------------------------]
-    
+
     statsFocal = mainButton.y + 1.5 * mainButton.height
     statsAreaH = display.actualContentHeight - statsFocal
     wh = 0.25 * statsAreaH
 
     -- Game Over Lines and Background -----------------------------------------[
     statsBG = display.newImageRect( group, "images/statsBG.jpg", 800, 800)
-    statsBG.x = display.contentCenterX
-    statsBG.y = display.actualContentHeight
+    statsBG.xIn = display.contentCenterX
+    statsBG.xOut = statsBG.xIn
+    statsBG.yIn = statsFocal
+    statsBG.yOut = display.actualContentHeight
+    statsBG.x = statsBG.xOut
+    statsBG.y = statsBG.yOut
     statsBG.anchorY = 0
     statsBG.height = statsAreaH
     statsBG.width = display.actualContentWidth
     statsBG.alpha = 0.8
+    statsBG.id = "statsBG"
+    controller.addGameOverObject( statsBG )
 
-    statsLine1 = display.newLine( 
-        group, 
-        0, 
-        statsFocal + 0.5 * statsAreaH, 
-        display.contentWidth, 
+    statsLine1 = display.newLine(
+        group,
+        0,
+        statsFocal + 0.5 * statsAreaH,
+        display.contentWidth,
         statsFocal + 0.5 * statsAreaH
     )
     statsLine1:setStrokeColor( unpack( g.purple ) )
     statsLine1.strokeWidth = 2
     statsLine1.alpha = 0
-    
-    statsLine2 = display.newLine( 
-        group, 
-        display.contentCenterX - 0.5 * wh, 
-        statsFocal + 0.5 * statsAreaH, 
-        display.contentCenterX - 0.5 * wh, 
-        display.actualContentHeight 
+    statsLine1.id = "line1"
+    statsLine1.shouldFade = true
+    controller.addGameOverObject( statsLine1 )
+
+    statsLine2 = display.newLine(
+        group,
+        display.contentCenterX - 0.5 * wh,
+        statsFocal + 0.5 * statsAreaH,
+        display.contentCenterX - 0.5 * wh,
+        display.actualContentHeight
     )
     statsLine2:setStrokeColor( unpack( g.purple ) )
     statsLine2.strokeWidth = 2
     statsLine2.alpha = 0
-    
-    statsLine3 = display.newLine( 
-        group, 
-        display.contentCenterX + 0.5 * wh, 
-        statsFocal + 0.5 * statsAreaH, 
-        display.contentCenterX + 0.5 * wh, 
-        display.contentHeight 
+    statsLine2.id = "line2"
+    statsLine2.shouldFade = true
+    controller.addGameOverObject( statsLine2 )
+
+    statsLine3 = display.newLine(
+        group,
+        display.contentCenterX + 0.5 * wh,
+        statsFocal + 0.5 * statsAreaH,
+        display.contentCenterX + 0.5 * wh,
+        display.contentHeight
     )
     statsLine3:setStrokeColor( unpack( g.purple ) )
     statsLine3.strokeWidth = 2
     statsLine3.alpha = 0
+    statsLine3.id = "line3"
+    statsLine3.shouldFade = true
+    controller.addGameOverObject( statsLine3 )
     ---------------------------------------------------------------------------]
-    
+
     -- Game Over Stat Text ----------------------------------------------------[
     categoryText = display.newText({
         parent = group,
-        text = "Score:\nTime:",
-        x = 0,
-        y = statsFocal + 0.25 * statsAreaH,
+        text = controller.getCategoryText(),
         font = g.comRegular,
         fontSize = 85,
         align = "right"
     })
+    categoryText.xIn = display.contentCenterX - 0.15 * wh
+    categoryText.xOut = 0
+    categoryText.yIn = statsFocal + 0.25 * statsAreaH
+    categoryText.yOut = categoryText.yIn
+    categoryText.x = categoryText.xOut
+    categoryText.y = categoryText.yOut
     categoryText:setFillColor( unpack( g.orange ) )
     categoryText.anchorX = 1
+    categoryText.id = "categoryText"
+    controller.addGameOverObject( categoryText )
 
     valuesText = display.newText({
         parent = group,
         text = " ",
-        x = display.actualContentWidth,
-        y = categoryText.y,
         font = g.comRegular,
         fontSize = 85,
         align = "left"
     })
+    valuesText.xIn = display.contentCenterX + 0.15 * wh
+    valuesText.xOut = display.actualContentWidth
+    valuesText.yIn = categoryText.y
+    valuesText.yOut = valuesText.yIn
+    valuesText.x = valuesText.yOut
+    valuesText.y = valuesText.yOut
     valuesText:setFillColor( unpack( g.orange ) )
     valuesText.anchorX = 0
+    valuesText.id = "valuesText"
+    controller.addGameOverObject( valuesText )
+    controller.linkValuesText( valuesText )
 
     highScoreText = display.newText({
         parent = group,
-        text = "High Score\n• • •\n",
+        text = controller.getHighScoreText(),
         width = 0.5 * (display.actualContentWidth - wh),
         height = 0,
         x = 0.5 * statsLine2.x,
@@ -488,12 +280,19 @@ function scene:create( event )
         fontSize = 40,
         align = "center"
     })
-    highScoreText:setFillColor( unpack( g.purple ) ) 
-    highScoreText.y = display.actualContentHeight + 0.5 * highScoreText.height
+    highScoreText.xIn = 0.5 * statsLine2.x
+    highScoreText.xOut = highScoreText.xIn
+    highScoreText.yIn = statsFocal + statsAreaH * 0.75
+    highScoreText.yOut = display.actualContentHeight + 0.5 * highScoreText.height
+    highScoreText.x = highScoreText.xOut
+    highScoreText.y = highScoreText.yOut
+    highScoreText:setFillColor( unpack( g.purple ) )
+    highScoreText.id = "highScoreText"
+    controller.addGameOverObject( highScoreText )
 
-    highTimeText = display.newText({ 
+    highTimeText = display.newText({
         parent = group,
-        text = "High Time\n• • •\n",
+        text = controller.getHighTimeText(),
         width = highScoreText.width,
         height = 0,
         x = display.actualContentWidth - highScoreText.x,
@@ -501,86 +300,83 @@ function scene:create( event )
         fontSize = 40,
         align = "center",
     })
+    highTimeText.xIn = display.actualContentWidth - highScoreText.x
+    highTimeText.xOut = highTimeText.xIn
+    highTimeText.yIn = statsFocal + statsAreaH * 0.75
+    highTimeText.yOut = highScoreText.y
+    highTimeText.x = highTimeText.xOut
+    highTimeText.y = highTimeText.yOut
     highTimeText:setFillColor( unpack( g.purple ) )
-    highTimeText.y = highScoreText.y
+    highTimeText.id = "highTimeText"
+    controller.addGameOverObject( highTimeText )
     ---------------------------------------------------------------------------]
-    
+
     -- Socail Button ----------------------------------------------------------[
     twitter = widget.newButton{
         id = "twitter",
-        x = display.contentCenterX,
-        y = display.actualContentHeight,
         width = wh,
         height = wh,
         defaultFile = "images/twitter.png",
         overFile = "images/twitterD.png",
-        onRelease = socialListener,
-    } 
+        onRelease = controller.socialButtonListener,
+    }
+    twitter.xIn = display.contentCenterX
+    twitter.xOut = twitter.xIn
+    twitter.yIn = statsFocal + 0.5 * statsAreaH
+    twitter.yOut = display.actualContentHeight
+    twitter.x = twitter.xOut
+    twitter.y = twitter.yOut
     group:insert( twitter )
     twitter.anchorY = 0
-    
+    controller.addGameOverObject( twitter )
+
     facebook = widget.newButton{
         id = "facebook",
-        x = display.contentCenterX,
-        y = twitter.y + 2 * wh,
         width = wh,
         height = wh,
         defaultFile = "images/facebook.png",
         overFile = "images/facebookD.png",
-        onRelease = socialListener
-    } 
+        onRelease = controller.socialButtonListener
+    }
+    facebook.xIn = display.contentCenterX
+    facebook.xOut = facebook.xIn
+    facebook.yIn = display.actualContentHeight + 2 * wh
+    facebook.yOut = twitter.y + 2 * wh
+    facebook.x = facebook.xOut
+    facebook.y = facebook.yOut
     group:insert( facebook )
     facebook.anchorY = 1
+    controller.addGameOverObject( facebook )
     ---------------------------------------------------------------------------]
 end
 
 function scene:show( event )
- 
+
     local sceneGroup = self.view
     local phase = event.phase
-    parentScene = event.parent
- 
+    controller.setParentScene(event.parent)
+
     if ( phase == "will" ) then
     elseif ( phase == "did" ) then
 
-        functionToCallOnHide = nil
-        isPaused = event.params.isPaused
-        isGameOver = not isPaused
-        canRevive = ld.getInvincibility() > 0
-        score = event.params.scoreText
-        valuesText.text = score .. "\n" .. event.params.timeText
+        controller.setSceneHideCallback(nil)
+        controller.setGamePaused(event.params.isPaused)
+        controller.setValues(event.params.scoreText, event.params.timeText)
 
-        transitionInPause()
-
-        if isPaused then
-            transparentRect:setFillColor( unpack(transparentRect.blueFill) )
-            message.text = "Game Paused"
-            resumeButton:setLabel( "Resume" )
-        else
-            transparentRect:setFillColor( unpack(transparentRect.redFill) )
-            message.text = "Game Over"
-            transitionInOver()
-        end
-
-        if isGameOver and canRevive then
-            resumeButton:setLabel( "Revive" )
-        elseif isGameOver and not canRevive then
-            resumeButton:setLabel( "Purchase Lives" )
-        end
+        controller.transitionInPause()
+        controller.transitionAndSetupSceneBasedOnGameState()
 
     end
 end
 
 function scene:hide( event )
- 
+
     local sceneGroup = self.view
     local phase = event.phase
- 
-    if ( phase == "will" ) then 
+
+    if ( phase == "will" ) then
     elseif ( phase == "did" ) then
-        if functionToCallOnHide then 
-            functionToCallOnHide()
-        end
+        controller.sceneHideCallback()
     end
 end
 

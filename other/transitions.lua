@@ -1,9 +1,9 @@
 --Transitions
 
-local g = require( "globalVariables" )
+local g = require( "other.globalVariables" )
 local cp = require( "composer" )
-local ld = require( "localData" )
-local logoModule = require( "logoModule" )
+local ld = require( "data.localData" )
+local logoModule = require( "other.logoModule" )
 
 local v = {}
 

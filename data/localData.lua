@@ -5,8 +5,10 @@
 --
 -- Don't set important values to true (i.e. purchases) until the server/backend confirms
 
-local GGData = require( "utilities.GGData" )
+local GGData = require( "thirdParty.GGData" )
 local json = require( "json" )
+local achievementsModel = require( "models.achievementsModel" )
+local highScoresModel = require( "models.highScoresModel" )
 
 -- GGData boxes ---------------------------------------------------------------[
 local first = GGData:new( "first" )
@@ -43,71 +45,6 @@ local socialDefault = {
 -------------------------------------------------------------------------------]
 
 -- GameSparks Short Codes -----------------------------------------------------[
--- These are copies of the tables in achievements.lua and highScores.lua
--- This had to be duplicated to avoid a requires/dependency loop
-local achievementsShortCodes = {
-    "MIST",
-    "DOUBLE_MIST",
-    "DRIZZLE",
-    "DOUBLE_DRIZZLE",
-    "SHOWER",
-    "DOUBLE_SHOWER",
-    "DOWNPOUR",
-    "DOUBLE_DOWNPOUR",
-    "THUNDERSTORM",
-    "DOUBLE_THUNDERSTORM",
-    "TROPICAL_STORM",
-    "DOUBLE_TROPICAL_STORM",
-    "MIST_TRICKY",
-    "DOUBLE_MIST_TRICKY",
-    "DRIZZLE_TRICKY",
-    "DOUBLE_DRIZZLE_TRICKY",
-    "SHOWER_TRICKY",
-    "DOUBLE_SHOWER_TRICKY",
-    "DOWNPOUR_TRICKY",
-    "DOUBLE_DOWNPOUR_TRICKY",
-    "THUNDERSTORM_TRICKY",
-    "DOUBLE_THUNDERSTORM_TRICKY",
-    "TROPICAL_STORM_TRICKY",
-    "DOUBLE_TROPICAL_STORM_TRICKY",
-    "HURRICANE_1",
-    "HURRICANE_5",
-    "HURRICANE_10",
-    "SHIELD_5",
-    "SHIELD_15",
-    "SHIELD_30",
-    "REVIVE_1",
-    "REVIVE_5",
-    "REVIVE_15",
-    "PLAY_10",
-    "PLAY_50",
-    "PLAY_100",
-    "PLAY_500",
-    "PLAY_1000",
-    "DIE_RED",
-    "DIE_ORANGE",
-    "DIE_YELLOW",
-    "DIE_LIGHT_GREEN",
-    "DIE_DARK_GREEN",
-    "DIE_LIGHT_BLUE",
-    "DIE_DARK_BLUE",
-    "DIE_PINK",
-    "SPECIAL_RED",
-    "SPECIAL_ORANGE",
-    "SPECIAL_YELLOW",
-    "SPECIAL_LIGHT_GREEN",
-    "SPECIAL_DARK_GREEN",
-    "SPECIAL_LIGHT_BLUE",
-    "SPECIAL_DARK_BLUE",
-    "SPECIAL_PINK"
-}
-
-local scorerShortCodes = {
-    "HIGH_SCORE_SCORER",
-    "HIGH_SCORE_TRICKY_SCORER",
-    "HIGH_TIME_SCORER",
-    "HIGH_TIME_TRICKY_SCORER"
-}
 -------------------------------------------------------------------------------]
     
 -- Local methods and ops ------------------------------------------------------[
@@ -152,7 +89,7 @@ local function initializeAllData( dropTypes )
     stats:set( "lifeUses", 0 )
     stats:set( "phase", 0 ) --highest level the player completed/survived
     stats:set( "hurricaneTiem", 0 ) --seconds
-    for k, shortCode in pairs(scorerShortCodes) do
+    for k, shortCode in pairs(highScoresModel.getScorerShortCodes()) do
         stats:set( shortCode, 0 )
     end
     for i=1,#dropTypes do
@@ -164,7 +101,7 @@ local function initializeAllData( dropTypes )
         })
     end
     stats:save()
-    for k,v in pairs( achievementsShortCodes ) do
+    for k,v in pairs( achievementsModel.getAchievementShortCodes() ) do
         achievements:set( v, achievementsDefault.isComplete )
     end
     achievements:set( "unawarded", {} )
@@ -435,6 +372,7 @@ end
 
 v.setHurricaneTime = function( newTime )
     local currentTime = stats:get( "hurricaneTime" )
+    --TODO: currentTime is nil
     if newTime > currentTime then
         stats:set( "hurricaneTime", newTime )
         stats:save()

@@ -2,12 +2,12 @@
 
 local cp = require( "composer" )
 local scene = cp.newScene()
-local g = require( "globalVariables" )
+local g = require( "other.globalVariables" )
 local widget = require( "widget" )
-local t = require( "transitions" )
-local GGTwitter = require( "utilities.GGTwitter" )
-local logoModule = require( "logoModule" )
-local ld = require( "localData" )
+local t = require( "other.transitions" )
+local GGTwitter = require( "thirdParty.GGTwitter" )
+local logoModule = require( "other.logoModule" )
+local ld = require( "data.localData" )
 local Alert = require( "views.other.Alert" )
 local bg = require( "controllers.backgroundController" )
 

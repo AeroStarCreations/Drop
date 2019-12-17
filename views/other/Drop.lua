@@ -1,7 +1,7 @@
 -- Consider this like a Java object class
 -- Each droplet in the game will be an instance of this class
 
-local ld = require( "localData" )
+local ld = require( "data.localData" )
 local physics = require( "physics" )
 local json = require( "json" )
 

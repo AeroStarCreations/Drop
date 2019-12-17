@@ -1,8 +1,8 @@
 -- Server Communication 
 
 local parse = require( "mod_parse" )
-local GGData = require( "utilities.GGData" )
-local g = require( "globalVariables" )
+local GGData = require( "thirdParty.GGData" )
+local g = require( "other.globalVariables" )
 
 local v = {}
 
