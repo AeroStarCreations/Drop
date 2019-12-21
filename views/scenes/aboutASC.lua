@@ -1,3 +1,4 @@
+local controller = require("controllers.aboutASCController")
 local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
@@ -7,41 +8,9 @@ local logoModule = require( "other.logoModule" )
 
 
 --Precalls
-local drop
-local backArrow
-local asc
-local lineTop
-local lineBottom
-local bio
-local fb
-local twit
+local facebook
+local twitter
 ----------
-
---Functions
-local function transitionIn()
-    transition.to( ascLogo, { time=500, x=ascLogoX, transition=easing.outSine } )
-    transition.to( lineTop, {time=600, x=0, transition=easing.outSine})
-    transition.to( lineBottom, {time=600, x=0})
-    transition.to( asc, {time=500, alpha=1})
-    transition.to( bio, {time=500, alpha=1})
-    transition.to( fb, { time=600, x=display.contentCenterX - 80, transition=easing.outQuad } )
-    transition.to( twit, { time=600, x=display.contentCenterX + 80, transition=easing.outQuad } )
-end
-
-local function transitionOut( callback )
-    local function listener( event )
-        cp.gotoScene( "views.scenes.extras" )
-    end
-
-    transition.to( ascLogo, {time=500, x=display.contentWidth+0.5*ascLogo.width, transition=easing.inSine})
-    transition.to( lineTop, {time=600, x=display.contentWidth, onComplete=listener})
-    transition.to( lineBottom, {time=600, x=-display.contentWidth})
-    transition.to( asc, {time=500, alpha=0})
-    transition.to( bio, {time=500, alpha=0})
-    transition.to( fb, { time=600, x=-120, transition=easing.outQuad } )
-    transition.to( twit, { time=600, x=display.contentWidth+twit.width, transition=easing.outQuad } )
-end
------------
 
 function scene:create( event )
 
@@ -50,16 +19,11 @@ function scene:create( event )
     g.create()
     
     ------------------------------------------Logo
-    drop = logoModule.getSmallLogo(group)
+    local drop = logoModule.getSmallLogo(group)
     ----------------------------------------------
     
     ------------------------------------Back Arrow
-    local function baf( event )
-        print( "Arrow Pressed" )
-        transitionOut()
-    end
-    
-    backArrow = widget.newButton{
+    local backArrow = widget.newButton{
         id = "backArrow",
         x = 90,
         y = 0,
@@ -67,60 +31,75 @@ function scene:create( event )
         height = 100,
         defaultFile = "images/arrow.png",
         overFile = "images/arrowD.png",
-        onRelease = baf,
+        onRelease = controller.backArrowListener,
     }
     backArrow.rotation = 180
     backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
     backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
+    controller.linkBackArrow(backArrow)
     ----------------------------------------------
 
     --------------------------------------ASC Logo
-    ascLogo = display.newImageRect( group, "images/ASClogo.png", 266, 266 )
+    local ascLogo = display.newImageRect( group, "images/ASClogo.png", 266, 266 )
     ascLogo.height = 1.1 * backArrow.height
     ascLogo.width = ascLogo.height
-    ascLogo.x = display.contentWidth + 0.5*ascLogo.width
-    ascLogo.y = backArrow.y 
-    ascLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
+    ascLogo.xIn = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
+    ascLogo.xOut = display.contentWidth + 0.5*ascLogo.width
+    ascLogo.x = ascLogo.xOut
+    ascLogo.y = backArrow.y
+    controller.linkASCLogo(ascLogo)
     ----------------------------------------------
 
     -------------------------"Aero Star Creations"
-    asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, g.comBold, 70, "center")
+    local asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, g.comBold, 70, "center")
     asc:setFillColor( unpack(g.purple) )
     asc.y = drop.y + drop.height + 0.7 * asc.height
-    asc.alpha = 0
+    asc.alphaIn = 1
+    asc.alphaOut = 0
+    asc.alpha = asc.alphaOut
+    controller.linkASC(asc)
     ----------------------------------------------
 
     -----------------------------------------Lines
-    lineTopY = asc.y - 0.5 * asc.height
-    lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
+    local lineTopY = asc.y - 0.5 * asc.height
+    local lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
     lineTop:setStrokeColor( unpack( g.purple ) )
     lineTop.strokeWidth = 2
+    lineTop.xIn = 0
+    lineTop.xOut = display.contentWidth
     lineTop.x = -display.contentWidth
+    controller.linkLineTop(lineTop)
 
-    lineBottomY = lineTopY + asc.height
-    lineBottom = display.newLine( group, 0, lineBottomY, display.contentWidth, lineBottomY )
+    local lineBottomY = lineTopY + asc.height
+    local lineBottom = display.newLine( group, 0, lineBottomY, display.contentWidth, lineBottomY )
     lineBottom:setStrokeColor( unpack( g.purple ) )
     lineBottom.strokeWidth = 2
+    lineBottom.xIn = 0
+    lineBottom.xOut = -display.contentWidth
     lineBottom.x = display.contentWidth
+    controller.linkLineBottom(lineBottom)
     ----------------------------------------------
 
     ------------------------------------------Text
-    bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, g.comRegular, 26, "center")
+    local bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, g.comRegular, 26, "center")
     bio:setFillColor( 0, 0, 0 )
     bio.anchorY = 0
-    bio.text = "\n\n\tHello!  I'm Nathan Balli, the little man behind Aero Star Creations.  I hope you've enjoyed Drop so far!  I had an incredible time developing the game.  Now here's a bit about myself:\n\n\tWhen I was 15 (5 years ago) I began teaching myself how to develop mobile applications using Corona Labs.  I have quite a few hobbies, including soccer and ukulele, and app developing is one of my favorites.  I originally planned on pursuing a future in aeronautical engineering, but my little big randevu with app developing changed my mind.  Now I'm a second-year Computer Science and Engineering undergrad at The Ohio State University.  No regrets!  I have a long way to go, but I'm loving it thus far.  Mobile app development is completely separate from my schooling, so I have to make time for both. However, I won't be stopping either any time soon!  Like my page on Facebook or follow me on Twitter to stay up-to-date on the latest ASC news such as upcoming updates and apps.  Also feel free to contact me with suggestions!  I love hearing back from users.  It's the best way to make the best apps. \n\n\t\tThank you!\n\t\t\tNathan Balli"
-    bio.alpha = 0
+    bio.text = "\n\n\tHello!  I'm Nathan, the little man behind Aero Star Creations.  I hope you've enjoyed Drop so far!  I had an incredible time developing the game.  Now here's a bit about myself:\n\n\tWhen I was 15 (5 years ago) I began teaching myself how to develop mobile applications using Corona Labs.  I have quite a few hobbies, including soccer and ukulele, and app developing is one of my favorites.  I originally planned on pursuing a future in aeronautical engineering, but my little big randevu with app developing changed my mind.  Now I'm a second-year Computer Science and Engineering undergrad at The Ohio State University.  No regrets!  I have a long way to go, but I'm loving it thus far.  Mobile app development is completely separate from my schooling, so I have to make time for both. However, I won't be stopping either any time soon!  Like my page on Facebook or follow me on Twitter to stay up-to-date on the latest ASC news such as upcoming updates and apps.  Also feel free to contact me with suggestions!  I love hearing back from users.  It's the best way to make the best apps. \n\n\t\tThank you!\n\t\t\tNathan Balli"
+    bio.alphaIn = 1
+    bio.alphaOut = 0
+    bio.alpha = bio.alphaOut
+    controller.linkBio(bio)
     ----------------------------------------------
 
     --------------------------------Social Buttons
-    local function fbFunction (event)
+    local function facebookFunction (event)
         if event.phase == "began" then
-            fb.xScale = 1.4; fb.yScale = 1.4
+            facebook.xScale = 1.4; facebook.yScale = 1.4
         elseif event.phase == "moved" then
-            fb.xScale = 1; fb.yScale = 1
+            facebook.xScale = 1; facebook.yScale = 1
         elseif event.phase == "ended" then
-            fb.xScale = 1; fb.yScale = 1
+            facebook.xScale = 1; facebook.yScale = 1
             print("Facebook pressed")
             local facebookView
             local facebookViewListener
@@ -174,11 +153,11 @@ function scene:create( event )
     
     local function twitFunction (event)
         if event.phase == "began" then
-            twit.xScale = 1.4; twit.yScale = 1.4
+            twitter.xScale = 1.4; twitter.yScale = 1.4
         elseif event.phase == "moved" then
-            twit.xScale = 1; twit.yScale = 1
+            twitter.xScale = 1; twitter.yScale = 1
         elseif event.phase == "ended" then
-            twit.xScale = 1; twit.yScale = 1
+            twitter.xScale = 1; twitter.yScale = 1
             print("Twitter pressed")
             local twitter
             local function twitterListener( event )
@@ -204,29 +183,37 @@ function scene:create( event )
         end
     end
     
-    fb = widget.newButton {
+    facebook = widget.newButton {
         id = "fb",
-        x = -120,
+        x = 0,
         y = bio.y + bio.height + 0.5*(display.contentHeight - (bio.y + bio.height)),
         width = 120,
         height = 120,
         defaultFile = "images/facebook.png",
         overFile = "images/facebookD.png",
-        onEvent = fbFunction,
+        onEvent = facebookFunction,
     }
-    group:insert(fb)
+    facebook.xIn = display.contentCenterX - 80
+    facebook.xOut = -120
+    facebook.x = facebook.xOut
+    group:insert(facebook)
+    controller.linkFacebook(facebook)
     
-    twit = widget.newButton {
+    twitter = widget.newButton {
         id = "twit",
-        x = display.contentWidth+fb.width,
-        y = fb.y,
-        width = fb.width,
-        height = fb.height,
+        x = 0,
+        y = facebook.y,
+        width = facebook.width,
+        height = facebook.height,
         defaultFile = "images/twitter.png",
         overFile = "images/twitterD.png",
         onEvent = twitFunction,
     }
-    group:insert(twit)
+    twitter.xIn = display.contentCenterX + 80
+    twitter.xOut = display.contentWidth + twitter.width
+    twitter.x = twitter.xOut
+    group:insert(twitter)
+    controller.linkTwitter(twitter)
     ----------------------------------------------
 end
 
@@ -242,7 +229,7 @@ function scene:show( event )
         
         g.show()
         
-        transitionIn()
+        controller.transitionIn()
 
     end
 end
