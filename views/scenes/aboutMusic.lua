@@ -1,41 +1,9 @@
+local controller = require( "controllers.aboutMusicController" )
 local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "other.globalVariables" )
-local GGTwitter = require( "thirdParty.GGTwitter" )
 local logoModule = require( "other.logoModule" )
-
-
---Precalls
-local drop
-local backArrow
-local jeg
-local lineTop
-local lineBottom
-local bio
-----------
-
---Functions
-local function transitionIn()
-    transition.to( musicLogo, {time=500, x=musicLogoX, transition=easing.outSine})
-    transition.to( lineTop, {time=600, x=0})
-    transition.to( lineBottom, {time=600, x=0})
-    transition.to( jeg, {time=500, alpha=1})
-    transition.to( bio, {time=500, alpha=1})
-end
-
-local function transitionOut( callback )
-    local function listener( event )
-        cp.gotoScene( "views.scenes.extras" )
-    end
-
-    transition.to( musicLogo, {time=500, x=display.contentWidth+0.5*musicLogo.width, transition=easing.inSine})
-    transition.to( lineTop, {time=600, x=display.contentWidth, onComplete=listener})
-    transition.to( lineBottom, {time=600, x=-display.contentWidth})
-    transition.to( jeg, {time=500, alpha=0})
-    transition.to( bio, {time=500, alpha=0})
-end
------------
 
 function scene:create( event )
 
@@ -44,16 +12,11 @@ function scene:create( event )
     g.create()
     
     ------------------------------------------Logo
-    drop = logoModule.getSmallLogo(group)
+    local drop = logoModule.getSmallLogo(group)
     ----------------------------------------------
     
     ------------------------------------Back Arrow
-    local function baf( event )
-        print( "Arrow Pressed" )
-        transitionOut()
-    end
-    
-    backArrow = widget.newButton{
+    local backArrow = widget.newButton{
         id = "backArrow",
         x = 90,
         y = 0,
@@ -61,7 +24,7 @@ function scene:create( event )
         height = 100,
         defaultFile = "images/arrow.png",
         overFile = "images/arrowD.png",
-        onRelease = baf,
+        onRelease = controller.backArrowListener,
     }
     backArrow.rotation = 180
     backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
@@ -70,44 +33,58 @@ function scene:create( event )
     ----------------------------------------------
 
     ------------------------------------Music Logo
-    musicLogo = display.newImageRect( group, "images/logoMusic.png", 66, 66 )
+    local musicLogo = display.newImageRect( group, "images/logoMusic.png", 66, 66 )
     musicLogo.height = backArrow.height
     musicLogo.width = musicLogo.height
-    musicLogo.x = display.contentWidth + 0.5*musicLogo.width
+    musicLogo.xIn = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
+    musicLogo.xOut = display.contentWidth+0.5*musicLogo.width
+    musicLogo.x = musicLogo.xOut
     musicLogo.y = backArrow.y
-    musicLogoX = drop.x + 0.5*drop.contentWidth + 0.5*(display.contentWidth - drop.x - 0.5*drop.contentWidth)
+    controller.linkMusicLogo(musicLogo)
     ----------------------------------------------
 
     ----------------------"Jeffrey Emerson Gaiser"
-    jeg = display.newText( group, "Jeffrey Emerson Gaiser", display.contentCenterX, 0, g.comBold, 70, "center")
+    local jeg = display.newText( group, "Jeffrey Emerson Gaiser", display.contentCenterX, 0, g.comBold, 70, "center")
     jeg:setFillColor( unpack(g.purple) )
     jeg.y = drop.y + drop.height + 0.7 * jeg.height
     while jeg.width > 0.95 * display.contentWidth do
         jeg.size = jeg.size - 0.5
     end
-    jeg.alpha = 0
+    jeg.alphaIn = 1
+    jeg.alphaOut = 1
+    jeg.alpha = jeg.alphaOut
+    controller.linkJEG(jeg)
     ----------------------------------------------
 
     -----------------------------------------Lines
-    lineTopY = jeg.y - 0.5 * jeg.height
-    lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
+    local lineTopY = jeg.y - 0.5 * jeg.height
+    local lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
     lineTop:setStrokeColor( unpack( g.purple ) )
     lineTop.strokeWidth = 2
+    lineTop.xIn = 0
+    lineTop.xOut = display.contentWidth
     lineTop.x = -display.contentWidth
+    controller.linkLineTop(lineTop)
 
-    lineBottomY = lineTopY + jeg.height
-    lineBottom = display.newLine( group, 0, lineBottomY, display.contentWidth, lineBottomY )
+    local lineBottomY = lineTopY + jeg.height
+    local lineBottom = display.newLine( group, 0, lineBottomY, display.contentWidth, lineBottomY )
     lineBottom:setStrokeColor( unpack( g.purple ) )
     lineBottom.strokeWidth = 2
+    lineBottom.xIn = 0
+    lineBottom.xOut = -display.contentWidth
     lineBottom.x = display.contentWidth
+    controller.linkLineBottom(lineBottom)
     ----------------------------------------------
 
     ------------------------------------------Text
-    bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, g.comRegular, 30, "center")
+    local bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, g.comRegular, 30, "center")
     bio:setFillColor( 0, 0, 0 )
     bio.anchorY = 0
     bio.text = "\n\n\tJeffrey Emerson Gaiser is an award-winning composer who specializes in working with film, video games, and other visual media. Jeffrey has scored numerous independent short films, games, and advertisements—garnering universal acclaim and millions of views on projects such as Masque; a finalist in Lionsgate’s The Storytellers: New Voices of the Twilight Saga competition. While attending the prestigious Berklee College of Music in Boston, Massachusetts, Jeffrey was also the Grand Prize-Winning Composer for Berklee’s own Scoring and Sound Design Contest two years in a row, and his work has been heard in festivals around the globe including The Cannes Film Festival, The Cleveland International Film Festival, and the Boston Science Fiction Film Festival."
-    bio.alpha = 0
+    bio.alphaIn = 1
+    bio.alphaOut = 0
+    bio.alpha = bio.alphaOut
+    controller.linkBio(bio)
     ----------------------------------------------
 
     --------------------------------Social Buttons
@@ -127,7 +104,7 @@ function scene:show( event )
         
         g.show()
         
-        transitionIn()
+        controller.transitionIn()
 
     end
 end

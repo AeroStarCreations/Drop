@@ -37,7 +37,6 @@ function scene:create( event )
     backArrow.x = 0.4 * (drop.x - 0.5 * drop.width)
     backArrow.y = drop.y + 0.5 * drop.height
     group:insert(backArrow)
-    controller.linkBackArrow(backArrow)
     ----------------------------------------------
 
     --------------------------------------ASC Logo

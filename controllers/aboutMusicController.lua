@@ -5,25 +5,21 @@
 local cp = require("composer")
 
 -- View Objects
-local ascLogo
-local asc
+local musicLogo
+local jeg
 local lineTop
 local lineBottom
 local bio
-local facebook
-local twitter
 
 ---------------------------------------------------------------------
 -- Transitions ------------------------------------------------------
 ---------------------------------------------------------------------
 local function transitionIn()
-    transition.to( ascLogo, { time=500, x=asc.xIn, transition=easing.outSine } )
+    transition.to( musicLogo, { time=500, x=musicLogo.xIn, transition=easing.outSine } )
     transition.to( lineTop, {time=600, x=lineTop.xIn, transition=easing.outSine})
     transition.to( lineBottom, {time=600, x=lineBottom.xIn})
-    transition.to( asc, {time=500, alpha=asc.alphaIn})
+    transition.to( jeg, {time=500, alpha=jeg.alphaIn})
     transition.to( bio, {time=500, alpha=bio.alphaIn})
-    transition.to( facebook, { time=600, x=facebook.xIn, transition=easing.outQuad } )
-    transition.to( twitter, { time=600, x=twitter.xIn, transition=easing.outQuad } )
 end
 
 local function transitionOutListener()
@@ -31,13 +27,11 @@ local function transitionOutListener()
 end
 
 local function transitionOut()
-    transition.to( ascLogo, {time=500, x=ascLogo.xOut, transition=easing.inSine})
+    transition.to( musicLogo, {time=500, x=musicLogo.xOut, transition=easing.inSine})
     transition.to( lineTop, {time=600, x=lineTop.xOut, onComplete=transitionOutListener})
     transition.to( lineBottom, {time=600, x=lineBottom.xOut})
-    transition.to( asc, {time=500, alpha=asc.alphaOut})
+    transition.to( jeg, {time=500, alpha=jeg.alphaOut})
     transition.to( bio, {time=500, alpha=bio.alphaOut})
-    transition.to( facebook, { time=600, x=facebook.xOut, transition=easing.outQuad } )
-    transition.to( twitter, { time=600, x=twitter.xOut, transition=easing.outQuad } )
 end
 
 ---------------------------------------------------------------------
@@ -65,12 +59,12 @@ function v.backArrowListener()
     backArrowListener()
 end
 
-function v.linkASCLogo(viewObject)
-    ascLogo = viewObject
+function v.linkMusicLogo(viewObject)
+    musicLogo = viewObject
 end
 
-function v.linkASC(viewObject)
-    asc = viewObject
+function v.linkJEG(viewObject)
+    jeg = viewObject
 end
 
 function v.linkLineTop(viewObject)
@@ -83,14 +77,6 @@ end
 
 function v.linkBio(viewObject)
     bio = viewObject
-end
-
-function v.linkFacebook(viewObject)
-    facebook = viewObject
-end
-
-function v.linkTwitter(viewObject)
-    twitter = viewObject
 end
 
 return v
