@@ -1,130 +1,18 @@
 --Center
 
+local controller = require( "controllers.centerController" )
 local cp = require( "composer" )
 local scene = cp.newScene()
 local g = require( "other.globalVariables" )
 local widget = require( "widget" )
-local t = require( "other.transitions" )
 local GGTwitter = require( "thirdParty.GGTwitter" )
 local logoModule = require( "other.logoModule" )
 local ld = require( "data.localData" )
-local Alert = require( "views.other.Alert" )
-local bg = require( "controllers.backgroundController" )
 
--------Precalls 
-local asc
-local drop
-local arrow
-local fb
-local twit
-local settings
-local extras
-local rotate
+-- Precalls
+local facebook
+local twitter
 local achievementButton
-------- 
-
-------------------------------------------------------Functions
-local function transitionOutAchievementButton()
-    transition.to( achievementButton, { time=400, delay=400, xScale=0.01, yScale=0.01, transition=easing.inBack } )
-end
----------------------------------------------------------------
-
------------------------------------------ Transition In and Out
-local function transitionIn( onComplete )
-    local function arrowCheck( event )
-        if arrow.x ~= display.contentCenterX+17 then
-            arrow.x = -arrow.width
-            transition.to( arrow, { time=800, transition=easing.outQuad, x=display.contentCenterX+17, onComplete=arrowCheck } )
-        end
-    end
-
-    local logoY = logoModule.getBigLogoY(arrow)
-    
-    transition.to( asc, { time=400, y=display.contentHeight-30, transition=easing.outQuad } )
-    transition.to( drop, { time=700, y=logoY, transition=easing.outQuad, xScale=1, yScale=1--[[, rotation=0--]], onComplete=onComplete } )
-    transition.to( fb, { time=700, x=display.contentCenterX - 80, transition=easing.outQuad } )
-    transition.to( twit, { time=700, x=display.contentCenterX + 80, transition=easing.outQuad } )
-    transition.to( extras, { time=600, x=0, y=display.contentHeight, transition=easing.outQuad } )
-    transition.to( settings, { time=600, x=display.contentWidth, y=display.contentHeight, transition=easing.outQuad } )
-    if ld.hasUnawardedAchievement() then
-        transition.to( achievementButton, { delay=300, time=300, xScale=1, yScale=1, transition=easing.outBack } )
-    end
-    
-    if g.justOpened then
-        transition.to( arrow, { time=900, xScale=1, yScale=1, transition=easing.outBack } )
-    elseif cp.getSceneName( "previous" ) == "views.scenes.game2" then
-        arrow.x = g.arrowX
-        transition.to( arrow, { time=1200, transition=easing.outBack, x=display.contentCenterX+17, y=display.contentCenterY, xScale=1, yScale=1, rotation=rot2 })
-    else
-        arrow.x = -arrow.width
-        transition.to( arrow, { time=800, transition=easing.outQuad, x=display.contentCenterX+17, onComplete=arrowCheck } )
-    end
-
-    --Fade out the backgrounds from gameplay
-    if ld.getChangingBackgroundsEnabled() then
-        bg.fadeOutToDefault()
-    end
-end
-
-local function transitionOut()
-    local function startListener( event )
-        arrow:setEnabled( false )
-        fb:setEnabled( false )
-        twit:setEnabled( false )
-        extras:setEnabled( false )
-        settings:setEnabled( false )
-        
-        print( "Transitions begun" )
-    end
-    
-    local function finishListener( event )
-        arrow:setEnabled( true )
-        fb:setEnabled( true )
-        twit:setEnabled( true )
-        extras:setEnabled( true )
-        settings:setEnabled( true )
-        
-        if g.goingToGame == true then
-            cp.gotoScene( "views.scenes.game2" )
-        elseif g.goingToExtras == true then
-            cp.gotoScene( "views.scenes.extras" )
-        elseif g.goingToSettings == true then
-            cp.gotoScene( "views.scenes.settings" )
-        end
-        
-        print( "Transitions complete" )
-    end
-    
-    local a = math.random()
-    if a < 0.5 then
-        rot1 = arrow.rotation-90
-        rot2 = 0--arrow.rotation+90
-    else
-        rot1 = arrow.rotation+270
-        rot2 = 0--arrow.rotation-270
-    end
-    
-    if g.goingToGame == true then
-        transition.to( asc, { time=400, delay=800, y=display.contentHeight+50, transition=easing.inQuad } )
-        transition.to( drop, { time=700, y=-drop.height, transition=easing.inQuad } )
-        transition.to( arrow, { time=2000, transition=easing.inOutBack, x=display.contentCenterX, y=display.contentHeight-49.5, xScale=0.33, yScale=0.33, rotation=rot1, onStart=startListener, onComplete=finishListener })
-        transition.to( fb, { time=700, delay=500, x=-fb.width, transition=easing.inQuad } )
-        transition.to( twit, { time=700, delay=500, x=display.contentWidth+twit.width, transition=easing.inQuad } )
-        transition.to( extras, { time=600, delay=800, x=-200, y=display.contentHeight+200, transition=easing.inQuad } )
-        transition.to( settings, { time=600, delay=800, x=display.contentWidth+200, y=display.contentHeight+200, transition=easing.inQuad } )
-    else
-        transition.to( asc, { time=400, delay=400, y=display.contentHeight+50, transition=easing.inQuad } )
-        transition.to( drop, { time=500, delay=300, y=logoModule.getSmallLogoY(), transition=easing.inQuad, xScale=0.47, yScale=0.47, rotation=0 } )
-        transition.to( arrow, { time=800, transition=easing.inQuad, x=display.contentWidth+arrow.width, onStart=startListener, onComplete=finishListener } )
-        transition.to( fb, { time=700, delay=100, x=-fb.width, transition=easing.inQuad } )
-        transition.to( twit, { time=700, delay=100, x=display.contentWidth+twit.width, transition=easing.inQuad } )
-        transition.to( extras, { time=600, delay=200, x=-200, y=display.contentHeight+200, transition=easing.inQuad } )
-        transition.to( settings, { time=600, delay=200, x=display.contentWidth+200, y=display.contentHeight+200, transition=easing.inQuad } )
-    end
-    transitionOutAchievementButton()
-end
---------------------------------------------------------------]]
-    
 
 function scene:create( event )
     local group = self.view
@@ -132,48 +20,64 @@ function scene:create( event )
     g.create()
 
     --------------------------------------------Aero Star Creations
-    asc = display.newText( "Aero Star Creations", display.contentCenterX, display.contentHeight+50, g.comBold, 30)
+    local asc = display.newText( "Aero Star Creations", display.contentCenterX, 0, g.comBold, 30)
+    asc.yIn = display.contentHeight - 30
+    asc.yOut = display.contentHeight + 50
+    asc.y = asc.yOut
     asc:setFillColor( unpack(g.purple) )
     group:insert(asc)
+    controller.linkASC(asc)
     ---------------------------------------------------------------
     
     --------------------------------------------Drop Logo
-    drop = logoModule.getBigLogo(group)
+    local drop = logoModule.getBigLogo(group)
+    drop.yOutToGame = -drop.height
+    drop.yOut = logoModule.getSmallLogoY()
+    drop.xScaleIn = 1
+    drop.yScaleIn = 1
+    drop.xScaleOut = 0.47
+    drop.yScaleOut = 0.47
+    controller.linkDrop(drop)
     -----------------------------------------------------
     
     --------------------------------------------Arrow
     local arrowW, arrowH = 352, 457
-    g.arrowRatio = arrowW/arrowH
+    g.arrowRatio = arrowW / arrowH
     
-    local function arrowFunction( event )
-        g.goingToGame = true
-        Runtime:removeEventListener( "accelerometer", rotate )
-        transitionOut()
-    end
-    
-    arrow = widget.newButton {
+    local arrow = widget.newButton {
         id = "arrow",
-        x = display.contentCenterX+17,
-        y = display.contentCenterY,
         width = arrowW,
         height = arrowH,
         defaultFile = "images/arrow.png",
         overFile = "images/arrowD.png",
-        onRelease = arrowFunction,
+        onRelease = controller.arrowListener,
     }
+    arrow.xIn = display.contentCenterX + 17
+    arrow.xOut = display.contentWidth+arrow.width
+    arrow.xOutToGame = display.contentCenterX
+    arrow.yIn = display.contentCenterY
+    arrow.yOut = display.contentHeight - 49.5
+    arrow.xScaleIn = 1
+    arrow.yScaleIn = 1
+    arrow.xScaleOut = 0.33
+    arrow.yScaleOut = 0.33
+    arrow.x = arrow.xIn
+    arrow.y = arrow.yIn
+    arrow.xScale = 0.01
+    arrow.yScale = 0.01
     group:insert(arrow)
-    arrow.xScale, arrow.yScale = 0.01, 0.01
+    controller.linkArrow(arrow)
     -------------------------------------------------
     
     --------------------------------------------Social Buttons
     --MAKE A NEW FILE FOR OFFICIAL FACEBOOK AND TWITTER FUNCTIONS
     local function fbFunction (event)
         if event.phase == "began" then
-            fb.xScale = 1.4; fb.yScale = 1.4
+            facebook.xScale = 1.4; facebook.yScale = 1.4
         elseif event.phase == "moved" then
-            fb.xScale = 1; fb.yScale = 1
+            facebook.xScale = 1; facebook.yScale = 1
         elseif event.phase == "ended" then
-            fb.xScale = 1; fb.yScale = 1
+            facebook.xScale = 1; facebook.yScale = 1
             print("Facebook pressed")
             local facebookView
             local facebookViewListener
@@ -227,11 +131,11 @@ function scene:create( event )
     
     local function twitFunction (event)
         if event.phase == "began" then
-            twit.xScale = 1.4; twit.yScale = 1.4
+            twitter.xScale = 1.4; twitter.yScale = 1.4
         elseif event.phase == "moved" then
-            twit.xScale = 1; twit.yScale = 1
+            twitter.xScale = 1; twitter.yScale = 1
         elseif event.phase == "ended" then
-            twit.xScale = 1; twit.yScale = 1
+            twitter.xScale = 1; twitter.yScale = 1
             print("Twitter pressed")
             local twitter
             local function twitterListener( event )
@@ -257,85 +161,93 @@ function scene:create( event )
         end
     end
     
-    fb = widget.newButton {
+    facebook = widget.newButton {
         id = "fb",
-        x = -120,
-        y = 0.8*display.contentHeight,
+        x = 0,
+        y = 0.8 * display.contentHeight,
         width = 120,
         height = 120,
         defaultFile = "images/facebook.png",
         overFile = "images/facebookD.png",
         onEvent = fbFunction,
     }
-    group:insert(fb)
+    facebook.xIn = display.contentCenterX - 80
+    facebook.xOut = -facebook.width
+    facebook.x = facebook.xOut
+    group:insert(facebook)
+    controller.linkFacebook(facebook)
     
-    twit = widget.newButton {
+    twitter = widget.newButton {
         id = "twit",
-        x = display.contentWidth+fb.width,
-        y = fb.y,
-        width = fb.width,
-        height = fb.height,
+        x = 0,
+        y = facebook.y,
+        width = facebook.width,
+        height = facebook.height,
         defaultFile = "images/twitter.png",
         overFile = "images/twitterD.png",
         onEvent = twitFunction,
     }
-    group:insert(twit)
+    twitter.xIn = display.contentCenterX + 80
+    twitter.xOut = display.contentWidth + twitter.width
+    twitter.x = twitter.xOut
+    group:insert(twitter)
+    controller.linkTwitter(twitter)
     -------------------------------------------------------------
     
     -----------------------------------------------------Settings
-    local function settingsFunction (event)
-        g.goingToSettings = true
-        transitionOut()
-    end
-    
-    settings = widget.newButton {
+    local settings = widget.newButton {
         id = "settings",
-        x = display.contentWidth + 200,
-        y = display.contentHeight + 200,
         width = 120,
         height = 120,
         defaultFile = "images/settings.png",
         overFile = "images/settingsD.png",
-        onRelease = settingsFunction,
+        onRelease = controller.settingsListener,
     }
+    settings.xIn = display.contentWidth
+    settings.xOut = display.contentWidth + 200
+    settings.yIn = display.contentHeight
+    settings.yOut = display.contentHeight + 200
+    settings.x = settings.xOut
+    settings.y = settings.yOut
+    settings.anchorX = 1
+    settings.anchorY = 1
     group:insert( settings )
-    settings.anchorX = 1; settings.anchorY = 1
+    controller.linkSettings(settings)
     -------------------------------------------------------------
     
     ---------------------------------------------------------More
-    local function extrasFunction (event)
-        g.goingToExtras = true
-        transitionOut()
-    end
-    
-    extras = widget.newButton {
+    local extras = widget.newButton {
         id = "extras",
-        x = - 200,
-        y = display.contentHeight + 200,
         width = 120,
         height = 120,
         defaultFile = "images/info.png",
         overFile = "images/infoD.png",
-        onRelease = extrasFunction,
+        onRelease = controller.extrasListener,
     }
+    extras.xIn = 0
+    extras.xOut = -200
+    extras.yIn = display.contentHeight
+    extras.yOut = display.contentHeight + 200
+    extras.x = extras.xOut
+    extras.y = extras.yOut
+    extras.anchorX = 0
+    extras.anchorY = 1
     group:insert( extras )
-    extras.anchorX = 0; extras.anchorY = 1
+    controller.linkExtras(extras)
     -------------------------------------------------------------
 
     -------------------------------------------------Achievements
-    local distFromCenterX = display.actualContentWidth / 7
-    local rewardLives = 0
-    local rewardInvincibilites = 0
-
     local livesImage = display.newImageRect(group, "images/lives.png", 53, 53)
     livesImage.y = arrow.y - 0.6 * arrow.height
     livesImage.anchorX = 0
     livesImage.xScale, livesImage.yScale = 0.01, 0.01
+    controller.linkLivesImage(livesImage)
 
     local invincibilitesImage = display.newImageRect(group, "images/invincibility.png", 53, 53)
     invincibilitesImage.y = livesImage.y
     invincibilitesImage.anchorX = 0
     invincibilitesImage.xScale, invincibilitesImage.yScale = 0.01, 0.01
+    controller.linkInvincibilityImage(invincibilitesImage)
 
     local livesText = display.newText({
         parent = group,
@@ -348,6 +260,7 @@ function scene:create( event )
     livesText:setFillColor(0, 0, 0)
     livesText.anchorX = 1
     livesText.xScale, livesText.yScale = 0.01, 0.01
+    controller.linkLivesText(livesText)
 
     local invincibilitesText = display.newText({
         parent = group,
@@ -360,90 +273,13 @@ function scene:create( event )
     invincibilitesText:setFillColor(0, 0, 0)
     invincibilitesText.anchorX = 1
     invincibilitesText.xScale, invincibilitesText.yScale = 0.01, 0.01
-
-    local function updateRewardTexts()
-        livesText.text = "+" .. rewardLives
-        invincibilitesText.text = "+" .. rewardInvincibilites
-    end
-
-    local function updateRewardPosition()
-        if rewardLives == 0 then
-            invincibilitesImage.x = display.contentCenterX
-            invincibilitesText.x = invincibilitesImage.x
-        elseif rewardInvincibilites == 0 then
-            livesImage.x = display.contentCenterX
-            livesText.x = livesImage.x
-        else
-            invincibilitesImage.x = display.contentCenterX - distFromCenterX
-            invincibilitesText.x = invincibilitesImage.x
-            livesImage.x = display.contentCenterX + distFromCenterX
-            livesText.x = livesImage.x
-        end
-    end
-
-    local function setRewardScales()
-        livesImage.xScale = 0.01
-        livesImage.yScale = 0.01
-        livesText.xScale = 0.01
-        livesText.yScale = 0.01
-        invincibilitesImage.xScale = 0.01
-        invincibilitesImage.yScale = 0.01
-        invincibilitesText.xScale = 0.01
-        invincibilitesText.yScale = 0.01
-    end
-
-    local function setRewardAlpha()
-        livesImage.alpha = 1
-        livesText.alpha = 1
-        invincibilitesImage.alpha = 1
-        invincibilitesText.alpha = 1
-    end
-
-    local function playAnimation()
-        local paramsIn = {time=300, xScale=1.3, yScale=1.3, transition=easing.outBack}
-        local paramsOut = {delay=paramsIn.time+1000, time=200, xScale=4, yScale=4, alpha=0}
-        if rewardLives > 0 then
-            transition.to( livesImage, paramsIn )
-            transition.to( livesText, paramsIn )
-            transition.to( livesImage, paramsOut )
-            transition.to( livesText, paramsOut)
-        end
-        if rewardInvincibilites > 0 then
-            transition.to( invincibilitesImage, paramsIn )
-            transition.to( invincibilitesText, paramsIn )
-            transition.to( invincibilitesImage, paramsOut )
-            transition.to( invincibilitesText, paramsOut )
-        end
-    end
-
-    local function showRewardAnimation()
-        updateRewardTexts()
-        updateRewardPosition()
-        setRewardScales()
-        setRewardAlpha()
-        playAnimation()
-    end
-
-    local function achievementFunction( event )
-        -- Get achievement reward from ld
-        local reward = ld.getUnawardedAchievementReward()
-        --Credit awards
-        rewardLives = reward.lives
-        rewardInvincibilites = reward.invincibilities
-        ld.addLives( rewardLives )
-        ld.addInvincibility( rewardInvincibilites )
-        --Display achievement
-        local alert = Alert:new( "Congrats!", reward.description, { "Claim!" }, showRewardAnimation )
-        --Update achievementButton
-        achievementButton:setLabel( ld.quantityUnawardedAchievements() )
-        if not ld.hasUnawardedAchievement() then transitionOutAchievementButton() end
-    end
+    controller.linkInvincibilityText(invincibilitesText)
 
     local circleRadius = 40
     achievementButton = widget.newButton({
         x = display.actualContentWidth - 1.5 * circleRadius,
         y = 0 + 1.5 * circleRadius,
-        onRelease = achievementFunction,
+        onRelease = controller.achievementButtonListener,
         label = ld.quantityUnawardedAchievements(),
         labelColor = { default={ 1, 1, 1 }, over={ 0.9, 0.9, 0.9 } },
         font = g.comBold,
@@ -455,6 +291,7 @@ function scene:create( event )
     group:insert(achievementButton)
     achievementButton.xScale = 0.01
     achievementButton.yScale = 0.01
+    controller.linkAchievementButton(achievementButton)
     -------------------------------------------------------------
 
 end
@@ -471,35 +308,30 @@ function scene:show( event )
         
         cp.loadScene( "views.scenes.game2" )
         
-        -----------------------------------------Creates the accelerometer rotations
-        function rotate( event )
-            local r = -event.xGravity*90
-            fb.rotation = r
-            twit.rotation = r
-            drop.rotation = -event.xGravity*25--r*0.25
-            return true
-        end
-        local function transDone( )
-            Runtime:addEventListener( "accelerometer", rotate )
-        end
-        -----------------------------------------------------------------------------
-
         ----------------------------------------Show and Update Achievement Indicator
         -- For testing
-        -- ld.addUnawardedAchievement( {
-        --     shortCode = "shortCode",
-        --     reward = {
-        --         lives = 1,
-        --         invincibilities = 1,
-        --         description = "the description"
-        --     }
-        -- })
+        ld.addUnawardedAchievement( {
+            shortCode = "shortCode",
+            reward = {
+                lives = 1,
+                invincibilities = 1,
+                description = "the description"
+            }
+        })
+        ld.addUnawardedAchievement( {
+            shortCode = "shortCode",
+            reward = {
+                lives = 1,
+                invincibilities = 1,
+                description = "the description"
+            }
+        })
 
         achievementButton:setLabel( ld.quantityUnawardedAchievements() )
         ---------------------------------------------------------------------------]]
         
-        transitionIn( transDone )
-        
+        controller.transitionIn()
+
     end
 end
 
@@ -508,8 +340,6 @@ function scene:hide( event )
     local phase = event.phase
     
     if phase == "will" then
-        
-        g.justOpened = false
         
     elseif phase == "did" then
         
