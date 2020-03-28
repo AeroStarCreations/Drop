@@ -132,10 +132,13 @@ local function showRewardAnimation()
     playAnimation()
 end
 
+<<<<<<< HEAD
 local function transitionOutAchievementButton()
     transition.to( achievementButton, { time=400, delay=400, xScale=0.01, yScale=0.01, transition=easing.inBack } )
 end
 
+=======
+>>>>>>> refactored center scene
 local function achievementListener( event )
     -- Get achievement reward from ld
     local reward = ld.getUnawardedAchievementReward()
@@ -177,7 +180,11 @@ local function transitionIn()
     transition.to( settings, { time=600, x=settings.xIn, y=settings.yIn, transition=easing.outQuad } )
     
     if ld.hasUnawardedAchievement() then
+<<<<<<< HEAD
         transition.to( achievementButton, { delay=300, time=300, xScale=1, yScale=1, transition=easing.outBack } )
+=======
+        -- transition.to( achievementButton, { delay=300, time=300, xScale=1, yScale=1, transition=easing.outBack } )
+>>>>>>> refactored center scene
     end
     
     if gameWasJustOpened() then
@@ -204,7 +211,11 @@ local function transitionOut( scene )
 
     if scene == "game" then
         transition.to( asc, { time=400, delay=800, y=asc.yOut, transition=easing.inQuad } )
+<<<<<<< HEAD
         transition.to( drop, { time=700, y=drop.yOutToGame, transition=easing.inQuad } )
+=======
+        transition.to( drop, { time=700, y=-drop.yOutToGame, transition=easing.inQuad } )
+>>>>>>> refactored center scene
         transition.to( arrow, { time=2000, transition=easing.inOutBack, x=arrow.xOutToGame, y=arrow.yOut, xScale=arrow.xScaleOut, yScale=arrow.yScaleOut, rotation=getArrowRotation(), onComplete=finishListener })
         transition.to( facebook, { time=700, delay=500, x=facebook.xOut, transition=easing.inQuad } )
         transition.to( twitter, { time=700, delay=500, x=twitter.xOut, transition=easing.inQuad } )
@@ -220,7 +231,11 @@ local function transitionOut( scene )
         transition.to( settings, { time=600, delay=200, x=settings.xOut, y=settings.yOut, transition=easing.inQuad } )
     end
 
+<<<<<<< HEAD
     transitionOutAchievementButton()
+=======
+    -- transitionOutAchievementButton()
+>>>>>>> refactored center scene
 end
 
 -------------------------------------------------------------------------------
