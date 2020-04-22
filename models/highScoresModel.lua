@@ -1,18 +1,27 @@
 -- Private Members ------------------------------------------------------------[
 local TAG = "highScores:"
 
-local scorerShortCodes = {
-    [1] = "HIGH_SCORE_SCORER",
-    [2] = "HIGH_SCORE_TRICKY_SCORER",
-    [3] = "HIGH_TIME_SCORER",
-    [4] = "HIGH_TIME_TRICKY_SCORER"
-}
-
-local leaderboardShortCodes = {
-    [1] = "HIGH_SCORE_LEADERBOARD",
-    [2] = "HIGH_SCORE_TRICKY_LEADERBOARD",
-    [3] = "HIGH_TIME_LEADERBOARD",
-    [4] = "HIGH_TIME_TRICKY_LEADERBOARD"
+local leaderboardNames = {
+    {
+        name = "HighScore",
+        type = "score",
+        isTricky = false
+    },
+    {
+        name = "HighScoreTricky",
+        type = "score",
+        isTricky = true
+    },
+    {
+        name = "HighTime",
+        type = "time",
+        isTricky = false
+    },
+    {
+        name = "HighTimeTricky",
+        type = "time",
+        isTricky = true
+    }
 }
 
 -- Public Members -------------------------------------------------------------[
@@ -23,11 +32,11 @@ function v.getTag()
 end
 
 function v.getScorerShortCodes()
-    return scorerShortCodes
+    -- return scorerShortCodes
 end
 
-function v.getLeaderboardShortCodes()
-    return leaderboardShortCodes
+function v.getLeaderboardNames()
+    return leaderboardNames
 end
 
 return v

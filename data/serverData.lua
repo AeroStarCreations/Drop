@@ -1,343 +1,239 @@
--- Control center for writing and reading server storage data.
--- Format of data can be found at the bottom of this file.
+-- Control center for writing and reading server storage data (PlayFab).
+--
+-- USES:
+--  * Login
+--  * Achievements
+--  * High scores
+--  * Purchases
 --
 -- !!! Make sure to call init() when using this module !!!
 
-local GS = require( "plugin.gamesparks" )
-local json = require( "json" )
-local ld = require( "data.localData" )
-local gameCenter = require( "other.gameCenter" )
-local googlePlay = require( "other.googlePlay" )
-local Alert = require( "views.other.Alert" )
+local playFabClientPlugin = require("plugin.playfab.client")
+local gameNetwork = require("other.gameNetworkNew")
+local json = require("json")
+local highScoresModel = require("models.highScoresModel")
+local ld = require("data.localData")
 
 -- Local variables ------------------------------------------------------------[
-local TAG = "data.serverData:"
-
-local gs
-local platformType
-local isGamesparksAvailable
-local player
-local isLoggedIn
+local TAG = "serverData:"
+local playFab
+local alias
+local loginCallback
+local getLeaderboardCallback
+local getAllLeaderboardValuesCallback
 -------------------------------------------------------------------------------]
 
--- Authentication -------------------------------------------------------------[
-local function setTypes()
-    platformType = "ios"
-    if system.getInfo( "platform" ) == "android" then
-        platformType = "android"
+-- Leaderboards ---------------------------------------------------------------[
+local function leaderboardSuccessListener(result)
+    print(TAG, "Leaderboard SUCCESS")
+    print(TAG, json.prettify(result))
+    -- getLeaderboardCallback(result.Leaderboard)
+end
+
+local function getAllLeaderboardValuesSuccessListener(result)
+    print(TAG, "Loaded all Leaderboard values")
+    getAllLeaderboardValuesCallback(result)
+end
+
+local function leaderboardFailureListener(error)
+    print(TAG, "Leaderboard FAILURE")
+end
+
+local function getAllLeaderboardValues()
+    local request = {
+        StatisticNames = {}
+    }
+    for k, board in pairs(highScoresModel.getLeaderboardNames()) do
+        table.insert( request.StatisticNames, board.name )
     end
+    playFab.GetPlayerStatistics(request, getAllLeaderboardValuesSuccessListener, leaderboardFailureListener)
 end
 
-local function availabilityCallback( isAvailable )
-    print( "Availability: " .. tostring(isAvailable) )
-    if isAvailable then
-        isGamesparksAvailable = true
+local function setLeaderboardValue(score, time, isTricky)
+    local trickySuffix = ""
+    if isTricky then
+        trickySuffix = "Tricky"
     end
+    local request = {
+        Statistics = {
+            {
+                StatisticName = "HighScore" .. trickySuffix,
+                Value = score
+            },
+            {
+                StatisticName = "HighTime" .. trickySuffix,
+                Value = time
+            }
+        }
+    }
+    playFab.UpdatePlayerStatistics(request, leaderboardSuccessListener, leaderboardFailureListener)
 end
 
-local function getPlayerDetails( callback )
-    local requestBuilder = gs.getRequestBuilder()
-    local playerDetails = requestBuilder.createAccountDetailsRequest()
-    playerDetails:send( function(response)
-        if not response:hasErrors() then
-            print(TAG, "Got player details")
-            player = response.data
-            if callback then callback(player) end
-        else
-            print(TAG, "Could not retrieve player")
-            for k,v in pairs(response:getErrors()) do
-                print(TAG, k.." : "..v)
-            end
-            if player and callback then callback(player) end
-        end
-    end)
-end
-
-local function authenticatedCallback( playerId )
-    if playerId then
-        print( "Player ID: " .. tostring(playerId) )
-        isLoggedIn = true;
+local function getLeaderboard(isScore, isTricky, isTop)
+    local name = "HighScore"
+    if not isScore then
+        name = "HighTime"
+    end
+    if isTricky then
+        name = name .. "Tricky"
+    end
+    local request = {
+        MaxResultsCount = 100,
+        StatisticName = name
+    }
+    if isTop then
+        playFab.GetLeaderboard(request, leaderboardSuccessListener, leaderboardFailureListener)
     else
-        print( "GameSparks authentication FAILED" )
+        playFab.GetLeaderboardAroundPlayer(request, leaderboardSuccessListener, leaderboardFailureListener)
     end
-end
-
-local function setUpGamesparks()
-    gs = createGS()
-    gs.setLogger( print )
-    gs.setApiKey( "C372422jElYG" )
-    gs.setApiSecret( "DvSJMXlWTLFeRaqZGMReJwRTU7d6BkA5" )
-    gs.setApiCredential( "device" )
-    gs.setAvailabilityCallback( availabilityCallback )
-    gs.setAuthenticatedCallback( authenticatedCallback )
-    gs.connect()
-end
-
-local function loginWithGameSparks( sig )
-    local requestBuilder = gs.getRequestBuilder()
-    local authenticationRequest = requestBuilder.createAuthenticationRequest()
-    authenticationRequest:setUserName( sig.playerId )
-    authenticationRequest:setPassword( sig.playerId )
-    authenticationRequest:send( function( response )
-        if not response:hasErrors() then
-            print(TAG, response:getDisplayName().." has logged in!")
-            getPlayerDetails()
-        else
-            print(TAG, "ERROR: loginWithGameSparks()")
-            for k,v in pairs(response:getErrors()) do
-                print(k,v)
-            end
-        end
-    end)
-end
-
-local function registerWithGameSparks( sig )
-    -- testText.text = json.prettify(sig)
-    -- local requestBuilder = gs.getRequestBuilder()
-    -- local connectRequest = requestBuilder.createGameCenterConnectRequest()
-    -- connectRequest:setExternalPlayerId( sig.playerId )
-    -- connectRequest:setDisplayName( sig.alias )
-    -- connectRequest:setPublicKeyUrl( sig.keyURL)
-    -- connectRequest:setTimestamp( sig.timestamp )
-    -- connectRequest:setSalt( sig.salt )
-    -- connectRequest:setSignature( sig.signature )
-    -- connectRequest:send( function( response )
-    --     testText.text = testText.text .. json.prettify(response)
-    --     if not response:hasErrors() then
-    --         print( "GameSparks login SUCCESS : "..response:getDisplayName())
-    --     else
-    --         print( "GameSparks login FAILURE" )
-    --         for k,v in pairs(response:getErrors()) do 
-    --             print("***")
-    --             print(k)
-    --             print(v)
-    --         end
-    --     end
-    -- end)
-
-    local requestBuilder = gs.getRequestBuilder()
-    local registerRequest = requestBuilder.createRegistrationRequest()
-    registerRequest:setDisplayName( sig.alias )
-    registerRequest:setUserName( sig.playerId )
-    registerRequest:setPassword( sig.playerId )
-    registerRequest:send( function( response )
-        if not response:hasErrors() then
-            print(TAG, response:getUserName().." has registered!")
-            getPlayerDetails()
-        elseif response:getErrors().USERNAME == "TAKEN" then
-            print(TAG, "register: username taken")
-            loginWithGameSparks( sig )
-        else
-            print(TAG, "ERROR: registerWithGameSparks()")
-            for key,value in pairs(response:getErrors()) do
-                print(key,value)
-            end
-        end
-    end)
-end
-
--- 'sig' must contain 'alias' and 'playerId'
-local function checkIfPlayerExists( sig )
-    if ld.getAlias() == sig.alias then 
-        print(TAG, "player exists")
-        loginWithGameSparks( sig )
-    else
-        print(TAG, "player does not exist")
-        registerWithGameSparks( sig )
-        ld.setAlias( sig.alias )
-    end
-end
-
-local function setUpGameNetwork()
-    if platformType == "ios" then
-        gameCenter.init( checkIfPlayerExists )
-    elseif platformType == "android" then
-        googlePlay.init( checkIfPlayerExists )
-    end
-end
--------------------------------------------------------------------------------]
-
--- Achievements ---------------------------------------------------------------[
-local function onAchievementMessage( message )
-    print(TAG, "Earned: "..message:getAchievementName())
-    print(TAG, json.prettify(message))
-    -- update currency
-end
-
-local function setUpAchievementMessageHandler()
-    gs.getMessageHandler().setAchievementEarnedMessageHandler(onAchievementMessage)
-end
-
-local function completeAchievement( shortCode )
-    local requestBuilder = gs.getRequestBuilder()
-    local request = requestBuilder.createLogEventRequest()
-    request:setEventKey("ACHIEVEMENT")
-    request:setEventAttribute("SHORT_CODE", shortCode)
-    request:send( function( response )
-        if not response:hasErrors() then
-            print(TAG, "achievement completed")
-        else
-            print(TAG, "ERROR: could not complete achievement")
-            for key,value in pairs(response:getErrors()) do
-                print(key,value)
-            end
-        end
-    end)
-end
--------------------------------------------------------------------------------]
-
--- High Scores ----------------------------------------------------------------[
-local function onHighScoreMessage( message )
-    print(TAG, "Earned high score in: "..message:getLeaderboardName())
-    print(TAG, json.prettify(message))
-end
-
-local function setUpHighScoreMessageHandler()
-    gs.getMessageHandler().setNewHighScoreMessageHandler(onHighScoreMessage)
-end
-
-local function setHighScore( shortCode, value )
-    local requestBuilder = gs.getRequestBuilder()
-    local request = requestBuilder.createLogEventRequest()
-    request:setEventKey(shortCode)
-    request:setEventAttribute("SCORE", value)
-    request:send( function( response )
-        if not response:hasErrors() then
-            print(TAG, "high score posted")
-        else
-            print(TAG, "ERROR: could not post high score")
-            for key,value in pairs(response:getErrors()) do
-                print(key,value)
-            end
-        end
-    end)
 end
 -------------------------------------------------------------------------------]
 
 -- Leaderboards ---------------------------------------------------------------[
-local function getLeaderboardShortCode(isScore, withSpecials)
-    local shortCode = "HIGH_"
-    if isScore then
-        shortCode = shortCode .. "SCORE_"
-    else
-        shortCode = shortCode .. "TIME_"
-    end
-    if not withSpecials then
-        shortCode = shortCode .. "TRICKY_"
-    end
-    return shortCode .. "LEADERBOARD"
-end
 
-local function getLeaderboardData(isScore, withSpecials, areLeaders, callback)
-    local shortCode = getLeaderboardShortCode(isScore, withSpecials)
+-- gameStats = {
+--     gamesPlayed = 1,
+--     deaths = int,
+--     drops = {
+--         {
+--             type = <dropType>,
+--             normalDodges = int,
+--             normalCollisions = int,
+--             specialDodges = int,
+--             specialCollisions = int
+--         },
+--         --one for each drop type
+--     }
+-- }
+local function setPlayerGameData(gameStats)
 
-    local requestBuilder = gs.getRequestBuilder()
-    local getEntryRequest = requestBuilder.createLeaderboardDataRequest()
-    if not areLeaders then
-        getEntryRequest = requestBuilder.createAroundMeLeaderboardRequest()
-    end
-
-    getEntryRequest:setLeaderboardShortCode(shortCode)
-    getEntryRequest:setEntryCount(100)
-    getEntryRequest:send( function( response )
-        if not response:hasErrors() then
-            print(TAG, "leaderboard data retrieved")
-            callback(response:getData())
-        else
-            print(TAG, "ERROR: could not retrieve leaderboard data")
-            for key,value in pairs(response:getErrors()) do
-                print(key,value)
-            end
-        end
-    end)
 end
 -------------------------------------------------------------------------------]
 
--- In-App Purchases -----------------------------------------------------------[
-local function confirmPurchaseWithApple( receipt, callback )
-    local requestBuilder = gs.getRequestBuilder()
-    local request = requestBuilder.createIOSBuyGoodsRequest()
-    request:setReceipt( receipt )
-    request:send( function( response )
-        if not response:hasErrors() then
-            print(TAG, "Apple purchase confirmed")
-        else
-            print(TAG, "ERROR: could not confirm Apple purchase")
-            for key,value in pairs(response:getErrors()) do
-                print(key,value)
-            end
-        end
-        callback( response:getBoughtItems(), response:hasErrors() )
-    end)
+-- Authentication -------------------------------------------------------------[
+local function setupPlayFab()
+    playFab = playFabClientPlugin.PlayFabClientApi
+    playFab.settings.titleId = "C5B8B"
 end
 
-local function confirmPurchaseWithGoogle( receipt, signature, callback )
-    local requestBuilder = gs.getRequestBuilder()
-    local request = requestBuilder.createGooglePlayBuyGoodsRequest()
-    request:setSignedData( receipt )
-    request:setSignature( signature )
-    request:send( function( response )
-        if not response:hasErrors() then
-            print(TAG, "Google purchase confirmed")
-            showSuccessfulPurchaseAlert( response:getBoughtItems(), callback )
-        else
-            print(TAG, "ERROR: could not confirm Google purchase")
-            for key,value in pairs(response:getErrors()) do
-                print(key,value)
-            end
+local function setDisplayName(displayName)
+    if alias and string.len(alias) >= 3 then --PlayFab requires a minimum display name length of 3
+        if displayName == nil or displayName ~= alias then
+            playFab.UpdateUserTitleDisplayName({
+                DisplayName = displayName
+            })
         end
-        callback( response:getBoughtItems(), response:hasErrors() )
-    end)
+    end
+end
+
+local function loginSuccessListener(result)
+    print(TAG, "PlayFab login SUCCESS: " .. result.PlayFabId)
+    print(TAG, "Welcome: " .. result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName)
+    if loginCallback ~= nil then
+        loginCallback(result)
+    end
+
+    local request = {
+        FunctionName = "helloWorld",
+        FunctionParameter = {inputValue = "Nathan Balli"}
+    }
+    playFab.ExecuteCloudScript(
+        request,
+        function(result) 
+            print("**************", json.prettify(result) )
+        end,
+        function(error) 
+            print("##############")
+            json.prettify(error) 
+        end
+    )
+end
+
+local function loginFailureListener(error)
+    print(TAG, "PlayFab login FAILURE: " .. error.errorMessage)
+    if loginCallback then
+        loginCallback(error)
+    end
+end
+
+local function loginWithGameCenter(signature)
+    local loginRequest = {
+        CreateAccount = true,
+        PublicKeyUrl = signature.keyURL,
+        Salt = signature.salt,
+        Signature = signature.signature,
+        Timestamp = signature.timestamp,
+        PlayerId = signature.playerId,
+        InfoRequestParameters = { GetUserAccountInfo = true }
+    }
+    playFab.LoginWithGameCenter(loginRequest, loginSuccessListener, loginFailureListener)
+end
+
+local function loginWithGoogle(signature)
+    local loginRequest = {
+        CreateAccount = true,
+        ServerAuthCode = signature.serverAuthCode,
+        InfoRequestParameters = { GetUserAccountInfo = true }
+    }
+    playFab.LoginWithGoogleAccount(loginRequest, loginSuccessListener, loginFailureListener)
+end
+
+local function loginWithDeviceId()
+
+end
+
+local function gameNetworkCallback(type, signature)
+    alias = signature.alias
+    if signature.playerId == nil then
+        loginWithDeviceId()
+    elseif type == "gamecenter" then
+        loginWithGameCenter(signature)
+    elseif type == "google" then
+        loginWithGoogle(signature)
+    end
 end
 -------------------------------------------------------------------------------]
-
+    
 -- Returned values/table ------------------------------------------------------[
 local v = {}
 
-v.init = function()
-    isLoggedIn = false
-    player = nil
-    setUpGamesparks()
-    setTypes()
-    setUpGameNetwork()
-    setUpAchievementMessageHandler()
-    setUpHighScoreMessageHandler()
+function v.init(callback)
+    loginCallback = callback
+    setupPlayFab()
+    if system.getInfo("environment") == "simulator" then
+        playFab.LoginWithCustomID({
+                CustomId = "TestCustomId",
+                CreateAccount = true,
+                InfoRequestParameters = { GetUserAccountInfo = true }
+            },
+            loginSuccessListener,
+            loginFailureListener
+        )
+    else
+        gameNetwork.login(gameNetworkCallback)
+    end
 end
 
-v.completeAchievement = function( shortCode )
-    completeAchievement(shortCode)
+function v.setDisplayName(name)
+    setDisplayName(name)
 end
 
-v.setHighScore = function( shortCode, value )
-    setHighScore( shortCode, value)
+function v.sendToLeaderboard(score, time, isTricky)
+    setLeaderboardValue(score, time, isTricky)
 end
 
-v.getPlayerDetails = function( callback )
-    getPlayerDetails(callback)
+function v.getLeaderboard(isScore, isTricky, isTop, callback)
+    getLeaderboardCallback = callback
+    getLeaderboard(isScore, isTricky)
 end
 
-v.getPlayer = function()
-    return player
+function v.getAllLeaderboardValues(callback)
+    getAllLeaderboardValuesCallback = callback
+    getAllLeaderboardValues()
 end
 
-v.hasPlayerDetails = function()
-    return not (player == nil)
-end
-
-v.isLoggedIn = function()
-    return isLoggedIn
-end
-
-v.getLeaderboardData = function(isScore, withSpecials, areLeaders, callback)
-    getLeaderboardData(isScore, withSpecials, areLeaders, callback)
-end
-
-v.confirmPurchaseWithApple = function( receipt, callback )
-    confirmPurchaseWithApple( receipt, callback )
-end
-
-v.confirmPurchaseWithGoogle = function( receipt, signature, callback )
-    confirmPurchaseWithGoogle( receipt, signature, callback )
+function v.updatePlayerGameData(gameStats)
+    setPlayerGameData(gameStats)
 end
 
 return v

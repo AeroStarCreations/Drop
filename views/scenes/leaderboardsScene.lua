@@ -31,7 +31,7 @@ local leadersRect
 local rectStrokeWidth = 6
 
 local isScore = true        -- isTime otherwise
-local isWithSpecials = true -- is not with specials otherwise
+local isTricky = false -- is with specials otherwise
 local isLeaders = false     -- is "by me" otherwise
 ----------
 
@@ -44,11 +44,11 @@ local function leaderboardDataCallback( entries )
             rowColor = { default={ 1, 0, 0, 0 }, over={ 0, 0, 0 } },
             rowHeight = rowHeight,
             params = {
-                country = data.country,
-                rank = data.rank,
-                name = data.userName,
-                date = data.when,
-                value = data.SCORE
+                -- country = data.country,
+                rank = entry.Position,
+                name = entry.DisplayName,
+                -- date = data.when,
+                value = entry.StatValue
             }
         })
     end
@@ -57,7 +57,7 @@ end
 local function updateButtonRectVisibilities()
     scoreRect.isVisible = isScore
     timeRect.isVisible = not isScore
-    specialRect.isVisible = isWithSpecials
+    specialRect.isVisible = not isTricky
     leadersRect.isVisible = isLeaders
 end
 
@@ -72,12 +72,13 @@ local function buttonListener( event )
         if not isScore then shouldUpdateRows = false end
         isScore = false
     elseif id == "special" then
-        isWithSpecials = not isWithSpecials
+        isTricky = not isTricky
     elseif id == "leaders" then
         isLeaders = not isLeaders
     end
     if shouldUpdateRows then 
-        sd.getLeaderboardData(isScore, isWithSpecials, isLeaders, leaderboardDataCallback)
+        -- sd.getLeaderboardData(isScore, not isTricky, isLeaders, leaderboardDataCallback)
+        sd.getLeaderboard(isScore, isTricky, isLeaders, leaderboardDataCallback)
         updateButtonRectVisibilities()
     end
 end
@@ -89,7 +90,7 @@ local function onRowRenderListener( event )
     local params = row.params
     local cushion = 20
 
-    local text = params.rank.."  "..params.name.."  "..params.value.."  "..params.country
+    local text = params.rank.."  "..params.name.."  "..params.value--.."  "..params.country
 
     ------- Background
     local bg = display.newRoundedRect(
@@ -325,7 +326,7 @@ function scene:create( event )
     specialRect:setStrokeColor( unpack(colors.darkBlue) )
     specialRect:setFillColor( 0, 0, 0, 0 )
     specialRect.anchorX = 0
-    specialRect.isVisible = isWithSpecials
+    specialRect.isVisible = not isTricky
     group:insert(specialRect)
 
     leadersRect = display.newRect(leadersButton.x, leadersButton.y, rectWidth, rectHeight)
@@ -389,7 +390,8 @@ function scene:show( event )
         transitionIn()
 
         -- Load initial leaderboard entries
-        sd.getLeaderboardData(isScore, isWithSpecials, isLeaders, leaderboardDataCallback)
+        -- sd.getLeaderboardData(isScore, not isTricky, isLeaders, leaderboardDataCallback)
+        sd.getLeaderboard(isScore, isTricky, isLeaders, leaderboardDataCallback)
 
         -- This is just test/sample data 
         -- if tableView:getNumRows() == 0 then

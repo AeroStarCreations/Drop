@@ -89,8 +89,8 @@ local function initializeAllData( dropTypes )
     stats:set( "lifeUses", 0 )
     stats:set( "phase", 0 ) --highest level the player completed/survived
     stats:set( "hurricaneTiem", 0 ) --seconds
-    for k, shortCode in pairs(highScoresModel.getScorerShortCodes()) do
-        stats:set( shortCode, 0 )
+    for k, lb in pairs(highScoresModel.getLeaderboardNames()) do
+        stats:set( lb.name, 0 )
     end
     for i=1,#dropTypes do
         stats:set( dropTypes[i], {
@@ -336,22 +336,28 @@ v.incrementDropSpecialCollisions = function( dropType )
     saveStats()
 end
 
-v.isHighScore = function( shortCode, value )
-    return value > (stats:get( shortCode ) or 0)
+v.isHighScore = function( name, value )
+    return value > (stats:get( name ) or 0)
 end
 
 -- Sets if higher and returns true if higher
-v.setHighScore = function( shortCode, value )
-    if v.isHighScore(shortCode, value) then
-        stats:set(shortCode, value)
+v.setHighScore = function( name, value )
+    if v.isHighScore(name, value) then
+        stats:set(name, value)
         stats:save()
         return true
     end
     return false
 end
 
-v.getHighScore = function( shortCode )
-    return stats:get( shortCode )
+-- Overrides the high score if value from server is lower than local value
+v.setHighScoreFromServer = function( name, value )
+    stats:set(name, value)
+    saveStats()
+end
+
+v.getHighScore = function( name )
+    return stats:get( name )
 end
 
 v.getPhase = function()
@@ -399,7 +405,7 @@ end
 
 v.getUnawardedAchievementReward = function()
     local unawarded = achievements:get( "unawarded" )
-    reward = table.remove( unawarded )
+    local reward = table.remove( unawarded )
     achievements:set( "unawarded", unawarded )
     saveAchievements()
     return reward
@@ -469,8 +475,9 @@ return v
 --         normalCollisions = int,
 --         specialDodges = int,
 --         specialCollisions = int
---     }
+--     },
 --     ... one for every drop type
+--     'leaderboard' = int
 -- }
 
 -- ACHIEVEMENTS
