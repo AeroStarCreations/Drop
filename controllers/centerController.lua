@@ -212,10 +212,14 @@ local function transitionOut( scene )
     if scene == "game" then
         transition.to( asc, { time=400, delay=800, y=asc.yOut, transition=easing.inQuad } )
 <<<<<<< HEAD
+<<<<<<< HEAD
         transition.to( drop, { time=700, y=drop.yOutToGame, transition=easing.inQuad } )
 =======
         transition.to( drop, { time=700, y=-drop.yOutToGame, transition=easing.inQuad } )
 >>>>>>> refactored center scene
+=======
+        transition.to( drop, { time=700, y=drop.yOutToGame, transition=easing.inQuad } )
+>>>>>>> Configured PlayFab
         transition.to( arrow, { time=2000, transition=easing.inOutBack, x=arrow.xOutToGame, y=arrow.yOut, xScale=arrow.xScaleOut, yScale=arrow.yScaleOut, rotation=getArrowRotation(), onComplete=finishListener })
         transition.to( facebook, { time=700, delay=500, x=facebook.xOut, transition=easing.inQuad } )
         transition.to( twitter, { time=700, delay=500, x=twitter.xOut, transition=easing.inQuad } )
@@ -232,10 +236,14 @@ local function transitionOut( scene )
     end
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     transitionOutAchievementButton()
 =======
     -- transitionOutAchievementButton()
 >>>>>>> refactored center scene
+=======
+    transitionOutAchievementButton()
+>>>>>>> Configured PlayFab
 end
 
 -------------------------------------------------------------------------------
