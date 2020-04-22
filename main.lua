@@ -13,14 +13,14 @@ local ld = require( "data.localData" )
 ld.init( Drop.types )
 local bg = require( "controllers.backgroundController" )
 bg.init()
-local sd = require( "data.serverData" )
+local sd = require( "data.serverDataOld" )
 sd.init()
+local sdNew = require( "data.serverData" )
 local achieve = require( "data.achievements" )
 achieve.init()
-local highScores = require( "data.highScores" )
-highScores.init()
 local ads = require( "other.advertisements2" )
 ads.init()
+local highScores = require( "data.highScores" )
 
 system.setAccelerometerInterval( 30 )
 
@@ -49,6 +49,16 @@ testText:setFillColor(0,0,0)
 -- testText.alpha = 0
 
 --------------------------------------------------------------------------------
+
+local function loginCallback( values )
+    --set display name
+    sdNew.setDisplayName(values.InfoResultPayload.AccountInfo.TitleInfo.DisplayName)
+    --get high scores
+    sdNew.getAllLeaderboardValues(highScores.storeHighScoresFromServer)
+    --get stats
+end
+
+sdNew.init(loginCallback)
 
 --------------------------------------------------------------------------------
 

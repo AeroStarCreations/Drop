@@ -206,6 +206,12 @@ settings =
         {
             publisherId = "com.gamesparks",
         },
+        -- The following blocks are for PlayFab
+        ["plugin.playfab.client"] = 
+        { 
+            publisherId = "com.playfab"
+        },
+        -- https://github.com/agramonte/idVerifySig-corona-plugin
         ["plugin.idVerifySig"] =
         {
             publisherId = "com.cabagomez",

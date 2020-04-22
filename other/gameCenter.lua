@@ -1,6 +1,7 @@
 local gameNetwork = require( "gameNetwork" )
 local idVerify = require( "plugin.idVerifySig" )
 local json = require( "json" )
+local ld = require( "data.localData" )
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "gameCenter:"
@@ -36,13 +37,24 @@ local function getPlayerInfo()
             print(TAG, json.prettify(player))
             signature.playerId = player.data.playerID
             signature.alias = player.data.alias
+            ld.setAlias( player.data.alias )
             callbackFunction( signature )
         else
             print(TAG, "gameNetwork could not get player")
         end
+        callbackFunction( "gamecenter", signature )
     end})
 end
 
+-- event value
+-- {
+--     "keyURL":"<keyURL>",
+--     "name":"IdVerifySigEvent",
+--     "salt":"<salt>",
+--     "signature":"<signature>",
+--     "timestamp":12345678,
+--     "isError":false
+-- }
 local function verifyListener( event )
     signature = event
     if not signature.isError then

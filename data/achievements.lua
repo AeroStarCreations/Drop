@@ -1,5 +1,5 @@
 local ld = require( "data.localData" )
-local sd = require( "data.serverData" )
+local sd = require( "data.serverDataOld" )
 local Drop = require( "views.other.Drop" )
 local Alert = require( "views.other.Alert" )
 local model = require( "models.achievementsModel" )

@@ -204,7 +204,7 @@ local function transitionOut( scene )
 
     if scene == "game" then
         transition.to( asc, { time=400, delay=800, y=asc.yOut, transition=easing.inQuad } )
-        transition.to( drop, { time=700, y=-drop.yOutToGame, transition=easing.inQuad } )
+        transition.to( drop, { time=700, y=drop.yOutToGame, transition=easing.inQuad } )
         transition.to( arrow, { time=2000, transition=easing.inOutBack, x=arrow.xOutToGame, y=arrow.yOut, xScale=arrow.xScaleOut, yScale=arrow.yScaleOut, rotation=getArrowRotation(), onComplete=finishListener })
         transition.to( facebook, { time=700, delay=500, x=facebook.xOut, transition=easing.inQuad } )
         transition.to( twitter, { time=700, delay=500, x=twitter.xOut, transition=easing.inQuad } )
@@ -220,7 +220,7 @@ local function transitionOut( scene )
         transition.to( settings, { time=600, delay=200, x=settings.xOut, y=settings.yOut, transition=easing.inQuad } )
     end
 
-    -- transitionOutAchievementButton()
+    transitionOutAchievementButton()
 end
 
 -------------------------------------------------------------------------------

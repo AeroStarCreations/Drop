@@ -1,6 +1,7 @@
 local ld = require( "data.localData" )
 local sd = require( "data.serverData" )
 local model = require( "models.highScoresModel" )
+local json = require("json")
 
 -- Local variables ------------------------------------------------------------[
 
@@ -9,47 +10,30 @@ local model = require( "models.highScoresModel" )
 -- Local functions ------------------------------------------------------------[
 local function checkHighScore( score, time )
     print(model.getTag(), "checkHighScore()")
-    print(model.getTag(), tostring(ld.getSpecialDropsEnabled()))
 
-    local scorerShortCodes = model.getScorerShortCodes()
+    local leaderboards = model.getLeaderboardNames()
+    local didSetRecord = false
+    local isTricky = not ld.getSpecialDropsEnabled()
 
-    if ld.getSpecialDropsEnabled() then
-        if ld.setHighScore(scorerShortCodes[1], score) then
-            print(model.getTag(), "high score set")
-            sd.setHighScore(scorerShortCodes[1], score)
+    for k, board in pairs(leaderboards) do
+        if isTricky == board.isTricky then
+            local value = score
+            if board.type == "time" then
+                value = time
+            end
+            didSetRecord = ld.setHighScore(board.name, value) or didSetRecord
         end
-        if ld.setHighScore(scorerShortCodes[3], time) then
-        print(model.getTag(), "high time set")
-            sd.setHighScore(scorerShortCodes[3], time)
-        end
-    else
-        if ld.setHighScore(scorerShortCodes[2], score) then
-        print(model.getTag(), "high tricky score set")
-            sd.setHighScore(scorerShortCodes[2], score)
-        end
-        if ld.setHighScore(scorerShortCodes[4], time) then
-        print(model.getTag(), "high tricky time set")
-            sd.setHighScore(scorerShortCodes[4], time)
-        end
+    end
+
+    if didSetRecord then
+        sd.sendToLeaderboard(score, time, isTricky)
     end
 end
 
-local function syncToDatabase()
-    for k, shortCode in pairs(model.getScorerShortCodes()) do
-        print(model.getTag(), "local high score: "..tostring(ld.getHighScore(shortCode)))
-        sd.setHighScore(shortCode, ld.getHighScore(shortCode))
-    end
-end
-
-local function syncLeaderboardListener(event)
-    -- print(model.getTag(), "syncLeaderboardListener()")
-    if sd.isLoggedIn() then
-        print(model.getTag(), "is logged in")
-        timer.cancel( event.source )
-        syncToDatabase()
-    end
-    if event.count >= 60 then
-        timer.cancel( event.source )
+local function storeHighScores(values)
+    print(model.getTag(), json.prettify(values))
+    for k, stat in pairs(values.Statistics) do
+        ld.setHighScoreFromServer(stat.StatisticName, stat.Value)
     end
 end
 -------------------------------------------------------------------------------]
@@ -61,9 +45,8 @@ v.checkHighScore = function( score, time )
     checkHighScore( score, time )
 end
 
-v.init = function()
-    print(model.getTag(), "high scores init")
-    timer.performWithDelay(1000, syncLeaderboardListener, -1)
+function v.storeHighScoresFromServer(values)
+    storeHighScores(values)
 end
 
 return v

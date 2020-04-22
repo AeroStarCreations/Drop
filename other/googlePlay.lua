@@ -1,15 +1,14 @@
 local licensing = require( "licensing" )
 local json = require( "json" )
-if system.getInfo("platformName") == "Android" then
-    local gpgs = require( "plugin.gpgs" )
-end
+local gpgs = require( "plugin.gpgs" )
+local ld = require( "data.localData" )
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "googlePlay:"
 
 local callbackFunction
 local licensingInit
-local signature
+local signature = {}
 -------------------------------------------------------------------------------]
 
 local function showErrorAlert()
@@ -45,18 +44,33 @@ local function playerListener( event )
         print(TAG, "player info retrieved")
         local player = event.players[1]
         signature.alias = player.name
+        ld.setAlias( player.name )
         signature.playerId = player.id
-        callbackFunction( signature )
     else
         print(TAG, "could not retrieve player info")
         print(TAG, "errorCode: "..event.errorCode)
         print(TAG, "errorMessage: "..event.errorMessage)
         showLoadAlert()
     end
+    callbackFunction( "google", signature )
 end
 
 local function getPlayerInfo()
     gpgs.players.load( { listener = playerListener } )
+end
+
+local function serverAuthCodeListener(event)
+    if event.name == "getServerAuthCode" then
+        signature.serverAuthCode = event.code
+        getPlayerInfo()
+    end
+end
+
+local function getServerAuthCode(event)
+    gpgs.getServerAuthCode({
+        serverId = "343244002104-106jjpricq9spkhr7e01qgr3i9njsuf1.apps.googleusercontent.com",
+        listener = serverAuthCodeListener
+    })
 end
 
 local function loginListener( event )
@@ -64,7 +78,7 @@ local function loginListener( event )
     if not event.isError then
         if event.phase == "logged in" then
             print(TAG, "GPGS: logged in")
-            getPlayerInfo()
+            getServerAuthCode()
         end
     else
         print(TAG, "GPGS: login attempt failed")
@@ -99,7 +113,7 @@ end
 -- Returned values/table ------------------------------------------------------[
 local v = {}
 
-v.init = function( callback )
+function v.init( callback )
     callbackFunction = callback
     licensingInit = licensing.init( "google" )
     if licensingInit then
