@@ -21,6 +21,7 @@ local alias
 local loginCallback
 local getLeaderboardCallback
 local getAllLeaderboardValuesCallback
+local updateLeaderboardCallback
 -------------------------------------------------------------------------------]
 
 -- Leaderboards ---------------------------------------------------------------[
@@ -49,24 +50,33 @@ local function getAllLeaderboardValues()
     playFab.GetPlayerStatistics(request, getAllLeaderboardValuesSuccessListener, leaderboardFailureListener)
 end
 
-local function setLeaderboardValue(score, time, isTricky)
+local function updateLeaderboardSuccessListener(result)
+    print(TAG, "updateLeaderboard SUCCESS")
+    print(TAG, json.prettify(result))
+    updateLeaderboardCallback(result.FunctionResult)
+end
+
+local function updateLeaderboard(score, time, isTricky)
     local trickySuffix = ""
     if isTricky then
         trickySuffix = "Tricky"
     end
     local request = {
-        Statistics = {
-            {
-                StatisticName = "HighScore" .. trickySuffix,
-                Value = score
-            },
-            {
-                StatisticName = "HighTime" .. trickySuffix,
-                Value = time
+        FunctionName = "updateLeaderboard",
+        FunctionParameter = {
+            Statistics = {
+                {
+                    StatisticName = "HighScore" .. trickySuffix,
+                    Value = score
+                },
+                {
+                    StatisticName = "HighTime" .. trickySuffix,
+                    Value = time
+                }
             }
         }
     }
-    playFab.UpdatePlayerStatistics(request, leaderboardSuccessListener, leaderboardFailureListener)
+    playFab.ExecuteCloudScript(request, updateLeaderboardSuccessListener, leaderboardFailureListener)
 end
 
 local function getLeaderboard(isScore, isTricky, isTop)
@@ -132,21 +142,6 @@ local function loginSuccessListener(result)
     if loginCallback ~= nil then
         loginCallback(result)
     end
-
-    local request = {
-        FunctionName = "helloWorld",
-        FunctionParameter = {inputValue = "Nathan Balli"}
-    }
-    playFab.ExecuteCloudScript(
-        request,
-        function(result) 
-            print("**************", json.prettify(result) )
-        end,
-        function(error) 
-            print("##############")
-            json.prettify(error) 
-        end
-    )
 end
 
 local function loginFailureListener(error)
@@ -218,8 +213,9 @@ function v.setDisplayName(name)
     setDisplayName(name)
 end
 
-function v.sendToLeaderboard(score, time, isTricky)
-    setLeaderboardValue(score, time, isTricky)
+function v.updateLeaderboard(score, time, isTricky, callback)
+    updateLeaderboardCallback = callback
+    updateLeaderboard(score, time, isTricky)
 end
 
 function v.getLeaderboard(isScore, isTricky, isTop, callback)
