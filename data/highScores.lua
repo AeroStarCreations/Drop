@@ -28,7 +28,7 @@ local function checkHighScore( score, time )
             end
             if ld.isHighScore(board.name, value) then
                 sd.updateLeaderboard(score, time, isTricky, sendToLeaderboardCallback)
-                break
+                break -- We break here because sd.updateLeaderboard() will send all value to PlayFab
             end
         end
     end

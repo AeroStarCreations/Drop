@@ -3,7 +3,7 @@
 -- USES:
 --  * Login
 --  * Achievements
---  * High scores
+--  * High scores/Leaderboards
 --  * Purchases
 --
 -- !!! Make sure to call init() when using this module !!!
@@ -25,19 +25,14 @@ local updateLeaderboardCallback
 -------------------------------------------------------------------------------]
 
 -- Leaderboards ---------------------------------------------------------------[
-local function leaderboardSuccessListener(result)
-    print(TAG, "Leaderboard SUCCESS")
-    print(TAG, json.prettify(result))
-    -- getLeaderboardCallback(result.Leaderboard)
-end
-
 local function getAllLeaderboardValuesSuccessListener(result)
     print(TAG, "Loaded all Leaderboard values")
     getAllLeaderboardValuesCallback(result)
 end
 
-local function leaderboardFailureListener(error)
-    print(TAG, "Leaderboard FAILURE")
+local function getAllLeaderboardValuesFailureListener(error)
+    print(TAG, "Failed to load all Leaderboard values")
+    print(TAG, json.prettify(error))
 end
 
 local function getAllLeaderboardValues()
@@ -47,13 +42,22 @@ local function getAllLeaderboardValues()
     for k, board in pairs(highScoresModel.getLeaderboardNames()) do
         table.insert( request.StatisticNames, board.name )
     end
-    playFab.GetPlayerStatistics(request, getAllLeaderboardValuesSuccessListener, leaderboardFailureListener)
+    playFab.GetPlayerStatistics(
+        request,
+        getAllLeaderboardValuesSuccessListener,
+        getAllLeaderboardValuesFailureListener
+    )
 end
 
 local function updateLeaderboardSuccessListener(result)
     print(TAG, "updateLeaderboard SUCCESS")
     print(TAG, json.prettify(result))
     updateLeaderboardCallback(result.FunctionResult)
+end
+
+local function updateLeaderboardFailureListener(error)
+    print(TAG, "updateLeaderboard FAILURE")
+    print(TAG, json.prettify(error))
 end
 
 local function updateLeaderboard(score, time, isTricky)
@@ -76,7 +80,22 @@ local function updateLeaderboard(score, time, isTricky)
             }
         }
     }
-    playFab.ExecuteCloudScript(request, updateLeaderboardSuccessListener, leaderboardFailureListener)
+    playFab.ExecuteCloudScript(
+        request,
+        updateLeaderboardSuccessListener,
+        updateLeaderboardFailureListener
+    )
+end
+
+local function getLeaderboardSuccessListener(result)
+    print(TAG, "Leaderboard SUCCESS")
+    print(TAG, json.prettify(result))
+    getLeaderboardCallback(result.Leaderboard)
+end
+
+local function getLeaderboardFailureListener(error)
+    print(TAG, "Leaderboard FAILURE")
+    print(TAG, json.prettify(error))
 end
 
 local function getLeaderboard(isScore, isTricky, isTop)
@@ -92,31 +111,18 @@ local function getLeaderboard(isScore, isTricky, isTop)
         StatisticName = name
     }
     if isTop then
-        playFab.GetLeaderboard(request, leaderboardSuccessListener, leaderboardFailureListener)
+        playFab.GetLeaderboard(
+            request,
+            getLeaderboardSuccessListener,
+            getLeaderboardFailureListener
+        )
     else
-        playFab.GetLeaderboardAroundPlayer(request, leaderboardSuccessListener, leaderboardFailureListener)
+        playFab.GetLeaderboardAroundPlayer(
+            request,
+            getLeaderboardSuccessListener,
+            getLeaderboardFailureListener
+        )
     end
-end
--------------------------------------------------------------------------------]
-
--- Leaderboards ---------------------------------------------------------------[
-
--- gameStats = {
---     gamesPlayed = 1,
---     deaths = int,
---     drops = {
---         {
---             type = <dropType>,
---             normalDodges = int,
---             normalCollisions = int,
---             specialDodges = int,
---             specialCollisions = int
---         },
---         --one for each drop type
---     }
--- }
-local function setPlayerGameData(gameStats)
-
 end
 -------------------------------------------------------------------------------]
 
@@ -226,10 +232,6 @@ end
 function v.getAllLeaderboardValues(callback)
     getAllLeaderboardValuesCallback = callback
     getAllLeaderboardValues()
-end
-
-function v.updatePlayerGameData(gameStats)
-    setPlayerGameData(gameStats)
 end
 
 return v
