@@ -10,5 +10,9 @@
         "Runtime",
         "graphics",
         "audio"
+    ],
+    "cSpell.words": [
+        "ipairs",
+        "tonumber"
     ]
 }
