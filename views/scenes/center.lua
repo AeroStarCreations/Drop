@@ -13,19 +13,6 @@ local ld = require( "data.localData" )
 local facebook
 local twitter
 local achievementButton
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> refactored center scene
-
-local function transitionOutAchievementButton()
-    transition.to( achievementButton, { time=400, delay=400, xScale=0.01, yScale=0.01, transition=easing.inBack } )
-end
-<<<<<<< HEAD
->>>>>>> 0e0a108... refactored center scene
-=======
->>>>>>> refactored center scene
 
 function scene:create( event )
     local group = self.view
