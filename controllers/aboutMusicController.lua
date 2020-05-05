@@ -37,10 +37,6 @@ end
 ---------------------------------------------------------------------
 -- Other Logic ------------------------------------------------------
 ---------------------------------------------------------------------
-local function backArrowListener(event)
-    print( "Back Arrow pressed" )
-    transitionOut()
-end
 
 -------------------------------------------------------------------------------
 -- Public Members -------------------------------------------------------------
@@ -56,7 +52,8 @@ function v.transitionOut()
 end
 
 function v.backArrowListener()
-    backArrowListener()
+    print( "Back Arrow pressed" )
+    transitionOut()
 end
 
 function v.linkMusicLogo(viewObject)
