@@ -88,7 +88,7 @@ local function initializeAllData( dropTypes )
     stats:set( "invincibilityUses", 0 )
     stats:set( "lifeUses", 0 )
     stats:set( "phase", 0 ) --highest level the player completed/survived
-    stats:set( "hurricaneTiem", 0 ) --seconds
+    stats:set( "hurricaneTime", 0 ) --seconds
     for k, lb in pairs(highScoresModel.getLeaderboardNames()) do
         stats:set( lb.name, 0 )
     end
@@ -261,6 +261,10 @@ v.incrementGamesPlayed = function()
     saveStats()
 end
 
+v.setGamesPlayedIfHigher = function(newValue)
+    stats:setIfHigher("gamesPlayed", newValue)
+end
+
 v.getDeaths = function()
     return stats:get( "deaths" )
 end
@@ -268,6 +272,10 @@ end
 v.incrementsDeaths = function()
     stats:increment( "deaths" )
     saveStats()
+end
+
+v.setDeathsIfHigher = function(newValue)
+    stats:setIfHigher("deaths", newValue)
 end
 
 v.getInvincibilityUses = function()
@@ -286,6 +294,26 @@ end
 v.incrementLifeUses = function()
     stats:increment( "lifeUses" )
     saveStats()
+end
+
+v.getDropTypeStats = function(dropType)
+    return stats:get(dropType)
+end
+
+v.setDropTypeStatsIfHigher = function(dropType, data)
+    local dropTable = stats:get(dropType)
+    if data.normalDodges > dropTable.normalDodges then
+        dropTable.normalDodges = data.normalDodges
+    end
+    if data.normalCollisions > dropTable.normalCollisions then
+        dropTable.normalCollisions = data.normalCollisions
+    end
+    if data.specialDodges > dropTable.specialDodges then
+        dropTable.specialDodges = data.specialDodges
+    end
+    if data.specialCollisions > dropTable.specialCollisions then
+        dropTable.specialCollisions = data.specialCollisions
+    end
 end
 
 v.getDropNormalDodges = function( dropType )
@@ -357,7 +385,7 @@ v.setHighScoreFromServer = function( name, value )
 end
 
 v.getHighScore = function( name )
-    return stats:get( name )
+    return stats:get( name ) or 0
 end
 
 v.getPhase = function()

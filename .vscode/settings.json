@@ -10,5 +10,8 @@
         "Runtime",
         "graphics",
         "audio"
+    ],
+    "cSpell.words": [
+        "tonumber"
     ]
 }

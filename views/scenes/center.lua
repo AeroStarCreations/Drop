@@ -8,6 +8,7 @@ local widget = require( "widget" )
 local GGTwitter = require( "thirdParty.GGTwitter" )
 local logoModule = require( "other.logoModule" )
 local ld = require( "data.localData" )
+local gameStatsUtil = require( "data.gameStatsUtil" )
 
 -- Precalls
 local facebook
@@ -292,6 +293,10 @@ function scene:create( event )
     achievementButton.xScale = 0.01
     achievementButton.yScale = 0.01
     controller.linkAchievementButton(achievementButton)
+    -------------------------------------------------------------
+
+    ----------------------------------------------Sync Game Stats
+    gameStatsUtil.sync()
     -------------------------------------------------------------
 
 end

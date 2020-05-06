@@ -12,7 +12,6 @@ local playFabClientPlugin = require("plugin.playfab.client")
 local gameNetwork = require("other.gameNetworkNew")
 local json = require("json")
 local highScoresModel = require("models.highScoresModel")
-local ld = require("data.localData")
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "serverData:"
@@ -22,6 +21,8 @@ local loginCallback
 local getLeaderboardCallback
 local getAllLeaderboardValuesCallback
 local updateLeaderboardCallback
+local getPlayerStatsCallback
+local isLoggedIn
 -------------------------------------------------------------------------------]
 
 -- Leaderboards ---------------------------------------------------------------[
@@ -40,13 +41,9 @@ local function getAllLeaderboardValues()
         StatisticNames = {}
     }
     for k, board in pairs(highScoresModel.getLeaderboardNames()) do
-        table.insert( request.StatisticNames, board.name )
+        table.insert(request.StatisticNames, board.name)
     end
-    playFab.GetPlayerStatistics(
-        request,
-        getAllLeaderboardValuesSuccessListener,
-        getAllLeaderboardValuesFailureListener
-    )
+    playFab.GetPlayerStatistics(request, getAllLeaderboardValuesSuccessListener, getAllLeaderboardValuesFailureListener)
 end
 
 local function updateLeaderboardSuccessListener(result)
@@ -80,11 +77,7 @@ local function updateLeaderboard(score, time, isTricky)
             }
         }
     }
-    playFab.ExecuteCloudScript(
-        request,
-        updateLeaderboardSuccessListener,
-        updateLeaderboardFailureListener
-    )
+    playFab.ExecuteCloudScript(request, updateLeaderboardSuccessListener, updateLeaderboardFailureListener)
 end
 
 local function getLeaderboardSuccessListener(result)
@@ -111,18 +104,58 @@ local function getLeaderboard(isScore, isTricky, isTop)
         StatisticName = name
     }
     if isTop then
-        playFab.GetLeaderboard(
-            request,
-            getLeaderboardSuccessListener,
-            getLeaderboardFailureListener
-        )
+        playFab.GetLeaderboard(request, getLeaderboardSuccessListener, getLeaderboardFailureListener)
     else
-        playFab.GetLeaderboardAroundPlayer(
-            request,
-            getLeaderboardSuccessListener,
-            getLeaderboardFailureListener
-        )
+        playFab.GetLeaderboardAroundPlayer(request, getLeaderboardSuccessListener, getLeaderboardFailureListener)
     end
+end
+-------------------------------------------------------------------------------]
+
+-- Player Stats ---------------------------------------------------------------[
+-- result = {
+--     Data = {
+--         statName = {
+--             Value = "1",
+--             Permission = "Private",
+--             LastUpdated = "2020-05-05T03:10:50.681Z"
+--         }
+--     },
+--     DataVersion = 1
+-- }
+local function getUserDataSuccessListener(result)
+    print(TAG, "get user data SUCCESS")
+    -- print(TAG, json.prettify(result))
+    getPlayerStatsCallback(result.Data)
+end
+
+local function getUserDataFailureListener(error)
+    print(TAG, "get user data FAILURE")
+    -- print(TAG, json.prettify(error))
+    getPlayerStatsCallback(error)
+end
+
+local function getPlayerStats(keys)
+    local request = {
+        Keys = keys
+    }
+    playFab.GetUserData(request, getUserDataSuccessListener, getUserDataFailureListener)
+end
+
+local function updateUserDataSuccessListener(result)
+    print(TAG, "update user data SUCCESS")
+    -- print(TAG, json.prettify(result))
+end
+
+local function updateUserDataFailureListener(error)
+    print(TAG, "update user data FAILURE")
+    -- print(TAG, json.prettify(error))
+end
+
+local function updatePlayerStats(gameStats)
+    local request = {
+        Data = gameStats
+    }
+    playFab.UpdateUserData(request, updateUserDataSuccessListener, updateUserDataFailureListener)
 end
 -------------------------------------------------------------------------------]
 
@@ -135,9 +168,11 @@ end
 local function setDisplayName(displayName)
     if alias and string.len(alias) >= 3 then --PlayFab requires a minimum display name length of 3
         if displayName == nil or displayName ~= alias then
-            playFab.UpdateUserTitleDisplayName({
-                DisplayName = displayName
-            })
+            playFab.UpdateUserTitleDisplayName(
+                {
+                    DisplayName = displayName
+                }
+            )
         end
     end
 end
@@ -145,6 +180,7 @@ end
 local function loginSuccessListener(result)
     print(TAG, "PlayFab login SUCCESS: " .. result.PlayFabId)
     print(TAG, "Welcome: " .. result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName)
+    isLoggedIn = true
     if loginCallback ~= nil then
         loginCallback(result)
     end
@@ -165,7 +201,7 @@ local function loginWithGameCenter(signature)
         Signature = signature.signature,
         Timestamp = signature.timestamp,
         PlayerId = signature.playerId,
-        InfoRequestParameters = { GetUserAccountInfo = true }
+        InfoRequestParameters = {GetUserAccountInfo = true}
     }
     playFab.LoginWithGameCenter(loginRequest, loginSuccessListener, loginFailureListener)
 end
@@ -174,13 +210,12 @@ local function loginWithGoogle(signature)
     local loginRequest = {
         CreateAccount = true,
         ServerAuthCode = signature.serverAuthCode,
-        InfoRequestParameters = { GetUserAccountInfo = true }
+        InfoRequestParameters = {GetUserAccountInfo = true}
     }
     playFab.LoginWithGoogleAccount(loginRequest, loginSuccessListener, loginFailureListener)
 end
 
 local function loginWithDeviceId()
-
 end
 
 local function gameNetworkCallback(type, signature)
@@ -194,7 +229,7 @@ local function gameNetworkCallback(type, signature)
     end
 end
 -------------------------------------------------------------------------------]
-    
+
 -- Returned values/table ------------------------------------------------------[
 local v = {}
 
@@ -202,10 +237,11 @@ function v.init(callback)
     loginCallback = callback
     setupPlayFab()
     if system.getInfo("environment") == "simulator" then
-        playFab.LoginWithCustomID({
+        playFab.LoginWithCustomID(
+            {
                 CustomId = "TestCustomId",
                 CreateAccount = true,
-                InfoRequestParameters = { GetUserAccountInfo = true }
+                InfoRequestParameters = {GetUserAccountInfo = true}
             },
             loginSuccessListener,
             loginFailureListener
@@ -213,6 +249,10 @@ function v.init(callback)
     else
         gameNetwork.login(gameNetworkCallback)
     end
+end
+
+function v.isLoggedIn()
+    return isLoggedIn
 end
 
 function v.setDisplayName(name)
@@ -232,6 +272,15 @@ end
 function v.getAllLeaderboardValues(callback)
     getAllLeaderboardValuesCallback = callback
     getAllLeaderboardValues()
+end
+
+function v.getPlayerStats(keys, callback)
+    getPlayerStatsCallback = callback
+    getPlayerStats()
+end
+
+function v.updatePlayerStats(playerStats)
+    updatePlayerStats(playerStats)
 end
 
 return v
