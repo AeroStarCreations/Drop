@@ -13,6 +13,7 @@ local playFabDataKeys = {
 local syncGameStatsTimeout = 10
 
 local syncGameStatsCounter
+local syncGameStatsAndAchievementsCallback
 
 --[[
 This method gets the value 'gameStats' from the PlayFab method GetUserData().
@@ -24,6 +25,10 @@ local function setLocalGameStatsIfHigher(gameStats)
         local generalGameStats = json.decode(gameStats.generalGameStats.Value)
         ld.setGamesPlayedIfHigher(generalGameStats.gamesPlayed)
         ld.setDeathsIfHigher(generalGameStats.deaths)
+        ld.setPhase(generalGameStats.highestLevel)
+        ld.setHurricaneTime(generalGameStats.hurricaneTime)
+        ld.setShieldUsesIfHigher(generalGameStats.shieldUses)
+        ld.setLifeUsesIfHigher(generalGameStats.reviveUses)
     end
 
     if gameStats.scoresAndTimes then
@@ -56,7 +61,11 @@ local function getGameStatsObjectToSendToPlayFab()
 
     local generalGameStats = {
         gamesPlayed = ld.getGamesPlayed(),
-        deaths = ld.getDeaths()
+        deaths = ld.getDeaths(),
+        highestLevel = ld.getPhase(),
+        hurricaneTime = ld.getHurricaneTime(),
+        shieldUses = ld.getInvincibilityUses(),
+        reviveUses = ld.getLifeUses()
     }
     gameStats.generalGameStats = json.encode(generalGameStats)
 
@@ -76,8 +85,8 @@ local function getGameStatsObjectToSendToPlayFab()
 end
 
 --[[
-Read game stats from PlayFab and update local game stats to highest values.
-Write local game stats (with new highest values) to PlayFab.
+-- Read game stats from PlayFab and update local game stats to highest values.
+-- Write local game stats (with new highest values) to PlayFab.
 --]]
 local function getPlayerStatsCallback(results)
     if results.error then
@@ -85,32 +94,33 @@ local function getPlayerStatsCallback(results)
     end
     setLocalGameStatsIfHigher(results)
     local gameStats = getGameStatsObjectToSendToPlayFab()
-    sd.updatePlayerStats(gameStats)
+    sd.updateGameStatsAndAchievements(gameStats, syncGameStatsAndAchievementsCallback)
 end
 
 --[[
-Wait up to 10 seconds for user to be logged in.
-Once logged in, sync game stats on PlayFab with local game stats 
+-- Wait up to 10 seconds for user to be logged in.
+-- Once logged in, syncGameStatsAndAchievements game stats on PlayFab with local game stats 
 --]]
-local function syncGameStats()
+local function syncGameStatsAndAchievements()
     if syncGameStatsCounter >= syncGameStatsTimeout then
         return
     end
     syncGameStatsCounter = syncGameStatsCounter + 1
 
     if (sd.isLoggedIn()) then
-        sd.getPlayerStats(playFabDataKeys, getPlayerStatsCallback)
+        sd.getGameStats(playFabDataKeys, getPlayerStatsCallback)
     else
-        timer.performWithDelay(1000, syncGameStats)
+        timer.performWithDelay(1000, syncGameStatsAndAchievements)
     end
 end
 
 -- Public Members -------------------------------------------------------------[
 local v = {}
 
-function v.sync()
+function v.syncGameStatsAndAchievements(callback)
+    syncGameStatsAndAchievementsCallback = callback
     syncGameStatsCounter = 0
-    syncGameStats()
+    syncGameStatsAndAchievements()
 end
 
 return v

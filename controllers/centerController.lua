@@ -5,8 +5,10 @@
 local logoModule = require( "other.logoModule" )
 local cp = require( "composer" )
 local ld = require( "data.localData" )
+local sd = require( "data.serverData" )
 local bg = require( "controllers.backgroundController" )
 local Alert = require( "views.other.Alert" )
+local gameStatsUtil = require( "data.gameStatsUtil" )
 
 -- View Objects
 local asc
@@ -136,19 +138,60 @@ local function transitionOutAchievementButton()
     transition.to( achievementButton, { time=400, delay=400, xScale=0.01, yScale=0.01, transition=easing.inBack } )
 end
 
+local function claimAchievementRewardCallback(result)
+    if (result.Error) then
+        print('there was an error')
+        Alert:new(
+            "Bummer",
+            "Could not claim reward. Please check your network connection and try again.",
+            { "Okay" }
+        )
+    else
+        result = result.FunctionResult
+        if result.Lives then
+            print('rewarded lives')
+            rewardLives = result.Lives.BalanceChange
+            ld.addLives(rewardLives)
+        end
+        if result.Shields then
+            print('rewarded shields')
+            rewardInvincibilites = result.Shields.BalanceChange
+            ld.addInvincibility(rewardInvincibilites)
+        end
+        ld.deleteUnawardedAchievement(result.achievementId)
+        --Update achievementButton
+        local unawardedAchievementCount = ld.unawardedAchievementCount()
+        achievementButton:setLabel( unawardedAchievementCount )
+        if unawardedAchievementCount > 0 then
+            transitionOutAchievementButton()
+        end
+        showRewardAnimation()
+    end
+end
+
+local function claimAchievementRewardFromPlayFab(event)
+    local achievementId = event.param
+    sd.claimAchievementReward(achievementId, claimAchievementRewardCallback)
+end
+
 local function achievementListener( event )
     -- Get achievement reward from ld
-    local reward = ld.getUnawardedAchievementReward()
-    --Credit awards
-    rewardLives = reward.lives
-    rewardInvincibilites = reward.invincibilities
-    ld.addLives( rewardLives )
-    ld.addInvincibility( rewardInvincibilites )
+    local achievement = ld.getUnawardedAchievement()
     --Display achievement
-    local alert = Alert:new( "Congrats!", reward.description, { "Claim!" }, showRewardAnimation )
-    --Update achievementButton
-    achievementButton:setLabel( ld.quantityUnawardedAchievements() )
-    if not ld.hasUnawardedAchievement() then transitionOutAchievementButton() end
+    local alert = Alert:new(
+        "Congrats!",
+        achievement.description,
+        { "Claim!" },
+        claimAchievementRewardFromPlayFab,
+        achievement.id
+    )
+end
+
+local function syncCallback(completedAchievements)
+    for k,v in pairs(completedAchievements) do
+        ld.addUnawardedAchievement(v)
+    end
+    achievementButton:setLabel(ld.unawardedAchievementCount())
 end
 
 ---------------------------------------------------------------------
@@ -299,6 +342,10 @@ end
 
 function v.transitionOut()
     transitionOut()
+end
+
+function v.syncGameStatsAndAchievements()
+    gameStatsUtil.syncGameStatsAndAchievements(syncCallback)
 end
 
 return v

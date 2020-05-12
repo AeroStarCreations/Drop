@@ -8,7 +8,6 @@ local widget = require( "widget" )
 local GGTwitter = require( "thirdParty.GGTwitter" )
 local logoModule = require( "other.logoModule" )
 local ld = require( "data.localData" )
-local gameStatsUtil = require( "data.gameStatsUtil" )
 
 -- Precalls
 local facebook
@@ -281,7 +280,7 @@ function scene:create( event )
         x = display.actualContentWidth - 1.5 * circleRadius,
         y = 0 + 1.5 * circleRadius,
         onRelease = controller.achievementButtonListener,
-        label = ld.quantityUnawardedAchievements(),
+        label = ld.unawardedAchievementCount(),
         labelColor = { default={ 1, 1, 1 }, over={ 0.9, 0.9, 0.9 } },
         font = g.comBold,
         fontSize = 40,
@@ -293,10 +292,6 @@ function scene:create( event )
     achievementButton.xScale = 0.01
     achievementButton.yScale = 0.01
     controller.linkAchievementButton(achievementButton)
-    -------------------------------------------------------------
-
-    ----------------------------------------------Sync Game Stats
-    gameStatsUtil.sync()
     -------------------------------------------------------------
 
 end
@@ -312,28 +307,8 @@ function scene:show( event )
         g.show()
         
         cp.loadScene( "views.scenes.game2" )
-        
-        ----------------------------------------Show and Update Achievement Indicator
-        -- For testing
-        ld.addUnawardedAchievement( {
-            shortCode = "shortCode",
-            reward = {
-                lives = 1,
-                invincibilities = 1,
-                description = "the description"
-            }
-        })
-        ld.addUnawardedAchievement( {
-            shortCode = "shortCode",
-            reward = {
-                lives = 1,
-                invincibilities = 1,
-                description = "the description"
-            }
-        })
 
-        achievementButton:setLabel( ld.quantityUnawardedAchievements() )
-        ---------------------------------------------------------------------------]]
+        controller.syncGameStatsAndAchievements()
         
         controller.transitionIn()
 

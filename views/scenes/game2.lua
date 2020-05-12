@@ -8,7 +8,6 @@ local Drop = require( "views.other.Drop" )
 local bg = require( "controllers.backgroundController" )
 local timer = require( "other.timers" )
 local json = require( "json" )
-local achieve = require( "data.achievements" )
 local highScores = require( "data.highScores" )
 
 local arrowIsWorking = true
@@ -456,9 +455,6 @@ local function gameStopped( isPaused )
             timeText = playTime.text
         }
     })
-    -- The followin is for tracking achievements
-    --TODO: save phase
-    --TODO: save hurricaneTimer
 end
 
 function scene:pauseGame()
@@ -477,8 +473,6 @@ function scene:gameIsActuallyOver()
     -- Save phase and hurricaneTime for achievement checks
     ld.setPhase( lvlParams.phase )
     ld.setHurricaneTime( hurricaneTime )
-    -- Check achievements
-    achieve.checkAchievements()
     -- Check high scores
     highScores.checkHighScore( score, totalGameTime )
 end

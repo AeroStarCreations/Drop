@@ -21,7 +21,9 @@ local loginCallback
 local getLeaderboardCallback
 local getAllLeaderboardValuesCallback
 local updateLeaderboardCallback
-local getPlayerStatsCallback
+local getGameStatsCallback
+local updateGameStatsAndAchievementsCallback
+local claimAchievementRewardCallback
 local isLoggedIn
 -------------------------------------------------------------------------------]
 
@@ -125,37 +127,73 @@ end
 local function getUserDataSuccessListener(result)
     print(TAG, "get user data SUCCESS")
     -- print(TAG, json.prettify(result))
-    getPlayerStatsCallback(result.Data)
+    getGameStatsCallback(result.Data)
 end
 
 local function getUserDataFailureListener(error)
     print(TAG, "get user data FAILURE")
     -- print(TAG, json.prettify(error))
-    getPlayerStatsCallback(error)
+    getGameStatsCallback(error)
 end
 
-local function getPlayerStats(keys)
+local function getGameStats(keys)
     local request = {
         Keys = keys
     }
     playFab.GetUserData(request, getUserDataSuccessListener, getUserDataFailureListener)
 end
 
-local function updateUserDataSuccessListener(result)
+local function updateGameStatsAndAchievementsSuccessListener(result)
     print(TAG, "update user data SUCCESS")
-    -- print(TAG, json.prettify(result))
+    print(TAG, json.prettify(result))
+    if updateGameStatsAndAchievementsCallback then
+        updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
+    end
 end
 
-local function updateUserDataFailureListener(error)
+local function updateGameStatsAndAchievementsFailureListener(error)
     print(TAG, "update user data FAILURE")
     -- print(TAG, json.prettify(error))
 end
 
-local function updatePlayerStats(gameStats)
+local function updateGameStatsAndAchievements(gameStats)
     local request = {
-        Data = gameStats
+        FunctionName = "updateUserDataAndCheckAchievements",
+        FunctionParameter = {
+            Data = gameStats
+        }
     }
-    playFab.UpdateUserData(request, updateUserDataSuccessListener, updateUserDataFailureListener)
+    playFab.ExecuteCloudScript(
+        request,
+        updateGameStatsAndAchievementsSuccessListener,
+        updateGameStatsAndAchievementsFailureListener
+    )
+end
+-------------------------------------------------------------------------------]
+
+-- Achievements ---------------------------------------------------------------[
+local function claimAchievementRewardSuccessListener(result)
+    print(TAG, "claim achievement reward SUCCESS")
+    claimAchievementRewardCallback(result)
+end
+
+local function claimAchievementRewardFailureListener(error)
+    print(TAG, "claim achievement reward FAILURE")
+    claimAchievementRewardCallback(error)
+end
+
+local function claimAchievementReward(achievementId)
+    local request = {
+        FunctionName = "claimAchievementReward",
+        FunctionParameter = {
+            achievementId = achievementId
+        }
+    }
+    playFab.ExecuteCloudScript(
+        request,
+        claimAchievementRewardSuccessListener,
+        claimAchievementRewardFailureListener
+    )
 end
 -------------------------------------------------------------------------------]
 
@@ -274,13 +312,19 @@ function v.getAllLeaderboardValues(callback)
     getAllLeaderboardValues()
 end
 
-function v.getPlayerStats(keys, callback)
-    getPlayerStatsCallback = callback
-    getPlayerStats()
+function v.getGameStats(keys, callback)
+    getGameStatsCallback = callback
+    getGameStats(keys)
 end
 
-function v.updatePlayerStats(playerStats)
-    updatePlayerStats(playerStats)
+function v.updateGameStatsAndAchievements(gameStats, callback)
+    updateGameStatsAndAchievementsCallback = callback
+    updateGameStatsAndAchievements(gameStats)
+end
+
+function v.claimAchievementReward(achievementId, callback)
+    claimAchievementRewardCallback = callback
+    claimAchievementReward(achievementId)
 end
 
 return v
