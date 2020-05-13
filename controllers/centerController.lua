@@ -3,6 +3,7 @@
 -------------------------------------------------------------------------------
 -- Imports
 local logoModule = require( "other.logoModule" )
+local g = require( "other.globalVariables" )
 local cp = require( "composer" )
 local ld = require( "data.localData" )
 local sd = require( "data.serverData" )
@@ -134,7 +135,13 @@ local function showRewardAnimation()
     playAnimation()
 end
 
+local function transitionInAchievementButton()
+    achievementButton.isVisible = true;
+    transition.to( achievementButton, { delay=300, time=300, xScale=1, yScale=1, transition=easing.outBack } )
+end
+
 local function transitionOutAchievementButton()
+    achievementButton.isVisible = false
     transition.to( achievementButton, { time=400, delay=400, xScale=0.01, yScale=0.01, transition=easing.inBack } )
 end
 
@@ -149,12 +156,10 @@ local function claimAchievementRewardCallback(result)
     else
         result = result.FunctionResult
         if result.Lives then
-            print('rewarded lives')
             rewardLives = result.Lives.BalanceChange
             ld.addLives(rewardLives)
         end
         if result.Shields then
-            print('rewarded shields')
             rewardInvincibilites = result.Shields.BalanceChange
             ld.addInvincibility(rewardInvincibilites)
         end
@@ -162,7 +167,7 @@ local function claimAchievementRewardCallback(result)
         --Update achievementButton
         local unawardedAchievementCount = ld.unawardedAchievementCount()
         achievementButton:setLabel( unawardedAchievementCount )
-        if unawardedAchievementCount > 0 then
+        if unawardedAchievementCount == 0 then
             transitionOutAchievementButton()
         end
         showRewardAnimation()
@@ -191,7 +196,14 @@ local function syncCallback(completedAchievements)
     for k,v in pairs(completedAchievements) do
         ld.addUnawardedAchievement(v)
     end
-    achievementButton:setLabel(ld.unawardedAchievementCount())
+    local count = ld.unawardedAchievementCount()
+    if count > 0 then
+        achievementButton:setLabel(ld.unawardedAchievementCount())
+        if not achievementButton.isVisible then
+            transitionInAchievementButton()
+        end
+    end
+    --transition in if invisible
 end
 
 ---------------------------------------------------------------------
@@ -220,7 +232,7 @@ local function transitionIn()
     transition.to( settings, { time=600, x=settings.xIn, y=settings.yIn, transition=easing.outQuad } )
     
     if ld.hasUnawardedAchievement() then
-        transition.to( achievementButton, { delay=300, time=300, xScale=1, yScale=1, transition=easing.outBack } )
+        transitionInAchievementButton()
     end
     
     if gameWasJustOpened() then

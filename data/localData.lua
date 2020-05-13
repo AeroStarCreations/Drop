@@ -112,6 +112,7 @@ local v = {}
 
 -- First -----------------------------[
 v.init = function( dropTypes )
+    achievements:enableIntegrityControl()
     purchases:enableIntegrityControl()
     stats:enableIntegrityControl()
     social:enableIntegrityControl()
@@ -414,15 +415,6 @@ end
 --------------------------------------]
 
 -- Achievements ----------------------[
-v.setAchievementComplete = function( shortCode )
-    achievements:set( shortCode, true )
-    saveAchievements()
-end
-
-v.getAchievementComplete = function( shortCode )
-    return achievements:get( shortCode )
-end
-
 v.addUnawardedAchievement = function( achievement )
     local unawarded = achievements:get( "unawarded" )
     unawarded[achievement.id] = achievement;

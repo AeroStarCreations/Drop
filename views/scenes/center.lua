@@ -291,6 +291,7 @@ function scene:create( event )
     group:insert(achievementButton)
     achievementButton.xScale = 0.01
     achievementButton.yScale = 0.01
+    achievementButton.isVisible = false
     controller.linkAchievementButton(achievementButton)
     -------------------------------------------------------------
 
