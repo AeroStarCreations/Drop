@@ -9,6 +9,13 @@ settings =
             "portrait",
         },
     },
+    licence = 
+    {
+        google =
+        {
+            key = "MY_APP_KEY", --TODO
+        }
+    },
     iphone =
     {
         plist =

@@ -24,6 +24,8 @@ local updateLeaderboardCallback
 local getGameStatsCallback
 local updateGameStatsAndAchievementsCallback
 local claimAchievementRewardCallback
+local getProductInfoCallback
+local validateReceiptCallback
 local isLoggedIn
 -------------------------------------------------------------------------------]
 
@@ -145,7 +147,6 @@ end
 
 local function updateGameStatsAndAchievementsSuccessListener(result)
     print(TAG, "update user data SUCCESS")
-    print(TAG, json.prettify(result))
     if updateGameStatsAndAchievementsCallback then
         updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
     end
@@ -197,6 +198,96 @@ local function claimAchievementReward(achievementId)
 end
 -------------------------------------------------------------------------------]
 
+-- Store ----------------------------------------------------------------------[
+-- result = {
+--     Catalog = {
+--         {
+--             Description = string,
+--             Tags = {string},
+--             Bundle = {
+--                 BundledItems = {},
+--                 BundledResultTables = {},
+--                 BundledVirtualCurrencies = {
+--                     SH = int,
+--                     LF = int
+--                 }
+--             },
+--             CanBecomeCharacter = boolean,
+--             DisplayName = string,
+--             InitialLimitedEditionCount = int,
+--             Consumable = {},
+--             IsLimitedEdition = boolean,
+--             IsTradable = boolean,
+--             VirtualCurrencyPrices = {
+--                 RM = int
+--             },
+--             CatalogVersion = string,
+--             IsStackable = boolean,
+--             ItemId = string
+--         },
+--         ...
+--     }
+-- }
+
+local function getProductInfoSuccessListener(result)
+    print(TAG, "get product info SUCCESS")
+    getProductInfoCallback(result)
+end
+
+local function getProductInfoFailureListener(error)
+    print(TAG, "get product info FAILURE")
+    getProductInfoCallback(error)
+end
+
+local function getProductInfo()
+    local request = {
+        CatalogVersion = nil  --this gets the default catalog
+    }
+    playFab.GetCatalogItems(
+        request,
+        getProductInfoSuccessListener,
+        getProductInfoFailureListener
+    )
+end
+
+local function validateReceiptSuccessListener(result)
+    print(TAG, "validate receipt SUCCESS")
+    validateReceiptCallback(result)
+end
+
+local function validateReceiptFailureListener(error)
+    print(TAG, "validate receipt FAILURE")
+    validateReceiptCallback(error)
+end
+
+local function validateGoogleReceipt(currencyCode, purchasePrice, receipt, signature)
+    local request = {
+        CurrencyCode = currencyCode,
+        PurchasePrice = purchasePrice,
+        ReceiptJson = receipt,
+        Signature = signature
+    }
+    playFab.ValidateGooglePlayPurchase(
+        request,
+        validateReceiptSuccessListener,
+        validateReceiptFailureListener
+    )
+end
+
+local function validateAppleReceipt(currencyCode, purchasePrice, receipt)
+    local request = {
+        CurrencyCode = currencyCode,
+        PurchasePrice = purchasePrice,
+        ReceiptData = receipt,
+    }
+    playFab.ValidateIOSReceipt(
+        request,
+        validateReceiptSuccessListener,
+        validateReceiptFailureListener
+    )
+end
+-------------------------------------------------------------------------------]
+    
 -- Authentication -------------------------------------------------------------[
 local function setupPlayFab()
     playFab = playFabClientPlugin.PlayFabClientApi
@@ -325,6 +416,21 @@ end
 function v.claimAchievementReward(achievementId, callback)
     claimAchievementRewardCallback = callback
     claimAchievementReward(achievementId)
+end
+
+function v.getProductInformationFromServer(callback)
+    getProductInfoCallback = callback
+    getProductInfo()
+end
+
+function v.validateGoogleReceipt(currencyCode, purchasePrice, receipt, signature, callback)
+    validateReceiptCallback = callback
+    validateGoogleReceipt(currencyCode, purchasePrice, receipt, signature)
+end
+
+function v.validateAppleReceipt(currencyCode, purchasePrice, receipt, callback)
+    validateReceiptCallback = callback
+    validateAppleReceipt(currencyCode, purchasePrice, receipt)
 end
 
 return v

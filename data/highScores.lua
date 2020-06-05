@@ -35,7 +35,6 @@ local function checkHighScore( score, time )
 end
 
 local function storeHighScores(values)
-    print(model.getTag(), json.prettify(values))
     for k, stat in pairs(values.Statistics) do
         ld.setHighScoreFromServer(stat.StatisticName, stat.Value)
     end
