@@ -135,21 +135,16 @@ local function showRewardAnimation()
     playAnimation()
 end
 
-<<<<<<< HEAD
-=======
 local function transitionInAchievementButton()
     achievementButton.isVisible = true;
     transition.to( achievementButton, { delay=300, time=300, xScale=1, yScale=1, transition=easing.outBack } )
 end
 
->>>>>>> playfab
 local function transitionOutAchievementButton()
     achievementButton.isVisible = false
     transition.to( achievementButton, { time=400, delay=400, xScale=0.01, yScale=0.01, transition=easing.inBack } )
 end
 
-<<<<<<< HEAD
-=======
 local function claimAchievementRewardCallback(result)
     if (result.Error) then
         print('there was an error')
@@ -184,7 +179,6 @@ local function claimAchievementRewardFromPlayFab(event)
     sd.claimAchievementReward(achievementId, claimAchievementRewardCallback)
 end
 
->>>>>>> playfab
 local function achievementListener( event )
     -- Get achievement reward from ld
     local achievement = ld.getUnawardedAchievement()
@@ -238,11 +232,7 @@ local function transitionIn()
     transition.to( settings, { time=600, x=settings.xIn, y=settings.yIn, transition=easing.outQuad } )
     
     if ld.hasUnawardedAchievement() then
-<<<<<<< HEAD
-        transition.to( achievementButton, { delay=300, time=300, xScale=1, yScale=1, transition=easing.outBack } )
-=======
         transitionInAchievementButton()
->>>>>>> playfab
     end
     
     if gameWasJustOpened() then
