@@ -6,13 +6,18 @@ local json = require("json")
 -- Local variables ------------------------------------------------------------[
 
 -------------------------------------------------------------------------------]
-    
+
 -- Local functions ------------------------------------------------------------[
+local function sendToLeaderboardCallback(response)
+    for k, stat in pairs(response) do
+        ld.setHighScore(stat.StatisticName, stat.Value)
+    end
+end
+
 local function checkHighScore( score, time )
     print(model.getTag(), "checkHighScore()")
 
     local leaderboards = model.getLeaderboardNames()
-    local didSetRecord = false
     local isTricky = not ld.getSpecialDropsEnabled()
 
     for k, board in pairs(leaderboards) do
@@ -21,17 +26,15 @@ local function checkHighScore( score, time )
             if board.type == "time" then
                 value = time
             end
-            didSetRecord = ld.setHighScore(board.name, value) or didSetRecord
+            if ld.isHighScore(board.name, value) then
+                sd.updateLeaderboard(score, time, isTricky, sendToLeaderboardCallback)
+                break -- We break here because sd.updateLeaderboard() will send all value to PlayFab
+            end
         end
-    end
-
-    if didSetRecord then
-        sd.sendToLeaderboard(score, time, isTricky)
     end
 end
 
 local function storeHighScores(values)
-    print(model.getTag(), json.prettify(values))
     for k, stat in pairs(values.Statistics) do
         ld.setHighScoreFromServer(stat.StatisticName, stat.Value)
     end
@@ -41,7 +44,7 @@ end
 -- Returned values/table ------------------------------------------------------[
 local v = {}
 
-v.checkHighScore = function( score, time )
+function v.checkHighScore( score, time )
     checkHighScore( score, time )
 end
 

@@ -72,6 +72,9 @@ local function createView( alert )
     local function buttonHandler(event)
         local index = tonumber(event.target.id)
         local event = { index=index }
+        if alert.listenerParam then 
+            event.param = alert.listenerParam
+        end
         if alert.listener ~= nil then
             alert.listener(event)
         end
@@ -154,7 +157,7 @@ end
 local Alert = {}
 local Alert_mt = { __index = Alert }
 
-function Alert:new( title, message, buttonLabels, listener )
+function Alert:new( title, message, buttonLabels, listener, listenerParam )
     local self = {}
     setmetatable(self, Alert_mt)
 
@@ -162,6 +165,7 @@ function Alert:new( title, message, buttonLabels, listener )
     self.message = message
     self.buttonLabels = buttonLabels
     self.listener = listener
+    self.listenerParam = listenerParam
     self.viewGroup = display.newGroup()
     self.backgroundListener = function() return true end
 

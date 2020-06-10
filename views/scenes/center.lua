@@ -280,7 +280,7 @@ function scene:create( event )
         x = display.actualContentWidth - 1.5 * circleRadius,
         y = 0 + 1.5 * circleRadius,
         onRelease = controller.achievementButtonListener,
-        label = ld.quantityUnawardedAchievements(),
+        label = ld.unawardedAchievementCount(),
         labelColor = { default={ 1, 1, 1 }, over={ 0.9, 0.9, 0.9 } },
         font = g.comBold,
         fontSize = 40,
@@ -291,6 +291,7 @@ function scene:create( event )
     group:insert(achievementButton)
     achievementButton.xScale = 0.01
     achievementButton.yScale = 0.01
+    achievementButton.isVisible = false
     controller.linkAchievementButton(achievementButton)
     -------------------------------------------------------------
 
@@ -307,28 +308,8 @@ function scene:show( event )
         g.show()
         
         cp.loadScene( "views.scenes.game2" )
-        
-        ----------------------------------------Show and Update Achievement Indicator
-        -- For testing
-        ld.addUnawardedAchievement( {
-            shortCode = "shortCode",
-            reward = {
-                lives = 1,
-                invincibilities = 1,
-                description = "the description"
-            }
-        })
-        ld.addUnawardedAchievement( {
-            shortCode = "shortCode",
-            reward = {
-                lives = 1,
-                invincibilities = 1,
-                description = "the description"
-            }
-        })
 
-        achievementButton:setLabel( ld.quantityUnawardedAchievements() )
-        ---------------------------------------------------------------------------]]
+        controller.syncGameStatsAndAchievements()
         
         controller.transitionIn()
 

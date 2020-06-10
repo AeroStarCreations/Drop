@@ -1,186 +1,156 @@
 local sd = require( "data.serverDataOld" )
 local json = require( "json" )
-local Alert = require( "views.other.Alert" )
+local model = require( "models.marketModel" )
 
---Precalls
+-- Precalls ------------------------------------------------------------------[
 local TAG = "Marketplace.lua: "
 local store
 local storeIsAvailable = true
-local canMakePurchases = true
 local purchaseCallback
+local getProductInfoCallback
+local targetAppStore
+local products
+local latestTransaction
 
-local productIDs = {
-    [1] = "com.aerostarcreations.drop.adsbundle",
-    [2] = "com.aerostarcreations.drop.shield1",
-    [3] = "com.aerostarcreations.drop.life1",
-    [4] = "com.aerostarcreations.drop.shield5",
-    [5] = "com.aerostarcreations.drop.life5",
-    [6] = "com.aerostarcreations.drop.shield10",
-    [7] = "com.aerostarcreations.drop.life10",
-    [8] = "com.aerostarcreations.drop.shield20",
-    [9] = "com.aerostarcreations.drop.life20",
-    [10] = "com.aerostarcreations.drop.shield50",
-    [11] = "com.aerostarcreations.drop.life50",
-    [12] = "com.aerostarcreations.drop.shield100",
-    [13] = "com.aerostarcreations.drop.life100",
-}
-----------
- 
-local targetAppStore = system.getInfo( "targetAppStore" )
-print(TAG, "targetAppStore = "..targetAppStore)
- 
-if ( "apple" == targetAppStore ) then  -- iOS
-    store = require( "store" )
-elseif ( "google" == targetAppStore ) then  -- Android
-    store = require( "plugin.google.iap.v3" )
-else
-    print( "In-app purchases are not available for this platform." )
-    storeIsAvailable = false
-    native.showAlert( "Notice", "In-app purchases are not supported on this system/device.", { "OK" } )
-end
-
-local function boughtItemsContains( boughtItems, shortCode )
-    for k,v in pairs( boughtItems ) do
-        if v.shortCode == shortCode then
-            return true
-        end
-    end
-    return false
-end
-
-local function boughtItemQuantity( boughtItems, shortCode )
-    for k,v in pairs( boughtItems ) do
-        if v.shortCode == shortCode then
-            return v.quantity
-        end
-    end
-end
-
-local function createMessageFromBoughtItems( boughtItems )
-    local message = ""
-    if boughtItemsContains( boughtItems, "ADS" ) then
-        message = "No more ads!"
-    end
-    if boughtItemsContains( boughtItems, "LIFE" ) then
-        local quantity = boughtItemQuantity( boughtItems, "LIFE" )
-        message = message .. "\n+" .. quantity .. " lives"
-    end
-    if boughtItemsContains( boughtItems, "SHIELD" ) then
-        local quantity = boughtItemQuantity( boughtItems, "SHIELD" )
-        message = message .. "\n+" .. quantity .. " shields"
-    end
-    if string.sub( message, 1, 1 ) == "\n" then
-        message = string.sub( message, 2, string.len( message ) )
-    end
-    return message
-end
-
-local function showSuccessfulPurchaseAlert( boughtItems )
-    local message = createMessageFromBoughtItems( boughtItems )
-    Alert:new( "Purchase Successful!", message, {"OK"}, purchaseCallback )
-end
-
-local function showFailedPurchaseAlert()
-    Alert:new( "Purchase Failed!", "Could not validate purchase receipt", {"OK"}, purchaseCallback )
-end
-
-local function showConfirmationAlert( boughtItems, hasErrors )
-    if hasErrors then
-        showFailedPurchaseAlert()
+------------------------------------------------------------------------------]
+local function validateReceiptCallback(result)
+    if result.error then
+        result.status = "validationError"
     else
-        showSuccessfulPurchaseAlert( boughtItems )
+        result.status = "validationSuccess"
+         -- On Google, consume purchase if it's not the AdsBundle
+        --TODO: move to correct location. should be called after GameSparks says the purchase is valid
+        if targetAppStore == "google" and latestTransaction.productIdentifier ~= model.getProductId(1) then
+            store.consumePurchase( latestTransaction.productIdentifier )
+        end
+        -- Tell the store that the transaction is complete
+        -- If you're providing downloadable content, do not call this until the download has completed
+        store.finishTransaction(latestTransaction)
     end
+    purchaseCallback(result)
 end
 
-local function confirmPurchaseWithGameSparks( receipt, signature )
-    if targetAppStore == "apple" then
-        sd.confirmPurchaseWithApple( receipt, showConfirmationAlert )
-    elseif targetAppStore == "google" then
-        sd.confirmPurchaseWithGoogle( receipt, signature, showConfirmationAlert )
+local function validatePurchaseReceipt()
+    local receipt = latestTransaction.receipt
+    local signature = latestTransaction.signature
+    local id = latestTransaction.productIdentifier
+    local currencyCode = products[id].priceLocale
+    local purchasePrice = products[id].priceCentesimal
+    if targetAppStore == "google" then
+        sd.validateGoogleReceipt(currencyCode, purchasePrice, receipt, signature, validateReceiptCallback)
+    elseif targetAppStore == "apple" then
+        sd.validateAppleReceipt(currencyCode, purchasePrice, receipt, validateReceiptCallback)
     end
 end
 
 local function transactionListener( event )
- 
     local transaction = event.transaction
  
     if event.name == "init" then -- Google IAP initialization event (Apple doesn't use this)
         if transaction.isError then 
             -- Unsuccessful initialization; output error details
-            print( transaction.errorType )
-            print( transaction.errorString )
+            print(TAG, "Store initialization error")
+            print(TAG, transaction.errorType)
+            print(TAG, transaction.errorString)
         else
             -- Perform steps to enable IAP, load products, etc.
             -- store.isActive will be 'true' at this point
         end
     else
         if transaction.isError then -- Failed transation
-            print( TAG, transaction.errorType )
-            print( TAG, transaction.errorString )
-            Alert:new( "Transaction Failed", "Please check your internet connection and try again", {"OK"}, purchaseCallback)
+            print(TAG, "Store transaction error")
+            print(TAG, transaction.errorType )
+            print(TAG, transaction.errorString )
+            purchaseCallback({status = "transactionError"})
         else -- Successful transaction
-            if not ( event.transaction.state == "failed" ) then  -- Successful transaction
-                print( json.prettify( event ) )
+            if event.transaction.state ~= "failed" then  -- Successful transaction
+                print( TAG, json.prettify( event ) )
                 print( TAG, "event.transaction: " .. json.prettify( transaction ) )
             else  -- Unsuccessful transaction; output error details
                 print( TAG, transaction.errorType )
                 print( TAG, transaction.errorString )
-                Alert:new( "Transaction Failed", "Please check your internet connection and try again", {"OK"}, purchaseCallback)
+                purchaseCallback({status = "transactionFailed"})
             end
 
-            if ( transaction.state == "purchased" or transaction.state == "restored" ) then
+            if transaction.state == "purchased" or transaction.state == "restored" then
                 -- Handle a normal purchase or restored purchase here
                 print( TAG, transaction.state )
                 print( TAG, transaction.productIdentifier )
                 print( TAG, transaction.date )
-                -- The reciept to send to GameSparks
-                confirmPurchaseWithGameSparks( transaction.receipt, transaction.signature )
-                -- On Google, consume purchase if it's not the AdsBundle
-                --TODO: move to correct location. should be called after GameSparks says the purchase is valid
-                if targetAppStore == "google" and transaction.productIdentifier ~= productIDs[1] then
-                    store.consumePurchase( transaction.productIdentifier )
-                end
+                -- The receipt to send to PlayFab
+                latestTransaction = transaction
+                validatePurchaseReceipt()
             elseif ( transaction.state == "cancelled" ) then
                 -- Handle a cancelled transaction here
-                purchaseCallback()
+                purchaseCallback({status = "transactionCancelled"})
             elseif ( transaction.state == "consumed" ) then
                 -- Handle a consumed product here
+                purchaseCallback({status = "transactionConsumed"})
             end
-    
-            -- Tell the store that the transaction is complete
-            -- If you're providing downloadable content, do not call this until the download has completed
-            store.finishTransaction( transaction )
         end
     end
 end
- 
--- Initialize store
-if targetAppStore ~= "none" then
-    store.init( transactionListener )
+
+local function getCentesimalPrice(formattedPrice)
+    return string.gsub(formattedPrice, "%D+", "")
 end
 
-------------------------------------Returned Module
-local v = {}
+-- This method creates a table where the keys are product IDs and
+-- the values are tables with the localized price, price locale, 
+-- and centesimal price
+local function loadProductsListener(event)
+    local result = {}
+    products = {}
+    for k, product in pairs(event.products) do
+        products[product.productIdentifier] = {
+            localizedPrice = product.localizedPrice,
+            priceLocale = product.priceLocale,
+            priceCentesimal = getCentesimalPrice(product.priceLocale)
+        }
+    end
+    getProductInfoCallback(products)
+end
 
-v.productIDs = productIDs
+-- Initialization ------------------------------------------------------------[
+targetAppStore = system.getInfo("targetAppStore")
+
+if ( "apple" == targetAppStore ) then  -- iOS
+    store = require( "store" )
+    store.init( transactionListener )
+elseif ( "google" == targetAppStore ) then  -- Android
+    store = require( "plugin.google.iap.v3" )
+    store.init( transactionListener )
+else
+    print( "In-app purchases are not available for this platform." )
+    storeIsAvailable = false
+    native.showAlert( "Uh-oh", "In-app purchases are not supported on this device.", { "OK" } )
+end
+------------------------------------------------------------------------------]
+
+-- Public Members ------------------------------------------------------------[
+local v = {}
 
 v.storeIsAvailable = storeIsAvailable
 
 function v.isStoreAvailable()
-    if targetAppStore == "apple" and not store.canMakePurchases and canMakePurchases then
-        native.showAlert( "Notice", "In-app purchases are disabled on this device.", { "OK" } )
-        canMakePurchases = false
-    end
-    return storeIsAvailable and canMakePurchases and store.isActive
+    return store ~= nil and storeIsAvailable and store.isActive
 end
 
+-- Passes the result of receipt validation to 'callback'
 function v.purchase( productID, callback )
-    print(TAG, "Attempting to purchse: " .. productID)
+    print(TAG, "Attempting to purchase: " .. productID)
     purchaseCallback = callback
-    if store ~= nil then
+    if v.isStoreAvailable() then
         store.purchase( productID )
     end
 end
 
+function v.getProductInformationFromPublisherStore(callback)
+    if v.isStoreAvailable() then
+        getProductInfoCallback = callback
+        store.loadProducts(model.getProductIds(), loadProductsListener)
+    end
+end
+
 return v
----------------------------------------------------
+------------------------------------------------------------------------------]

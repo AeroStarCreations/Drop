@@ -7,7 +7,6 @@
 
 local GGData = require( "thirdParty.GGData" )
 local json = require( "json" )
-local achievementsModel = require( "models.achievementsModel" )
 local highScoresModel = require( "models.highScoresModel" )
 
 -- GGData boxes ---------------------------------------------------------------[
@@ -87,8 +86,8 @@ local function initializeAllData( dropTypes )
     stats:set( "deaths", 0 )
     stats:set( "invincibilityUses", 0 )
     stats:set( "lifeUses", 0 )
-    stats:set( "phase", 0 ) --highest level the player completed/survived
-    stats:set( "hurricaneTiem", 0 ) --seconds
+    stats:set( "highestLevel", 0 ) --highest level the player completed/survived
+    stats:set( "hurricaneTime", 0 ) --seconds
     for k, lb in pairs(highScoresModel.getLeaderboardNames()) do
         stats:set( lb.name, 0 )
     end
@@ -101,9 +100,6 @@ local function initializeAllData( dropTypes )
         })
     end
     stats:save()
-    for k,v in pairs( achievementsModel.getAchievementShortCodes() ) do
-        achievements:set( v, achievementsDefault.isComplete )
-    end
     achievements:set( "unawarded", {} )
     saveAchievements()
     social:set( "alias", socialDefault.alias )
@@ -116,6 +112,7 @@ local v = {}
 
 -- First -----------------------------[
 v.init = function( dropTypes )
+    achievements:enableIntegrityControl()
     purchases:enableIntegrityControl()
     stats:enableIntegrityControl()
     social:enableIntegrityControl()
@@ -261,6 +258,10 @@ v.incrementGamesPlayed = function()
     saveStats()
 end
 
+v.setGamesPlayedIfHigher = function(newValue)
+    stats:setIfHigher("gamesPlayed", newValue)
+end
+
 v.getDeaths = function()
     return stats:get( "deaths" )
 end
@@ -268,6 +269,10 @@ end
 v.incrementsDeaths = function()
     stats:increment( "deaths" )
     saveStats()
+end
+
+v.setDeathsIfHigher = function(newValue)
+    stats:setIfHigher("deaths", newValue)
 end
 
 v.getInvincibilityUses = function()
@@ -279,6 +284,11 @@ v.incrementInvincibilityUses = function()
     saveStats()
 end
 
+v.setShieldUsesIfHigher = function(newValue)
+    stats:setIfHigher("invincibilityUses", newValue)
+    saveStats()
+end
+
 v.getLifeUses = function()
     return stats:get( "lifeUses" )
 end
@@ -286,6 +296,31 @@ end
 v.incrementLifeUses = function()
     stats:increment( "lifeUses" )
     saveStats()
+end
+
+v.setLifeUsesIfHigher = function(newValue)
+    stats:setIfHigher("lifeUses", newValue)
+    saveStats()
+end
+
+v.getDropTypeStats = function(dropType)
+    return stats:get(dropType)
+end
+
+v.setDropTypeStatsIfHigher = function(dropType, data)
+    local dropTable = stats:get(dropType)
+    if data.normalDodges > dropTable.normalDodges then
+        dropTable.normalDodges = data.normalDodges
+    end
+    if data.normalCollisions > dropTable.normalCollisions then
+        dropTable.normalCollisions = data.normalCollisions
+    end
+    if data.specialDodges > dropTable.specialDodges then
+        dropTable.specialDodges = data.specialDodges
+    end
+    if data.specialCollisions > dropTable.specialCollisions then
+        dropTable.specialCollisions = data.specialCollisions
+    end
 end
 
 v.getDropNormalDodges = function( dropType )
@@ -357,19 +392,16 @@ v.setHighScoreFromServer = function( name, value )
 end
 
 v.getHighScore = function( name )
-    return stats:get( name )
+    return stats:get( name ) or 0
 end
 
 v.getPhase = function()
-    return stats:get( "phase" )
+    return stats:get( "highestLevel" )
 end
 
 v.setPhase = function( newPhase )
-    local currentPhase = stats:get( "phase" )
-    if newPhase > currentPhase then
-        stats:set( "phase", newPhase )
-        stats:save()
-    end
+    stats:setIfHigher("highestLevel", newPhase)
+    stats:save()
 end
 
 v.getHurricaneTime = function()
@@ -377,46 +409,46 @@ v.getHurricaneTime = function()
 end
 
 v.setHurricaneTime = function( newTime )
-    local currentTime = stats:get( "hurricaneTime" )
-    --TODO: currentTime is nil
-    if newTime > currentTime then
-        stats:set( "hurricaneTime", newTime )
-        stats:save()
-    end
+    stats:setIfHigher("hurricaneTime", newTime)
+    stats:save()
 end
 --------------------------------------]
 
 -- Achievements ----------------------[
-v.setAchievementComplete = function( shortCode )
-    achievements:set( shortCode, true )
-    saveAchievements()
-end
-
-v.getAchievementComplete = function( shortCode )
-    return achievements:get( shortCode )
-end
-
 v.addUnawardedAchievement = function( achievement )
     local unawarded = achievements:get( "unawarded" )
-    table.insert( unawarded, achievement.reward )
+    unawarded[achievement.id] = achievement;
     achievements:set( "unawarded", unawarded )
     saveAchievements()
 end
 
-v.getUnawardedAchievementReward = function()
+v.getUnawardedAchievement = function()
     local unawarded = achievements:get( "unawarded" )
-    local reward = table.remove( unawarded )
-    achievements:set( "unawarded", unawarded )
+    for id,achievement in pairs(unawarded) do
+        return achievement
+    end
+end
+
+v.deleteUnawardedAchievement = function(id)
+    local unawarded = achievements:get( "unawarded" )
+    unawarded[id] = nil;
+    achievements:set("unawarded", unawarded)
     saveAchievements()
-    return reward
 end
 
 v.hasUnawardedAchievement = function()
-    return #achievements:get( "unawarded" ) > 0
+    for k,v in pairs(achievements:get("unawarded")) do
+        return true;
+    end
+    return false;
 end
 
-v.quantityUnawardedAchievements = function()
-    return #achievements:get( "unawarded" )
+v.unawardedAchievementCount = function()
+    local count = 0
+    for k,v in pairs(achievements:get("unawarded")) do
+        count = count + 1
+    end
+    return count
 end
 --------------------------------------]
 
