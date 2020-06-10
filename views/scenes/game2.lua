@@ -115,7 +115,7 @@ local function giveInvincibility()
     end
 
     timers.invincibilityTimer = timer.createTimer(
-        timeRemaining + 10000,
+        timeRemaining + 5000,
         invincibilityTimerListener,
         "invincibility"
     )
