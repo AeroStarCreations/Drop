@@ -29,7 +29,10 @@ local function isAdsId(id)
     return id == model.getProductId(1)
 end
 
-local function removeAdsButton(id)
+local function handleAdsBundlePurchase(id)
+    --Set ads bundle purchase in local data
+    ld.setAdsEnabled(false)
+    --Remove ads bundle button
     if isAdsId(id) then
         local entry = buttonGroups[id]
         if not entry then return end
@@ -96,7 +99,7 @@ local function onValidationSuccess(result)
         for k, item in pairs(fulfillment.FulfilledItems) do
             local message = createMessageFromItemId(item.ItemId)
             Alert:new( "Purchase Successful!", message, {"OK"})
-            removeAdsButton(item.ItemId)
+            handleAdsBundlePurchase(item.ItemId)
         end
     end
 end
