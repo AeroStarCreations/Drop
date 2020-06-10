@@ -17,6 +17,8 @@ local squares
 local countDown
 
 -- Other
+local TAG = "extrasController.lua: "
+
 local addButtonTouchListeners
 local buttonFocalX
 local adTimer
@@ -102,7 +104,6 @@ local function buttonReleasedWithinBounds(event)
 end
 
 local function buttonListener(event)
-    print(json.prettify(event))
     local id = event.target.parent.id
 
     if not event.target.isEnabled then
@@ -115,9 +116,8 @@ local function buttonListener(event)
     elseif event.phase == "ended" then
         display.getCurrentStage():setFocus(nil)
         transition.to(event.target.parent, {time = 40, xScale = 1, yScale = 1})
-        print(id .. "button was not pressed.")
         if buttonReleasedWithinBounds(event) then
-            print(id .. "button was pressed.")
+            print(TAG, id .. " button was pressed.")
             if id == "leaderboards" then
                 transitionOutToOther("views.scenes.leaderboardsScene")
             elseif id == "market" then
@@ -203,7 +203,7 @@ end
 local v = {}
 
 function v.backArrowListener()
-    print("Arrow Pressed")
+    print(TAG, "Arrow Pressed")
     transitionOutToCenter()
 end
 

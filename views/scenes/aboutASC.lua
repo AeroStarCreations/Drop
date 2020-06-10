@@ -1,16 +1,14 @@
+--Requires
 local controller = require("controllers.aboutASCController")
 local cp = require( "composer" )
 local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "other.globalVariables" )
-local GGTwitter = require( "thirdParty.GGTwitter" )
 local logoModule = require( "other.logoModule" )
-
+local social = require( "other.socialNetworks" )
 
 --Precalls
-local facebook
-local twitter
-----------
+local TAG = "aboutASC.lua: "
 
 function scene:create( event )
 
@@ -92,105 +90,34 @@ function scene:create( event )
     ----------------------------------------------
 
     --------------------------------Social Buttons
-    local function facebookFunction (event)
+    local function socialButtonListener(event)
         if event.phase == "began" then
-            facebook.xScale = 1.4; facebook.yScale = 1.4
+            event.target.xScale = 1.4;
+            event.target.yScale = 1.4
         elseif event.phase == "moved" then
-            facebook.xScale = 1; facebook.yScale = 1
+            event.target.xScale = 1;
+            event.target.yScale = 1
         elseif event.phase == "ended" then
-            facebook.xScale = 1; facebook.yScale = 1
-            print("Facebook pressed")
-            local facebookView
-            local facebookViewListener
-            
-            local button1
-            
-            local function buttonListener(event)
-                facebookView:removeEventListener( "urlRequest", facebookViewListener )
-                facebookView:removeSelf()
-                facebookView = nil
-                button1:removeSelf()
-                button1 = nil
+            print(TAG, event.target.id .. " pressed")
+            event.target.xScale = 1;
+            event.target.yScale = 1
+            if event.target.id == "facebook" then
+                social.openAscOnFacebook(group)
+            elseif event.target.id == "twitter" then
+                social.followAscOnTwitter()
             end
-            
-            button1 = widget.newButton{
-                width = display.contentWidth,
-                height = 150,
-                x = display.contentCenterX,
-                y = display.contentHeight - 0.5*150,
-                onRelease = buttonListener,
-                label = "Close",
-                labelYOffset = 7,
-                font = g.comRegular,
-                fontSize = 60,
-                labelColor = { default={ 1, 1, 1 }, over={ 0.8, 0.8, 1 } },
-                defaultFile = "images/buttonGreen.png",
-            }
-            group:insert(button1)
-            
-            function facebookViewListener(event)
-                if event.url then
-                    print("facebook 1")
-                    facebookView:removeEventListener( "urlRequest", facebookViewListener )
-                end
-                if event.errorCode then
-                    print("facebook 2")
-                    native.showAlert( "Error!", event.errorMessage, { "OK" } )
-                    facebookView:removeSelf()
-                    button1:removeSelf()
-                    button1 = nil
-                    facebookView:removeEventListener( "urlRequest", facebookViewListener )
-                    facebookView = nil
-                end
-            end
-            
-            facebookView = native.newWebView( display.contentCenterX, display.contentCenterY-0.5*150 ,display.contentWidth, display.contentHeight-150 )
-            facebookView:request("https://www.facebook.com/AeroStarCreations")
-            facebookView:addEventListener( "urlRequest", facebookViewListener )
         end
     end
     
-    local function twitFunction (event)
-        if event.phase == "began" then
-            twitter.xScale = 1.4; twitter.yScale = 1.4
-        elseif event.phase == "moved" then
-            twitter.xScale = 1; twitter.yScale = 1
-        elseif event.phase == "ended" then
-            twitter.xScale = 1; twitter.yScale = 1
-            print("Twitter pressed")
-            local twitter
-            local function twitterListener( event )
-                if event.phase == "authorised" then
-                    local function onComplete( event )
-                        if event.action == "clicked" then
-                            local i = event.index
-                            if i == 1 then
-                                --Dialog will dismiss automatically
-                            elseif i == 2 then
-                                twitter:follow( "Aero_SC" )
-                                native.showAlert( "Done!", "You are know following Aero Star Creations (Aero_SC).", { "Alrighty" } )
-                            end
-                        end
-                    end
-                    native.showAlert( "Follow Aero Star Creations?", "Follow Aero_SC to stay up-to-date on news, sneak peeks, and more.", { "Later", "Follow" }, onComplete )
-                elseif event.phase == "failed" then 
-                    print( "Twitter not authorised" )
-                end
-            end
-            twitter = GGTwitter:new( "C4gwN8bpltRt2N632U6epuQ9Q", "UDwrF3kWTpLId9IVr7GN81pQ9Lh5WaM7URygS1G4VRgVpBSkSI", twitterListener, "https://twitter.com/Aero_SC" )
-            twitter:authorise()
-        end
-    end
-    
-    facebook = widget.newButton {
-        id = "fb",
+    local facebook = widget.newButton {
+        id = "facebook",
         x = 0,
         y = bio.y + bio.height + 0.5*(display.contentHeight - (bio.y + bio.height)),
         width = 120,
         height = 120,
         defaultFile = "images/facebook.png",
         overFile = "images/facebookD.png",
-        onEvent = facebookFunction,
+        onEvent = socialButtonListener,
     }
     facebook.xIn = display.contentCenterX - 80
     facebook.xOut = -120
@@ -198,15 +125,15 @@ function scene:create( event )
     group:insert(facebook)
     controller.linkFacebook(facebook)
     
-    twitter = widget.newButton {
-        id = "twit",
+    local twitter = widget.newButton {
+        id = "twitter",
         x = 0,
         y = facebook.y,
         width = facebook.width,
         height = facebook.height,
         defaultFile = "images/twitter.png",
         overFile = "images/twitterD.png",
-        onEvent = twitFunction,
+        onEvent = socialButtonListener,
     }
     twitter.xIn = display.contentCenterX + 80
     twitter.xOut = display.contentWidth + twitter.width
