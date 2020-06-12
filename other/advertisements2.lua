@@ -15,6 +15,8 @@
 local appodeal = require( "plugin.appodeal" )
 local ld = require( "data.localData" )
 local colors = require( "other.colors" )
+local Spinner = require("views.other.Spinner")
+
 local platformName = system.getInfo( "platform" )
 local TAG = "advertisements2.lua: "
 local gamesBetweenAds = 2
@@ -28,9 +30,7 @@ local timerIterationDuration = 100
 local timerIterations = loadWaitTime / timerIterationDuration
 local adTimer
 -- Spinner
-local background
-local spinners = {}
-local spinnerTransitions = {}
+local spinner
 
 if platformName == "ios" then
     --TODO: this is the Drop Testing key. Switch for the non-testing key
@@ -47,46 +47,6 @@ local function showAlert()
     native.showAlert( "Oops!", message, { "Okay" } )
 end
 
-local function blockTouchListener()
-    return true
-end
-
-local function showBackground()
-    background = display.newRect( display.contentCenterX, display.contentCenterY, display.actualContentWidth, display.actualContentHeight )
-    background:setFillColor( 0, 0, 0, 0.6 )
-    background:addEventListener( "touch", blockTouchListener)
-end
-
-local function destroyBackground()
-    if background ~= nil then
-        background:removeEventListener( "touch", blockTouchListener)
-        background:removeSelf()
-        background = nil
-    end
-end
-
-local function showSpinner()
-    local times = { 1000, 1000, 800, 800 }
-    local rotations = { 180, -180, 180, -180 }
-    for i=1, 4 do
-        spinners[i] = display.newRoundedRect( display.contentCenterX, display.contentCenterY, 120, 20, 10 )
-        spinners[i]:setFillColor( unpack(colors.purple_l) )
-        spinnerTransitions[i] = transition.to( spinners[i], {
-            time = times[i],
-            iterations = -1,
-            rotation = spinners[i].rotation + rotations[i]
-        })
-    end
-end
-
-local function destroySpinner()
-    for i=1, #spinners do
-        transition.cancel( spinnerTransitions[i] )
-        spinners[i]:removeSelf()
-        spinners[i] = nil
-    end
-end
-
 -- Returns true if the ad is loaded, false otherwise
 local function showRewardedVideoIfLoaded()
     --TODO: remove outer environment condition
@@ -101,16 +61,15 @@ local function timerListener( event )
     if showRewardedVideoIfLoaded() then
         timer.cancel( adTimer )
     elseif event.count == timerIterations then
-        destroySpinner()
-        destroyBackground()
+        spinner:delete()
         showAlert()
     end
 end
 
 local function startTimerForAd()
     if not showRewardedVideoIfLoaded() then
-        showSpinner()
-        showBackground()
+        spinner = spinner or Spinner:new(true)
+        spinner:show()
         adTimer = timer.performWithDelay( timerIterationDuration, timerListener, timerIterations )
     end
 end
@@ -141,14 +100,14 @@ local function adListener( event )
 
     elseif phase == "failed" then
         showAlert()
-        destroyBackground()
+        -- destroyBackground()
     elseif phase == "playbackBegan" then
 
     elseif phase == "playbackEnded" then
-        destroyBackground()
+        -- destroyBackground()
         handleAdCompletion( true )
     elseif phase == "closed" then
-        destroyBackground()
+        -- destroyBackground()
         handleAdCompletion( false )
     elseif phase == "dataReceived" then
 

@@ -8,7 +8,7 @@ local sd = require( "data.serverData" )
 local Alert = require( "views.other.Alert" )
 local model = require( "models.marketModel" )
 local marketplace = require( "other.Marketplace" )
-local json = require( "json" )
+local Spinner = require( "views.other.Spinner" )
 
 -- View Objects
 local TAG = "marketController.lua: "
@@ -18,6 +18,10 @@ local storeLogo
 local buttonGroups
 local scrollView
 local playfabCatalog
+local publisherCatalog = {}
+local isShowing
+local transitionInButtons
+local spinner
 
 -- TODO: switch to false before release
 local testing = true
@@ -160,30 +164,43 @@ local function buttonListener(event)
     end
 end
 
-local function getProductInfoFromPublisherCallback(result)
-    for id, productInfo in pairs(result) do
-        buttonGroups[id].priceText.text = productInfo.localizedPrice
+local function didLoadProducts()
+    return publisherCatalog and playfabCatalog
+end
+
+local function onProductsLoaded()
+    if didLoadProducts() and isShowing then
+        transitionInButtons()
     end
 end
 
+local function getProductInfoFromPublisherCallback(result)
+    if result.error then return end
+    publisherCatalog = result.products
+    for id, productInfo in pairs(publisherCatalog) do
+        buttonGroups[id].priceText.text = productInfo.localizedPrice
+    end
+    onProductsLoaded()
+end
+
 local function getProductInfoFromServerCallback(result)
-    if not result.error then
-        playfabCatalog = result.Catalog
-        for k, product in pairs(playfabCatalog) do
-            if product.Bundle and product.Bundle.BundledVirtualCurrencies then
-                if isAdsId(product.ItemId) then
-                    buttonGroups[product.ItemId].lifeText.text = "+"..product.Bundle.BundledVirtualCurrencies.LF
-                    buttonGroups[product.ItemId].shieldText.text = "+"..product.Bundle.BundledVirtualCurrencies.SH
-                else
-                    if product.Bundle.BundledVirtualCurrencies.LF then
-                        buttonGroups[product.ItemId].button:setLabel(product.Bundle.BundledVirtualCurrencies.LF)
-                    elseif product.Bundle.BundledVirtualCurrencies.SH then
-                        buttonGroups[product.ItemId].button:setLabel(product.Bundle.BundledVirtualCurrencies.SH)
-                    end
+    if result.error then return end
+    playfabCatalog = result.Catalog
+    for k, product in pairs(playfabCatalog) do
+        if product.Bundle and product.Bundle.BundledVirtualCurrencies then
+            if isAdsId(product.ItemId) then
+                buttonGroups[product.ItemId].lifeText.text = "+"..product.Bundle.BundledVirtualCurrencies.LF
+                buttonGroups[product.ItemId].shieldText.text = "+"..product.Bundle.BundledVirtualCurrencies.SH
+            else
+                if product.Bundle.BundledVirtualCurrencies.LF then
+                    buttonGroups[product.ItemId].button:setLabel(product.Bundle.BundledVirtualCurrencies.LF)
+                elseif product.Bundle.BundledVirtualCurrencies.SH then
+                    buttonGroups[product.ItemId].button:setLabel(product.Bundle.BundledVirtualCurrencies.SH)
                 end
             end
         end
     end
+    onProductsLoaded()
 end
 
 local function sceneShow()
@@ -194,15 +211,31 @@ local function sceneShow()
     end
 end
 
+local function showSpinner()
+    if not didLoadProducts() then return end
+    spinner = spinner or Spinner:new()
+    spinner:show(true)
+end
 ---------------------------------------------------------------------
 -- Transitions ------------------------------------------------------
 ---------------------------------------------------------------------
+function transitionInButtons()
+    if didLoadProducts() then
+        if spinner then
+            spinner:delete()
+        end
+        for k,v in pairs(buttonGroups) do
+            transition.to( v.displayGroup, {time=350, delay=150, xScale=1, yScale=1, transition=easing.outBack} )
+        end
+    else
+        timer.performWithDelay(500, showSpinner)
+    end
+end
+
 local function transitionIn()
     transition.to( lineTop, {time=500, strokeWidth=lineTop.strokeWidthIn})
     transition.to( storeLogo, {time=500, x=storeLogo.xIn, transition=easing.outSine})
-    for k,v in pairs(buttonGroups) do
-        transition.to( v.displayGroup, {time=350, delay=150, xScale=1, yScale=1, transition=easing.outBack} )
-    end
+    transitionInButtons()
 end
 
 local function transitionOut()
@@ -210,6 +243,9 @@ local function transitionOut()
         cp.gotoScene( "views.scenes.extras" )
     end
 
+    if spinner then
+        spinner:delete()
+    end
     transition.to( storeLogo, {time=500, x=storeLogo.xOut, transition=easing.inSine})
     transition.to( lineTop, {time=500, strokeWidth=0, onComplete=listener})
     for k,v in pairs(buttonGroups) do
@@ -247,7 +283,11 @@ function v.buttonListener(event)
 end
 
 function v.sceneCreateComplete()
-    marketplace.getProductInformationFromPublisherStore(getProductInfoFromPublisherCallback)
+    if not publisherCatalog then
+        marketplace.getProductInformationFromPublisherStore(getProductInfoFromPublisherCallback)
+    else
+        getProductInfoFromPublisherCallback({products=publisherCatalog})
+    end
     if not playfabCatalog then
         sd.getProductInformationFromServer(getProductInfoFromServerCallback)
     else
@@ -257,8 +297,13 @@ function v.sceneCreateComplete()
 end
 
 function v.sceneShow()
+    isShowing = true
     transitionIn()
     sceneShow()
+end
+
+function v.sceneHide()
+    isShowing = false
 end
 
 function v.getAdsEnabled()
