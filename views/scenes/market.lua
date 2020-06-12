@@ -255,6 +255,8 @@ function scene:hide( event )
     elseif ( phase == "did" ) then
         
         g.hide()
+
+        controller.sceneHide()
         
     end
 end

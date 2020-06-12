@@ -308,9 +308,11 @@ end
 
 local function loginSuccessListener(result)
     print(TAG, "PlayFab login SUCCESS: " .. result.PlayFabId)
-    print(TAG, "Welcome: " .. result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName)
+    local displayName = result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName
+    print(TAG, "Welcome: " .. displayName)
+    setDisplayName(displayName)
     isLoggedIn = true
-    if loginCallback ~= nil then
+    if loginCallback then
         loginCallback(result)
     end
 end

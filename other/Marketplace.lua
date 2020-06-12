@@ -1,4 +1,4 @@
-local sd = require( "data.serverDataOld" )
+local sd = require( "data.serverData" )
 local json = require( "json" )
 local model = require( "models.marketModel" )
 
@@ -100,15 +100,16 @@ end
 -- and centesimal price
 local function loadProductsListener(event)
     local result = {}
-    products = {}
+    result.products = {}
+    products.error = #event.products > 0
     for k, product in pairs(event.products) do
-        products[product.productIdentifier] = {
+        result.products[product.productIdentifier] = {
             localizedPrice = product.localizedPrice,
             priceLocale = product.priceLocale,
             priceCentesimal = getCentesimalPrice(product.priceLocale)
         }
     end
-    getProductInfoCallback(products)
+    getProductInfoCallback(result)
 end
 
 -- Initialization ------------------------------------------------------------[
@@ -133,7 +134,7 @@ local v = {}
 v.storeIsAvailable = storeIsAvailable
 
 function v.isStoreAvailable()
-    return store ~= nil and storeIsAvailable and store.isActive
+    return store and storeIsAvailable and store.isActive
 end
 
 -- Passes the result of receipt validation to 'callback'
@@ -146,7 +147,7 @@ function v.purchase( productID, callback )
 end
 
 function v.getProductInformationFromPublisherStore(callback)
-    if v.isStoreAvailable() then
+    if v.isStoreAvailable() and store.canLoadProducts then
         getProductInfoCallback = callback
         store.loadProducts(model.getProductIds(), loadProductsListener)
     end

@@ -13,9 +13,10 @@ local platformType
 
 -- Local methods --------------------------------------------------------------[
 local function setTypes()
-    platformType = "ios"
     if system.getInfo( "platform" ) == "android" then
         platformType = "android"
+    elseif system.getInfo("platform") == "ios" then
+        platformType = "ios"
     end
 end
 
