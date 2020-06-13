@@ -55,6 +55,22 @@ function scene:create( event )
     controller.linkLineTop(lineTop)
     ----------------------------------------------
 
+    ----------------------------------Message Text
+    local message = display.newText({
+        parent = group,
+        text = "",
+        x = display.contentCenterX,
+        y = display.contentCenterY,
+        width = 0.6 * display.actualContentWidth,
+        font = g.comRegular,
+        fontSize = 45,
+        align = "center"
+    })
+    message:setFillColor(unpack(colors.purple))
+    message.isVisible = false
+    controller.linkMessage(message)
+    ----------------------------------------------
+
     -----------------------------------Scroll View
     local scrollView = widget.newScrollView( {
         left = 0,

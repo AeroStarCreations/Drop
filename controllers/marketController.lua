@@ -18,10 +18,11 @@ local storeLogo
 local buttonGroups
 local scrollView
 local playfabCatalog
-local publisherCatalog = {}
+local publisherCatalog
 local isShowing
 local transitionInButtons
 local spinner
+local message
 
 -- TODO: switch to false before release
 local testing = true
@@ -29,6 +30,17 @@ local testing = true
 ---------------------------------------------------------------------
 -- Logic ------------------------------------------------------------
 ---------------------------------------------------------------------
+local function getMessageText()
+    local text = "Google Play or Game Center"
+    local platform = system.getInfo("platform")
+    if "ios" == platform then
+        text = "Game Center"
+    elseif "android" == platform then
+        text = "Google Play"
+    end
+    return "You must be signed in to "..text.." on your device to view the Store"
+end
+
 local function isAdsId(id)
     return id == model.getProductId(1)
 end
@@ -216,6 +228,14 @@ local function showSpinner()
     spinner = spinner or Spinner:new()
     spinner:show(true)
 end
+
+local function loginListener(event)
+    if sd.isLoggedIn() then
+        message.isVisible = false
+        timer.cancel(event.target)
+        transitionInButtons()
+    end
+end
 ---------------------------------------------------------------------
 -- Transitions ------------------------------------------------------
 ---------------------------------------------------------------------
@@ -235,7 +255,12 @@ end
 local function transitionIn()
     transition.to( lineTop, {time=500, strokeWidth=lineTop.strokeWidthIn})
     transition.to( storeLogo, {time=500, x=storeLogo.xIn, transition=easing.outSine})
-    transitionInButtons()
+    if sd.isLoggedIn() then
+        transitionInButtons()
+    else
+       message.isVisible = true
+       timer.performWithDelay(1000, loginListener, -1)
+    end
 end
 
 local function transitionOut()
@@ -260,6 +285,11 @@ local v = {}
 
 function v.linkLineTop(viewObject)
     lineTop = viewObject
+end
+
+function v.linkMessage(viewObject)
+    message = viewObject
+    message.text = getMessageText()
 end
 
 function v.linkLogo(viewObject)
