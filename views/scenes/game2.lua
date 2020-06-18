@@ -9,8 +9,9 @@ local bg = require( "controllers.backgroundController" )
 local timer = require( "other.timers" )
 local json = require( "json" )
 local highScores = require( "data.highScores" )
+local sounds = require( "other.sounds" )
 
-local arrowIsWorking = true
+local arrowIsWorking = false
 
 --Precalls
 local arrow
@@ -257,6 +258,7 @@ local function levelStartListener()
 
     if lvlParams.mode == 1 then
         updateGravityY()
+        sounds.nextPhase()
         if ld.getChangingBackgroundsEnabled() then
             bg.fadeInNext()
         end
@@ -425,6 +427,7 @@ function scene:startGame()
     startScoreTimer()
     displayStormName()
     bg.fadeOutToDefault()
+    sounds.playMusic()
 end
 
 function scene:resumeGame()
@@ -433,6 +436,7 @@ function scene:resumeGame()
     -- header2.isVisible = false
     addEventListeners()
     timer.resumeAllTimers()
+    sounds.resumeMusic()
     transition.resume()
     physics.start()
     system.setAccelerometerInterval( 50 )
@@ -445,6 +449,7 @@ local function gameStopped( isPaused )
     system.setAccelerometerInterval( 30 )
     removeEventListeners()
     timer.pauseAllTimers()
+    sounds.pauseMusic()
     transition.pause()
     physics.pause()
     cp.showOverlay( "views.overlays.gameStopped", {
@@ -475,6 +480,8 @@ function scene:gameIsActuallyOver()
     ld.setHurricaneTime( hurricaneTime )
     -- Check high scores
     highScores.checkHighScore( score, totalGameTime )
+    -- Stop music
+    sounds.stopMusic()
 end
 -------------------------------------------------------------------------------]
 

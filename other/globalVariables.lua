@@ -156,13 +156,15 @@ end
 --------------------------------------------------------------------------------
 ----------------------------------------------------------------Level Parameters
 --------------------------------------------------------------------------------
+local singleTime = 30000
+local doubleTime = 12000
 local n = 1
 -- for testing
-n = 0.3
+-- n = 0.3
 
 v.level1AParams = {
     phase = 1,
-    duration = 30000*n,
+    duration = singleTime*n,
     interval = 800,
     mode = 1,
     gravity = 9,
@@ -171,7 +173,7 @@ v.level1AParams = {
 }
 v.level1BParams = {
     phase = 2,
-    duration = 10000*n,
+    duration = doubleTime*n,
     interval = 800,
     mode = 2,
     gravity = 9,
@@ -180,7 +182,7 @@ v.level1BParams = {
 }
 v.level2AParams = {
     phase = 3,
-    duration = 30000*n,
+    duration = singleTime*n,
     interval = 690,
     mode = 1,
     gravity = 11,
@@ -189,7 +191,7 @@ v.level2AParams = {
 }
 v.level2BParams = {
     phase = 4,
-    duration = 10000*n,
+    duration = doubleTime*n,
     interval = 690,
     mode = 2,
     gravity = 11,
@@ -198,7 +200,7 @@ v.level2BParams = {
 }
 v.level3AParams = {
     phase = 5,
-    duration = 30000*n,
+    duration = singleTime*n,
     interval = 580,
     mode = 1,
     gravity = 13,
@@ -207,7 +209,7 @@ v.level3AParams = {
 }
 v.level3BParams = {
     phase = 6,
-    duration = 10000*n,
+    duration = doubleTime*n,
     interval = 580,
     mode = 2,
     gravity = 13,
@@ -216,7 +218,7 @@ v.level3BParams = {
 }
 v.level4AParams = {
     phase = 7,
-    duration = 30000*n,
+    duration = singleTime*n,
     interval = 470,
     mode = 1,
     gravity = 15,
@@ -225,7 +227,7 @@ v.level4AParams = {
 }
 v.level4BParams = {
     phase = 8,
-    duration = 10000*n,
+    duration = doubleTime*n,
     interval = 470,
     mode = 2,
     gravity = 15,
@@ -234,7 +236,7 @@ v.level4BParams = {
 }
 v.level5AParams = {
     phase = 9,
-    duration = 30000*n,
+    duration = singleTime*n,
     interval = 360,
     mode = 1,
     gravity = 17,
@@ -243,7 +245,7 @@ v.level5AParams = {
 }
 v.level5BParams = {
     phase = 10,
-    duration = 10000*n,
+    duration = doubleTime*n,
     interval = 360,
     mode = 2,
     gravity = 17,
@@ -252,7 +254,7 @@ v.level5BParams = {
 }
 v.level6AParams = {
     phase = 11,
-    duration = 30000*n,
+    duration = singleTime*n,
     interval = 250,
     mode = 1,
     gravity = 19,
@@ -261,7 +263,7 @@ v.level6AParams = {
 }
 v.level6BParams = {
     phase = 12,
-    duration = 10000*n,
+    duration = doubleTime*n,
     interval = 250,
     mode = 2,
     gravity = 19,
@@ -309,66 +311,6 @@ function v.nextLevelParams( phase )
         p = v.level7AParams
     end
     return p
-end
-
-------------------------------------Function that unlocks the level achievements
-
-function v.unlockLevelAchievements( phase )
-    n = phase
-    if ld.getSpecialDropsEnabled() then
-        if n == 2 then
-            v.achievement.normalAchievements[1].isComplete = true
-        elseif n == 3 then
-            v.achievement.normalAchievements[2].isComplete = true
-        elseif n == 4 then
-            v.achievement.normalAchievements[3].isComplete = true
-        elseif n == 5 then
-            v.achievement.normalAchievements[4].isComplete = true
-        elseif n == 6 then
-            v.achievement.normalAchievements[5].isComplete = true
-        elseif n == 7 then
-            v.achievement.normalAchievements[6].isComplete = true
-        elseif n == 8 then
-            v.achievement.normalAchievements[7].isComplete = true
-        elseif n == 9 then
-            v.achievement.normalAchievements[8].isComplete = true
-        elseif n == 10 then
-            v.achievement.normalAchievements[9].isComplete = true
-        elseif n == 11 then
-            v.achievement.normalAchievements[10].isComplete = true
-        elseif n == 12 then
-            v.achievement.normalAchievements[11].isComplete = true
-        elseif n == 13 then
-            v.achievement.normalAchievements[12].isComplete = true
-        end
-    else
-        if n == 2 then
-            v.achievement.normalAchievements[13].isComplete = true
-        elseif n == 3 then
-            v.achievement.normalAchievements[14].isComplete = true
-        elseif n == 4 then
-            v.achievement.normalAchievements[15].isComplete = true
-        elseif n == 5 then
-            v.achievement.normalAchievements[16].isComplete = true
-        elseif n == 6 then
-            v.achievement.normalAchievements[17].isComplete = true
-        elseif n == 7 then
-            v.achievement.normalAchievements[18].isComplete = true
-        elseif n == 8 then
-            v.achievement.normalAchievements[19].isComplete = true
-        elseif n == 9 then
-            v.achievement.normalAchievements[20].isComplete = true
-        elseif n == 10 then
-            v.achievement.normalAchievements[21].isComplete = true
-        elseif n == 11 then
-            v.achievement.normalAchievements[22].isComplete = true
-        elseif n == 12 then
-            v.achievement.normalAchievements[23].isComplete = true
-        elseif n == 13 then
-            v.achievement.normalAchievements[24].isComplete = true
-        end
-    end
-    v.achievement:save()
 end
 
 --------------------------------------------------------------------------------

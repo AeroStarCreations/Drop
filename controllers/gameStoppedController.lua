@@ -62,6 +62,8 @@ end
 
 local function hideCountdownBackground()
     transition.to( backgroundImage, overlayBackgroundTransitionOutOptions)
+    local time = overlayBackgroundTransitionOutOptions.time + overlayBackgroundTransitionOutOptions.delay
+    timer.performWithDelay(time, cp.hideOverlay)
 end
 
 local function hideCountdown()

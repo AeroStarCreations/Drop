@@ -5,6 +5,7 @@ local timers = {}
 local v = {}
 
 v.cancel = function( id )
+    if not id then return false end
     for i = 1, table.maxn(timers) do
         if timers[i] == id then
             timer.cancel( id )
@@ -69,14 +70,14 @@ v.resumeAllTimers = function()
 end
 
 v.pause = function( id )
-    if id then
+    if id and v.exists(id) then
         return timer.pause( id )
     end
     return 0
 end
 
 v.resume = function( id )
-    if id then
+    if id and v.exists(id) then
         return timer.resume( id )
     end
     return 0
