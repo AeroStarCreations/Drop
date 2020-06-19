@@ -5,10 +5,11 @@
 -- looping transitions. The audio files fade out during that time
 
 -- Requires -------------------------------------------------------------------[
-local timers = require("other.timers")
+local TimerBank = require("other.TimerBank")
 
 -- Private Members ------------------------------------------------------------[
 local TAG = "sounds.lua: "
+local TIMERS = TimerBank:new()
 local FADE_OUT_TIME = 500
 local FADE_IN_TIME = 1000
 
@@ -95,8 +96,8 @@ end
 local function configureNextPhase()
     phase = phase % introIndex + 1
     local time = soundInfo[phase].duration
-    timers.cancel(trackTimer)
-    trackTimer = timers.createTimer(time, playCurrentPhaseAudio, "", -1)
+    TIMERS:cancel(trackTimer)
+    trackTimer = TIMERS:createTimer(time, playCurrentPhaseAudio, -1)
     startPlaybackTimer()
 end
 
@@ -128,6 +129,7 @@ function playCurrentPhaseAudio(shouldFadeIn)
 end
 
 local function introTimerListener(event)
+    shouldGoToNextPhase = true
     playCurrentPhaseAudio()
     introTimer = nil
 end
@@ -137,9 +139,8 @@ local function playMusicFromBeginning()
     phase = introIndex
     playCurrentPhaseAudio()
     startPlaybackTimer()
-    shouldGoToNextPhase = true
     local introDuration = soundInfo[introIndex].duration
-    introTimer = timers.createTimer(introDuration, introTimerListener, "")
+    introTimer = TIMERS:createTimer(introDuration, introTimerListener)
 end
 
 local function pauseMusic()
@@ -149,16 +150,14 @@ local function pauseMusic()
         time = time
     })
     pausePlaybackTimer()
-    timers.pause(introTimer)
-    timers.pause(trackTimer)
+    TIMERS:pauseAllTimers()
 end
 
 local function resumeMusic()
     playCurrentPhaseAudio(true)
     audio.seek(getPlaybackPosition(), {channel = activeChannel})
     resumePlaybackTimer()
-    timers.resume(introTimer)
-    timers.resume(trackTimer)
+    TIMERS:resumeAllTimers()
 end
 
 -- Initialization -------------------------------------------------------------[
@@ -177,8 +176,7 @@ end
 
 function v.stopMusic()
     disposeActiveChannel()
-    timers.cancel(introTimer)
-    timers.cancel(trackTimer)
+    TIMERS:cancelAllTimers()
 end
 
 function v.pauseMusic()

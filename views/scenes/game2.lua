@@ -6,7 +6,7 @@ local ld = require( "data.localData" )
 local physics = require( "physics" )
 local Drop = require( "views.other.Drop" )
 local bg = require( "controllers.backgroundController" )
-local timer = require( "other.timers" )
+local TimerBank = require( "other.TimerBank" )
 local json = require( "json" )
 local highScores = require( "data.highScores" )
 local sounds = require( "other.sounds" )
@@ -40,6 +40,7 @@ local endGame
 local iconLivesText
 local iconInvinceText
 local hurricaneTime
+local timerBank
 
 local timers = {}
 ----------
@@ -110,15 +111,12 @@ local function giveInvincibility()
     arrow.alpha = 0.5
     local timeRemaining = 0
 
-    if timer.exists(timers.invincibilityTimer) then
-        timeRemaining = timer.pause( timers.invincibilityTimer )
-        timer.cancel( timers.invincibilityTimer )
-    end
+    timeRemaining = timerBank:pause( timers.invincibilityTimer )
+    timerBank:cancel( timers.invincibilityTimer )
 
-    timers.invincibilityTimer = timer.createTimer(
+    timers.invincibilityTimer = timerBank:createTimer(
         timeRemaining + 5000,
-        invincibilityTimerListener,
-        "invincibility"
+        invincibilityTimerListener
     )
 end
 
@@ -226,10 +224,9 @@ local function spawnDrop()
 end
 
 local function startSpawnTimer()
-    timers.spawnTimer = timer.createTimer(
+    timers.spawnTimer = timerBank:createTimer(
         lvlParams.interval,
         spawnDrop,
-        "spawn",
         -1
     )
 end
@@ -239,10 +236,9 @@ local function hurricaneTimerListener()
 end
 
 local function startHurricaneTimer()
-    timers.hurricaneTimer = timer.createTimer( 
+    timers.hurricaneTimer = timerBank:createTimer( 
         1000, 
         hurricaneTimerListener,
-        "hurricane",
         -1
     )
 end
@@ -270,16 +266,15 @@ local function levelStartListener()
 end
 
 local function levelCompleteListener()
-    timer.cancel( timers.spawnTimer )
+    timerBank:cancel( timers.spawnTimer )
     lvlParams = g.nextLevelParams( lvlParams.phase )
-    timers.levelDelayTimer = timer.createTimer( 3000, levelStartListener, "levelComplete" )
+    timers.levelDelayTimer = timerBank:createTimer( 3000, levelStartListener )
 end
 
 function startLevelTimer()
-    timers.levelTimer = timer.createTimer( 
-        lvlParams.duration, 
-        levelCompleteListener,
-        "levelStart"
+    timers.levelTimer = timerBank:createTimer(
+        lvlParams.duration,
+        levelCompleteListener
     )
 end
 
@@ -289,7 +284,7 @@ local function gameTimerListener()
 end
 
 local function startGameTimer()
-    timers.gameTimer = timer.createTimer( 1000, gameTimerListener, "startGame", -1 )
+    timers.gameTimer = timerBank:createTimer( 1000, gameTimerListener, -1 )
 end
 
 local function scoreTimerListener()
@@ -298,7 +293,7 @@ local function scoreTimerListener()
 end
 
 local function startScoreTimer()
-    timers.scoreTimer = timer.createTimer( 10, scoreTimerListener, "score", -1 )
+    timers.scoreTimer = timerBank:createTimer( 10, scoreTimerListener, -1 )
 end
 
 local function collisionRectListener( self, event )
@@ -321,10 +316,8 @@ local function startGravityTimer( power )
         gravityPower = 1
         updateGravityY()
     end
-    if timer.exists(timers.gravityTimer) then
-        timer.cancel( timers.gravityTimer )
-    end
-    timers.gravityTimer = timer.createTimer( 10000, listener, "gravity" )
+    timerBank:cancel( timers.gravityTimer )
+    timers.gravityTimer = timerBank:createTimer( 10000, listener )
 end
 
 local function startScaleTimer( size )
@@ -333,31 +326,28 @@ local function startScaleTimer( size )
         local function listener()
             updateArrowScale( "regular" )
         end
-        if timer.exists(timers.scaleTimer) then
-            timer.cancel( timers.scaleTimer )
-        end
-        timers.scaleTimer = timer.createTimer( 10000, listener, "scale" )
+        timerBank:cancel( timers.scaleTimer )
+        timers.scaleTimer = timerBank:createTimer( 10000, listener )
     end
     -- slight delay is needed for collision calculations to complete
-    timer.createTimer( 40, delayListener, "scaleDelay" )
+    timerBank:createTimer( 40, delayListener )
 end
 
 local function startScoreMultiplierTimer()
     local timeRemaining = 0
-    if timer.exists(timers.multiplierTimer) then
+    if timerBank:exists(timers.multiplierTimer) then
         scoreMultiplier = scoreMultiplier + 3
-        timerRemaining = timer.pause( timers.multiplierTimer )
-        timer.cancel( timers.multiplierTimer )
+        timeRemaining = timerBank:pause( timers.multiplierTimer )
+        timerBank:cancel( timers.multiplierTimer )
     else
         scoreMultiplier = 3
     end
     local function listener()
         scoreMultiplier = 1
     end
-    timers.multiplierTimer = timer.createTimer( 
+    timers.multiplierTimer = timerBank:createTimer( 
         timeRemaining + 10000, 
-        listener,
-        "multiplier"
+        listener
     )
 end
 
@@ -418,7 +408,7 @@ function scene:startGame()
 
     -- Call Functions
     Drop:deleteAll()
-    timer.flushAllTimers()
+    timerBank:cancelAllTimers()
     startPhysics()
     addEventListeners()
     startSpawnTimer()
@@ -435,7 +425,7 @@ function scene:resumeGame()
     -- header1.isVisible = true
     -- header2.isVisible = false
     addEventListeners()
-    timer.resumeAllTimers()
+    timerBank:resumeAllTimers()
     sounds.resumeMusic()
     transition.resume()
     physics.start()
@@ -448,7 +438,7 @@ local function gameStopped( isPaused )
     -- header2.isVisible = true
     system.setAccelerometerInterval( 30 )
     removeEventListeners()
-    timer.pauseAllTimers()
+    timerBank:pauseAllTimers()
     sounds.pauseMusic()
     transition.pause()
     physics.pause()
@@ -491,6 +481,7 @@ function scene:create( event )
     physics.start()
     dropsGroup = display.newGroup()
     group:insert( dropsGroup )
+    timerBank = TimerBank:new()
 
     -- Arrow Setup ------------------------------------------------------------[
     arrow = display.newImageRect(group, "images/arrow.png", 352, 457)
@@ -705,7 +696,7 @@ function scene:hide( event )
 
         system.setIdleTimer( true )
         removeEventListeners()
-        timer.flushAllTimers()
+        timerBank:cancelAllTimers()
         transition.cancel()
         physics.stop()
         g.arrowX = arrow.x
@@ -720,7 +711,7 @@ function scene:destroy( event )
     
     g.destroy()
     removeEventListeners()
-    timer.flushAllTimers()
+    timerBank:cancelAllTimers()
     transition.cancel()
     physics.stop()
     
