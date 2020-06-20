@@ -63,7 +63,13 @@ function scene:create( event )
 
     controller.setButtonFocalX(unpack( coordinates[1], 1, 1 ))
     
-    for i=1,6 do
+    local numberOfButtons = 5
+    for i=1,numberOfButtons do
+        if i == numberOfButtons then
+            w = w * 2 + gap
+            coordinates[i][1] = display.contentCenterX
+        end
+
         buttonGroup[i] = display.newGroup()
         buttonGroup[i].id = ids[i]
         group:insert( buttonGroup[i] )

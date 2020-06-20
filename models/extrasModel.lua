@@ -3,45 +3,45 @@ local fillImages = {
     "images/squareGreen.jpg",
     "images/squareBlue.jpg",
     "images/squareOrange.jpg",
+    "images/squarePink.jpg",
     "images/squareRed.jpg",
     "images/squareYellow.jpg",
-    "images/squarePink.jpg"
 }
 
 local logoImages = {
     "images/logoRankings.png",
     "images/logoStore.png",
     "images/logoAboutASC.png",
-    "images/logoMusic.png",
-    "images/logoWatchAd.png",
     "images/logoGameStats.png",
+    "images/logoWatchAd.png",
+    "images/logoMusic.png",
 }
 
 local labelText = {
     "Rankings",
     "Store",
     "About ASC",
-    "The Music",
-    "Watch Ad",
     "Game Info",
+    "Watch Ad",
+    "The Music",
 }
 
 local strokeColors = {
     { 0.055, 0.545, 0.078 }, --green
     { 0.098, 0.329, 0.902 }, --blue
     { 1, 0.427, 0.063 },     --orange
+    { 1, 0, 0.722 },         --pink
     { 0.902, 0.141, 0.125 },  --red
     { 0.922, 0.678, 0.055 }, --yellow
-    { 1, 0, 0.722 },         --pink
 }
 
 local buttonIds = {
     "leaderboards",
     "market",
     "aboutASC",
-    "aboutMusic",
+    "gameInfo",
     "ad",
-    "gameInfo"
+    "aboutMusic",
 }
 
 -- Public Members -------------------------------------------------------------[
