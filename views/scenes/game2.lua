@@ -46,6 +46,18 @@ local timers = {}
 ----------
 
 -- Local Functions ------------------------------------------------------------[
+local function onSystemEvent(event)
+    if "applicationSuspend" == event.type then
+        sounds.pauseMusic()
+        timerBank:pauseAllTimers()
+        physics.pause()
+    elseif "applicationResume" == event.type then
+        sounds.resumeMusic()
+        timerBank:resumeAllTimers()
+        physics.start()
+    end
+end
+
 local function headerGroupTransitionIn()
     local function listener()
         header1:setEnabled( true )
@@ -178,6 +190,7 @@ local function addEventListeners()
     arrow:addEventListener( "collision", arrow )
     Runtime:addEventListener( "enterFrame", updateWindPower )
     Runtime:addEventListener( "enterFrame", checkArrowPortal )
+    Runtime:addEventListener( "system", onSystemEvent )
 end
 
 local function removeEventListeners()
@@ -189,6 +202,7 @@ local function removeEventListeners()
     arrow:removeEventListener( "collision", arrow )
     Runtime:removeEventListener( "enterFrame", updateWindPower )
     Runtime:removeEventListener( "enterFrame", checkArrowPortal )
+    Runtime:removeEventListener( "system", onSystemEvent )
 end
 
 local function updateArrowScale( size )
@@ -576,15 +590,15 @@ function scene:create( event )
     ---------------------------------------------------------------------------]
 
     -- Lives ------------------------------------------------------------------[
-    local iconLives = display.newImageRect( 
-        headerGroup, 
-        "images/lives.png", 
-        53, 
-        53 
+    local iconLives = display.newImageRect(
+        headerGroup,
+        "images/lives.png",
+        53,
+        53
     )
     iconLives.x = display.contentWidth * 0.3
     iconLives.y = scoreText.y
-    iconLives.anchorX = 1 
+    iconLives.anchorX = 1
     
     iconLivesText = display.newText {
         parent = headerGroup,
