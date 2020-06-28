@@ -11,7 +11,7 @@ local highScores = require( "data.highScores" )
 -- App Configuration ---------------------------------------------------------[
 display.setStatusBar(display.HiddenStatusBar)
 system.setAccelerometerInterval(30)
-audio.setVolume( ld.getVolume() )
+audio.setVolume( ld.getVolume() or 0.8 )
 g.getsReward = false
 g.adWatchCount = 0
 g.adDone = false
@@ -26,8 +26,9 @@ end
 ------------------------------------------------------------------------------]
 
 -- Initializations -----------------------------------------------------------[
-local function loginCallback( values )
+local function loginCallback( result )
     --get high scores
+    if result.error then return end
     sd.getAllLeaderboardValues(highScores.storeHighScoresFromServer)
     --get stats?
 end

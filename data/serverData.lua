@@ -18,6 +18,7 @@ local TAG = "serverData:"
 local playFab
 local alias
 local loginCallback
+local loginCallbackParams
 local getLeaderboardCallback
 local getAllLeaderboardValuesCallback
 local updateLeaderboardCallback
@@ -27,6 +28,12 @@ local claimAchievementRewardCallback
 local getProductInfoCallback
 local validateReceiptCallback
 local isLoggedIn
+-------------------------------------------------------------------------------]
+
+-- Local Methods --------------------------------------------------------------[
+local function getJson(table)
+    return json.prettify(table)
+end
 -------------------------------------------------------------------------------]
 
 -- Leaderboards ---------------------------------------------------------------[
@@ -61,9 +68,14 @@ local function updateLeaderboardFailureListener(error)
     print(TAG, json.prettify(error))
 end
 
-local function updateLeaderboard(score, time, isTricky)
+--- params = {
+---     score: int,
+---     time: int,
+---     isTricky boolean
+--- }
+local function updateLeaderboard(params)
     local trickySuffix = ""
-    if isTricky then
+    if params.isTricky then
         trickySuffix = "Tricky"
     end
     local request = {
@@ -72,11 +84,11 @@ local function updateLeaderboard(score, time, isTricky)
             Statistics = {
                 {
                     StatisticName = "HighScore" .. trickySuffix,
-                    Value = score
+                    Value = params.score
                 },
                 {
                     StatisticName = "HighTime" .. trickySuffix,
-                    Value = time
+                    Value = params.time
                 }
             }
         }
@@ -95,19 +107,24 @@ local function getLeaderboardFailureListener(error)
     print(TAG, json.prettify(error))
 end
 
-local function getLeaderboard(isScore, isTricky, isTop)
+--- params = {
+---     isScore: boolean,
+---     isTricky: boolean,
+---     isTop: boolean
+--- }
+local function getLeaderboard(params)
     local name = "HighScore"
-    if not isScore then
+    if not params.isScore then
         name = "HighTime"
     end
-    if isTricky then
+    if params.isTricky then
         name = name .. "Tricky"
     end
     local request = {
         MaxResultsCount = 100,
         StatisticName = name
     }
-    if isTop then
+    if params.isTop then
         playFab.GetLeaderboard(request, getLeaderboardSuccessListener, getLeaderboardFailureListener)
     else
         playFab.GetLeaderboardAroundPlayer(request, getLeaderboardSuccessListener, getLeaderboardFailureListener)
@@ -138,17 +155,24 @@ local function getUserDataFailureListener(error)
     getGameStatsCallback(error)
 end
 
-local function getGameStats(keys)
+--- params = {
+---     keys: string[]
+--- }
+local function getGameStats(params)
     local request = {
-        Keys = keys
+        Keys = params.keys
     }
     playFab.GetUserData(request, getUserDataSuccessListener, getUserDataFailureListener)
 end
 
 local function updateGameStatsAndAchievementsSuccessListener(result)
-    print(TAG, "update user data SUCCESS")
-    if updateGameStatsAndAchievementsCallback then
-        updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
+    if result.Error then
+        print(TAG, "update user data FAILURE\n"..getJson(result))
+    else
+        print(TAG, "update user data SUCCESS\n"..getJson(result))
+        if updateGameStatsAndAchievementsCallback then
+            updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
+        end
     end
 end
 
@@ -157,11 +181,14 @@ local function updateGameStatsAndAchievementsFailureListener(error)
     -- print(TAG, json.prettify(error))
 end
 
-local function updateGameStatsAndAchievements(gameStats)
+--- params = {
+---     gameStats: {}
+--- }
+local function updateGameStatsAndAchievements(params)
     local request = {
         FunctionName = "updateUserDataAndCheckAchievements",
         FunctionParameter = {
-            Data = gameStats
+            Data = params.gameStats
         }
     }
     playFab.ExecuteCloudScript(
@@ -183,11 +210,14 @@ local function claimAchievementRewardFailureListener(error)
     claimAchievementRewardCallback(error)
 end
 
-local function claimAchievementReward(achievementId)
+--- params = {
+---     achievementId: string
+--- }
+local function claimAchievementReward(params)
     local request = {
         FunctionName = "claimAchievementReward",
         FunctionParameter = {
-            achievementId = achievementId
+            achievementId = params.achievementId
         }
     }
     playFab.ExecuteCloudScript(
@@ -260,12 +290,18 @@ local function validateReceiptFailureListener(error)
     validateReceiptCallback(error)
 end
 
-local function validateGoogleReceipt(currencyCode, purchasePrice, receipt, signature)
+--- params = {
+---     currencyCode: string,
+---     purchasePrice: string,
+---     receipt: string,
+---     signature: string
+--- }
+local function validateGoogleReceipt(params)
     local request = {
-        CurrencyCode = currencyCode,
-        PurchasePrice = purchasePrice,
-        ReceiptJson = receipt,
-        Signature = signature
+        CurrencyCode = params.currencyCode,
+        PurchasePrice = params.purchasePrice,
+        ReceiptJson = params.receipt,
+        Signature = params.signature
     }
     playFab.ValidateGooglePlayPurchase(
         request,
@@ -274,11 +310,16 @@ local function validateGoogleReceipt(currencyCode, purchasePrice, receipt, signa
     )
 end
 
-local function validateAppleReceipt(currencyCode, purchasePrice, receipt)
+--- params = {
+---     currencyCode: string,
+---     purchasePrice: string,
+---     receipt: string
+--- }
+local function validateAppleReceipt(params)
     local request = {
-        CurrencyCode = currencyCode,
-        PurchasePrice = purchasePrice,
-        ReceiptData = receipt,
+        CurrencyCode = params.currencyCode,
+        PurchasePrice = params.purchasePrice,
+        ReceiptData = params.receipt,
     }
     playFab.ValidateIOSReceipt(
         request,
@@ -295,11 +336,13 @@ local function setupPlayFab()
 end
 
 local function setDisplayName(displayName)
+    if displayName then print(TAG, "displayName: "..displayName) end
+    if alias then print(TAG, "alias: "..alias) end
     if alias and string.len(alias) >= 3 then --PlayFab requires a minimum display name length of 3
-        if displayName == nil or displayName ~= alias then
+        if displayName ~= alias then
             playFab.UpdateUserTitleDisplayName(
                 {
-                    DisplayName = displayName
+                    DisplayName = displayName --TODO: Does this need success and failure listeners?
                 }
             )
         end
@@ -307,32 +350,44 @@ local function setDisplayName(displayName)
 end
 
 local function loginSuccessListener(result)
-    print(TAG, "PlayFab login SUCCESS: " .. result.PlayFabId)
+    print(TAG, "PlayFab login SUCCESS: " .. getJson(result))
     local displayName = result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName
-    print(TAG, "Welcome: " .. displayName)
+    if displayName then
+        print(TAG, "Welcome: " .. displayName)
+    end
     setDisplayName(displayName)
     isLoggedIn = true
     if loginCallback then
-        loginCallback(result)
+        if loginCallbackParams then
+            loginCallback(loginCallbackParams)
+        else
+            loginCallback(result)
+        end
     end
+    loginCallback = nil
+    loginCallbackParams = nil
 end
 
 local function loginFailureListener(error)
-    print(TAG, "PlayFab login FAILURE: " .. error.errorMessage)
-    if loginCallback then
+    print(TAG, "PlayFab login FAILURE:\n" .. getJson(error))
+    if loginCallback and not loginCallbackParams then
         loginCallback(error)
     end
+    loginCallback = nil
 end
 
 local function loginWithGameCenter(signature)
+    print(TAG, "*******************\n"..getJson(signature))
+    --Out of all the members of 'signature', playerId is at least needed to log in
     local loginRequest = {
         CreateAccount = true,
-        PublicKeyUrl = signature.keyURL,
-        Salt = signature.salt,
-        Signature = signature.signature,
-        Timestamp = signature.timestamp,
+        -- PublicKeyUrl = signature.keyURL,
+        -- Salt = signature.salt,
+        -- Signature = signature.signature,
+        -- Timestamp = signature.timestamp,
         PlayerId = signature.playerId,
-        InfoRequestParameters = {GetUserAccountInfo = true}
+        InfoRequestParameters = {GetUserAccountInfo = true},
+        TitleId = "C5B8B"
     }
     playFab.LoginWithGameCenter(loginRequest, loginSuccessListener, loginFailureListener)
 end
@@ -359,13 +414,10 @@ local function gameNetworkCallback(type, signature)
         loginWithGoogle(signature)
     end
 end
--------------------------------------------------------------------------------]
 
--- Returned values/table ------------------------------------------------------[
-local v = {}
-
-function v.init(callback)
+local function authenticate(callback, params)
     loginCallback = callback
+    loginCallbackParams = params
     setupPlayFab()
     if system.getInfo("environment") == "simulator" then
         playFab.LoginWithCustomID(
@@ -381,58 +433,95 @@ function v.init(callback)
         gameNetwork.login(gameNetworkCallback)
     end
 end
+-------------------------------------------------------------------------------]
+
+-- Check If Authenticated -----------------------------------------------------[
+local function completeTaskIfAuthenticated(functionToCall, params)
+    if isLoggedIn then
+        functionToCall(params)
+    else
+        authenticate(functionToCall, params)
+    end
+end
+-------------------------------------------------------------------------------]
+
+-- Returned values/table ------------------------------------------------------[
+local v = {}
+
+function v.init(callback)
+    authenticate(callback)
+end
 
 function v.isLoggedIn()
     return isLoggedIn
 end
 
-function v.setDisplayName(name)
-    setDisplayName(name)
-end
-
 function v.updateLeaderboard(score, time, isTricky, callback)
     updateLeaderboardCallback = callback
-    updateLeaderboard(score, time, isTricky)
+    completeTaskIfAuthenticated(updateLeaderboard, {
+        score = score,
+        time = time,
+        isTricky = isTricky
+    })
 end
 
 function v.getLeaderboard(isScore, isTricky, isTop, callback)
     getLeaderboardCallback = callback
-    getLeaderboard(isScore, isTricky)
+    completeTaskIfAuthenticated(getLeaderboard, {
+        isScore = isScore,
+        isTricky = isTricky,
+        isTop = isTop
+    })
 end
 
 function v.getAllLeaderboardValues(callback)
     getAllLeaderboardValuesCallback = callback
-    getAllLeaderboardValues()
+    completeTaskIfAuthenticated(getAllLeaderboardValues)
 end
 
 function v.getGameStats(keys, callback)
     getGameStatsCallback = callback
-    getGameStats(keys)
+    completeTaskIfAuthenticated(getGameStats, {
+        keys = keys
+    })
 end
 
 function v.updateGameStatsAndAchievements(gameStats, callback)
     updateGameStatsAndAchievementsCallback = callback
-    updateGameStatsAndAchievements(gameStats)
+    completeTaskIfAuthenticated(updateGameStatsAndAchievements, {
+        gameStats = gameStats
+    })
 end
 
 function v.claimAchievementReward(achievementId, callback)
     claimAchievementRewardCallback = callback
-    claimAchievementReward(achievementId)
+    completeTaskIfAuthenticated(claimAchievementReward, {
+        achievementId = achievementId
+    })
 end
 
 function v.getProductInformationFromServer(callback)
     getProductInfoCallback = callback
-    getProductInfo()
+    completeTaskIfAuthenticated(getProductInfo)
 end
 
 function v.validateGoogleReceipt(currencyCode, purchasePrice, receipt, signature, callback)
     validateReceiptCallback = callback
-    validateGoogleReceipt(currencyCode, purchasePrice, receipt, signature)
+    completeTaskIfAuthenticated(validateGoogleReceipt, {
+        currencyCode = currencyCode,
+        purchasePrice = purchasePrice,
+        receipt = receipt,
+        signature = signature
+    })
 end
 
 function v.validateAppleReceipt(currencyCode, purchasePrice, receipt, callback)
     validateReceiptCallback = callback
-    validateAppleReceipt(currencyCode, purchasePrice, receipt)
+    completeTaskIfAuthenticated(validateGoogleReceipt, {
+        currencyCode = currencyCode,
+        purchasePrice = purchasePrice,
+        receipt = receipt
+    })
 end
 
 return v

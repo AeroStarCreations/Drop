@@ -42,7 +42,7 @@ settings =
             
             --FacebookAppID = "",
 
-            CFBundleIdentifier = "com.appledts.GKTapper", -- Apple's GameCenter test bed
+            --CFBundleIdentifier = "com.appledts.GKTapper", -- Apple's GameCenter test bed
             
             CFBundleURLTypes =
             {
@@ -108,6 +108,8 @@ settings =
                     ["UILaunchImageSize"] = "{414, 736}"
                 },
             },
+            -- Appodeal
+            GADApplicationIdentifier = "ca-app-pub-1637963489942107~3857028658", -- replace with your app id. See: https://googlemobileadssdk.page.link/admob-ios-update-plist
         },
     },
     android = 
@@ -130,7 +132,15 @@ settings =
             { name = "android.hardware.location", required = false },
             { name = "android.hardware.location.gps", required = false },
         },
-        googlePlayGamesAppId = "YOUR_APPLICATION_ID", -- It might be "drop-232620"
+        googlePlayGamesAppId = "YOUR_APPLICATION_ID", -- It might be "drop-232620",
+        -- Appodeal
+        applicationChildElements =
+        {
+            [[
+                <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID"
+                    android:value="ca-app-pub-1637963489942107~6442474177"/>  -- replace with your app id. See: https://goo.gl/fQ2neu
+            ]],
+        },
     },
     plugins =
     {
@@ -177,6 +187,7 @@ settings =
         --     supportedPlatforms = { iphone=true, android=true, osx=true, win32=true, appletvos=true }
         -- },
         -- advertisements2.lua -----------------------------------------------------
+        -- Appodeal
         -- Base
         ['plugin.appodeal.beta.base'] = { publisherId = 'com.coronalabs' },
         ['plugin.appodeal.beta.GoogleAdMob'] = { publisherId = 'com.coronalabs' },
@@ -198,21 +209,6 @@ settings =
         -- ['plugin.appodeal.beta.Tapjoy'] = { publisherId = 'com.coronalabs' },
         -- ['plugin.appodeal.beta.TwitterMoPub'] = { publisherId = 'com.coronalabs' },
         ----------------------------------------------------------------------------
-        -- The following blocks are for GameSparks
-        ["plugin.bit"] =
-        {
-            publisherId = "com.coronalabs",
-            supportedPlatforms = { iphone=true, android=true, osx=true, win32=true }
-        },
-        ["plugin.openssl"] =
-        {
-            publisherId = "com.coronalabs",
-            supportedPlatforms = { iphone=true, android=true, osx=true, win32=true }
-        },
-        ["plugin.gamesparks"] =
-        {
-            publisherId = "com.gamesparks",
-        },
         -- The following blocks are for PlayFab
         ["plugin.playfab.client"] = 
         { 

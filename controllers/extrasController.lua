@@ -158,12 +158,14 @@ end
 
 local function adTimerListener()
     local adButton = getAdButton()
+    local dailyViews = 3
+    local timeBetweenViews = 1800 --30 minutes between video ads
 
-    if ld.getVideoAdViews() < 5 then
+    if ld.getVideoAdViews() < dailyViews then
         currentTime = os.time(os.date("*t")) --current seconds since 1970
         timeDifference = currentTime - ld.getVideoAdLastViewTime()
 
-        if timeDifference >= 300 then --300 seconds between video ads
+        if timeDifference >= timeBetweenViews then
             if not adButton.isEnabled then
                 adButton.alpha = 1
                 adButton.isEnabled = true
@@ -174,7 +176,7 @@ local function adTimerListener()
                 adButton.alpha = 0.4
                 adButton.isEnabled = false
             end
-            countDown.text = g.timeFormat(300 - timeDifference)
+            countDown.text = g.timeFormat(timeBetweenViews - timeDifference)
         end
     else
         adButton.isEnabled = false

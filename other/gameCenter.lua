@@ -38,7 +38,7 @@ local function getPlayerInfo()
             signature.playerId = player.data.playerID
             signature.alias = player.data.alias
             ld.setAlias( player.data.alias )
-            callbackFunction( signature )
+            -- callbackFunction( signature )
         else
             print(TAG, "gameNetwork could not get player")
         end
@@ -56,11 +56,10 @@ end
 --     "isError":false
 -- }
 local function verifyListener( event )
+    print(TAG, "*** verifyListener ***")
     signature = event
     if not signature.isError then
-        print(TAG, "Verify Signature SUCCESS" )
-        -- print(TAG, json.prettify(signature))
-        -- testText.text = json.prettify(signature) -- this works
+        print(TAG, "Verify Signature SUCCESS:\n"..json.prettify(event))
         getPlayerInfo()
     else
         print(TAG, "Verify Signature ERROR" )
@@ -68,6 +67,7 @@ local function verifyListener( event )
 end
 
 local function gamecenterCallback( event )
+    print(TAG, "*** gamecenterCallback ***\n"..json.prettify(event))
     if event.data then
         print(TAG, "GameCenter SUCCESS")
         idVerify.getSignature()

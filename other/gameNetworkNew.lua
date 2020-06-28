@@ -4,9 +4,6 @@
 --  * GameCenter login
 --  * Google Play login
 
-local gameCenter = require("other.gameCenter")
-local googlePlay = require("other.googlePlay")
-
 -- Local variables ------------------------------------------------------------[
 local platformType
 -------------------------------------------------------------------------------]
@@ -22,8 +19,10 @@ end
 
 local function initGameNetwork(callback)
     if platformType == "ios" then
+        local gameCenter = require("other.gameCenter")
         gameCenter.init(callback)
     elseif platformType == "android" then
+        local googlePlay = require("other.googlePlay")
         googlePlay.init(callback)
     end
 end
