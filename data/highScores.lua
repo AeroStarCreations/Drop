@@ -9,6 +9,7 @@ local json = require("json")
 
 -- Local functions ------------------------------------------------------------[
 local function sendToLeaderboardCallback(response)
+    if not response then return end
     for k, stat in pairs(response) do
         ld.setHighScore(stat.StatisticName, stat.Value)
     end

@@ -16,7 +16,7 @@ local highScoresModel = require("models.highScoresModel")
 -- Local variables ------------------------------------------------------------[
 local TAG = "serverData:"
 local playFab
-local alias
+local gameNetworkAlias
 local loginCallback
 local loginCallbackParams
 local getLeaderboardCallback
@@ -33,6 +33,14 @@ local isLoggedIn
 -- Local Methods --------------------------------------------------------------[
 local function getJson(table)
     return json.prettify(table)
+end
+
+local function getFormattedGameNetworkAlias()
+    if not gameNetworkAlias then return nil end
+    while string.len(gameNetworkAlias) < 3 do --PlayFab requires a minimum display name length of 3
+        gameNetworkAlias = gameNetworkAlias.." "
+    end
+    return gameNetworkAlias
 end
 -------------------------------------------------------------------------------]
 
@@ -167,9 +175,9 @@ end
 
 local function updateGameStatsAndAchievementsSuccessListener(result)
     if result.Error then
-        print(TAG, "update user data FAILURE\n"..getJson(result))
+        print(TAG, "update user data FAILURE\n")--..getJson(result))
     else
-        print(TAG, "update user data SUCCESS\n"..getJson(result))
+        print(TAG, "update user data SUCCESS\n")--..getJson(result))
         if updateGameStatsAndAchievementsCallback then
             updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
         end
@@ -335,25 +343,45 @@ local function setupPlayFab()
     playFab.settings.titleId = "C5B8B"
 end
 
-local function setDisplayName(displayName)
-    if displayName then print(TAG, "displayName: "..displayName) end
-    if alias then print(TAG, "alias: "..alias) end
-    if alias and string.len(alias) >= 3 then --PlayFab requires a minimum display name length of 3
-        if displayName ~= alias then
-            playFab.UpdateUserTitleDisplayName(
-                {
-                    DisplayName = displayName --TODO: Does this need success and failure listeners?
-                }
-            )
+local function setDisplayNameListener(result)
+    if result.error then
+        print(TAG, "set display name FAILURE\n"..json.prettify(result))
+    else
+        print(TAG, "set display name SUCCESS: "..result.DisplayName)
+    end
+end
+
+local function setDisplayName(currentDisplayName)
+    local newDisplayName
+
+    if not gameNetworkAlias and not currentDisplayName then
+        newDisplayName = "vapor"
+    elseif gameNetworkAlias and not currentDisplayName then
+        newDisplayName = getFormattedGameNetworkAlias()
+    elseif gameNetworkAlias and currentDisplayName then
+        if currentDisplayName ~= getFormattedGameNetworkAlias() then
+            newDisplayName = getFormattedGameNetworkAlias()
         end
+    end
+
+    if newDisplayName then
+        playFab.UpdateUserTitleDisplayName(
+            {
+                DisplayName = newDisplayName
+            },
+            setDisplayNameListener,
+            setDisplayNameListener
+        )
     end
 end
 
 local function loginSuccessListener(result)
-    print(TAG, "PlayFab login SUCCESS: " .. getJson(result))
+    print(TAG, "PlayFab login SUCCESS: ")-- .. getJson(result))
     local displayName = result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName
     if displayName then
         print(TAG, "Welcome: " .. displayName)
+    else
+        print(TAG, "Welcome: NO DISPLAY NAME")
     end
     setDisplayName(displayName)
     isLoggedIn = true
@@ -377,7 +405,6 @@ local function loginFailureListener(error)
 end
 
 local function loginWithGameCenter(signature)
-    print(TAG, "*******************\n"..getJson(signature))
     --Out of all the members of 'signature', playerId is at least needed to log in
     local loginRequest = {
         CreateAccount = true,
@@ -405,7 +432,8 @@ local function loginWithDeviceId()
 end
 
 local function gameNetworkCallback(type, signature)
-    alias = signature.alias
+    print(TAG, "gameNetworkCallback()\n".."type: "..type.."\n".."signature:"..json.prettify(signature))
+    gameNetworkAlias = signature.alias
     if signature.playerId == nil then
         loginWithDeviceId()
     elseif type == "gamecenter" then
@@ -454,6 +482,10 @@ end
 
 function v.isLoggedIn()
     return isLoggedIn
+end
+
+function v.getPlayfab()
+    return playFab
 end
 
 function v.updateLeaderboard(score, time, isTricky, callback)
