@@ -7,6 +7,7 @@ local bg = require( "controllers.backgroundController" )
 local sd = require( "data.serverData" )
 local ads = require( "other.advertisements2" )
 local highScores = require( "data.highScores" )
+local metrics = require( "other.metrics" )
 
 -- App Configuration ---------------------------------------------------------[
 display.setStatusBar(display.HiddenStatusBar)

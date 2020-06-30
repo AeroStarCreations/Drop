@@ -8,6 +8,7 @@ local ld = require("data.localData")
 local g = require("other.globalVariables")
 local ads = require("other.advertisements2")
 local json = require("json")
+local metrics = require("other.metrics")
 
 -- View Objects
 local backArrow
@@ -131,6 +132,9 @@ local function buttonListener(event)
                 ads.show(true)
             elseif id == "gameInfo" then
                 transitionOutToOther("views.scenes.gameInfo")
+            end
+            if id then
+                metrics.logEvent("extras_"..id.."_click")
             end
         end
     end

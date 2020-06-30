@@ -5,6 +5,7 @@ local Drop = require( "views.other.Drop" )
 local ld = require( "data.localData" )
 local social = require( "other.socialNetworks" )
 local model = require( "models.gameStoppedModel" )
+local metrics = require("other.metrics")
 
 local TAG = "gameStoppedController:"
 
@@ -188,6 +189,7 @@ end
 
 local function mainButtonListener()
     ads.show(false, mainButtonListenerAfterAd)
+    metrics.logEvent("gameStopped_main_click")
 end
 
 local function restartButtonListenerAfterAd()
@@ -199,6 +201,7 @@ end
 local function restartButtonListener()
     sceneHideCallback = parentScene.startGame
     ads.show(false, restartButtonListenerAfterAd)
+    metrics.logEvent("gameStopped_restart_click")
 end
 
 local function resumeGame()
@@ -213,15 +216,17 @@ end
 local function reviveAndResumeGame()
     -- ask for confirmation?
     ld.addLives( -1 )
-    sceneHideCallback = parentScene.startGame
+    sceneHideCallback = parentScene.resumeGame
     transitionOut()
 end
 
 local function resumeButtonListener()
     if (isGamePaused) then
         resumeGame()
+        metrics.logEvent("gameStopped_resume_click")
     elseif (playerCanRevive()) then
         reviveAndResumeGame()
+        metrics.logEvent("gameStopped_revive_click")
     elseif (not playerCanRevive()) then
         --TODO: purchase more lives
     end
@@ -230,8 +235,10 @@ end
 local function socialButtonListener( event )
     if event.target.id == "twitter" then
         social.shareResultsOnTwitter( scoreValue )
+        metrics.logEvent("gameStopped_facebook_click")
     elseif event.target.id == "facebook" then
         social.shareResultsOnFacebook( scoreValue )
+        metrics.logEvent("gameStopped_twitter_click")
     end
 end
 

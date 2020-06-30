@@ -167,6 +167,10 @@ settings =
         {
             publisherId = "com.coronalabs",
         },
+        ["plugin.flurry.analytics"] =
+        {
+            publisherId = "com.coronalabs"
+        },
         -- advertisements.lua
         -- ["CoronaProvider.ads.vungle"] =
         -- {

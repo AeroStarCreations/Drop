@@ -7,6 +7,7 @@ local widget = require( "widget" )
 local logoModule = require( "other.logoModule" )
 local ld = require( "data.localData" )
 local social = require("other.socialNetworks")
+local metrics = require("other.metrics")
 
 -- Precalls
 local TAG = "center.lua: "
@@ -82,8 +83,10 @@ function scene:create( event )
             event.target.yScale = 1
             if event.target.id == "facebook" then
                 social.openAscOnFacebook(group)
+                metrics.logEvent("center_facebook_click")
             elseif event.target.id == "twitter" then
                 social.followAscOnTwitter()
+                metrics.logEvent("center_twitter_click")
             end
         end
     end

@@ -10,6 +10,7 @@ local sd = require( "data.serverData" )
 local bg = require( "controllers.backgroundController" )
 local Alert = require( "views.other.Alert" )
 local gameStatsUtil = require( "data.gameStatsUtil" )
+local metrics = require("other.metrics")
 
 -- View Objects
 local asc
@@ -276,6 +277,14 @@ local function transitionOut( scene )
     end
 
     transitionOutAchievementButton()
+
+    if scene == "game" then
+        metrics.logEvent("center_arrow_click")
+    elseif scene == "extras" then
+        metrics.logEvent("center_extras_click")
+    elseif scene == "settings" then
+        metrics.logEvent("center_settings_click")
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -350,10 +359,6 @@ end
 
 function v.transitionIn()
     transitionIn()
-end
-
-function v.transitionOut()
-    transitionOut()
 end
 
 function v.syncGameStatsAndAchievements()

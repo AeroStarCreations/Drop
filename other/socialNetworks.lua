@@ -2,6 +2,7 @@
 local g = require("other.globalVariables")
 local widget = require("widget")
 local GGTwitter = require( "thirdParty.GGTwitter" )
+local metrics = require("other.metrics")
 
 --Precalls
 local TAG = "socialNetworks.lua: "

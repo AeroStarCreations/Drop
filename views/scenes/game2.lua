@@ -10,6 +10,7 @@ local TimerBank = require( "other.TimerBank" )
 local json = require( "json" )
 local highScores = require( "data.highScores" )
 local sounds = require( "other.sounds" )
+local metrics = require( "other.metrics" )
 
 local arrowIsWorking = false
 
@@ -432,6 +433,11 @@ function scene:startGame()
     displayStormName()
     bg.fadeOutToDefault()
     sounds.playMusic()
+
+    -- Metrics
+    metrics.logEvent("game_started", {
+        isTricky = ld.getSpecialDropsEnabled()
+    })
 end
 
 function scene:resumeGame()
@@ -444,6 +450,9 @@ function scene:resumeGame()
     transition.resume()
     physics.start()
     system.setAccelerometerInterval( 50 )
+
+    -- Metrics
+    metrics.logEvent("game_resumed")
 end
 
 local function gameStopped( isPaused )
@@ -468,11 +477,17 @@ end
 
 function scene:pauseGame()
     gameStopped( true )
+
+    -- Metrics
+    metrics.logEvent("game_paused")
 end
 
 function scene:endGame()
     Drop:deleteAllWithAnimation()
     gameStopped( false )
+    
+    -- Metrics
+    metrics.logEvent("game_death")
 end
 
 function scene:gameIsActuallyOver()
@@ -486,6 +501,9 @@ function scene:gameIsActuallyOver()
     highScores.checkHighScore( score, totalGameTime )
     -- Stop music
     sounds.stopMusic()
+    
+    -- Metrics
+    metrics.logEvent("game_over")
 end
 -------------------------------------------------------------------------------]
 
