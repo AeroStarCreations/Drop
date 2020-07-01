@@ -147,8 +147,7 @@ local function transitionOutAchievementButton()
 end
 
 local function claimAchievementRewardCallback(result)
-    if (result.Error) then
-        print('there was an error')
+    if (result.Error or result.error) then
         Alert:new(
             "Bummer",
             "Could not claim reward. Please check your network connection and try again.",

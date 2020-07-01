@@ -57,7 +57,7 @@ function scene:create( event )
         { display.contentWidth - gap - 0.5*w, focal + 0.5*h },
         { gap + 0.5*w, focal + 1.5*h + gap },
         { display.contentWidth - gap - 0.5*w, focal + 1.5*h + gap },
-        { gap + 0.5*w, focal + 2*gap + 2.5*h },
+        { display.contentCenterX, focal + 2*gap + 2.5*h },
         { display.contentWidth - gap - 0.5*w, focal + 2*gap + 2.5*h },
     }
 
@@ -86,7 +86,24 @@ function scene:create( event )
         logo[i] = display.newImageRect( buttonGroup[i], logoFile[i], 66, 66 )
         logo[i].y = 0.25 * h
         
-        buttonGroup[i].x, buttonGroup[i].y = unpack( coordinates[i] )
+        buttonGroup[i].xIn = coordinates[i][1]
+        buttonGroup[i].yIn = coordinates[i][2]
+        if i == 5 then
+            buttonGroup[i].xOut = buttonGroup[i].xIn
+            buttonGroup[i].yOut = display.actualContentHeight + 0.51 * h
+        elseif i % 2 == 0 then
+            buttonGroup[i].xOut = display.actualContentWidth + 0.51 * w
+            buttonGroup[i].yOut = buttonGroup[i].yIn
+        else
+            buttonGroup[i].xOut = -0.51 * w
+            buttonGroup[i].yOut = buttonGroup[i].yIn
+        end
+        buttonGroup[i].x = buttonGroup[i].xIn
+        buttonGroup[i].y = buttonGroup[i].yIn
+        buttonGroup[i].rightEdge = buttonGroup[i].xIn + 0.5 * w
+        buttonGroup[i].leftEdge = buttonGroup[i].rightEdge - w
+        buttonGroup[i].topEdge = buttonGroup[i].yIn - 0.5 * h
+        buttonGroup[i].bottomEdge = buttonGroup[i].topEdge + h
         buttonGroup[i].xScale, buttonGroup[i].yScale = 0.001, 0.001
     end
 

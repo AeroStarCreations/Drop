@@ -39,14 +39,12 @@ end
 
 local function transitionInFromOther()
     for i = 1, #buttonGroup do
-        if (i % 2 == 0) then
-            transition.to(
-                buttonGroup[i],
-                {time = 400, x = display.contentWidth - buttonFocalX, transition = easing.outSine}
-            )
-        else
-            transition.to(buttonGroup[i], {time = 400, x = buttonFocalX, transition = easing.outSine})
-        end
+        transition.to(buttonGroup[i], {
+            time = 400,
+            x = buttonGroup[i].xIn,
+            y = buttonGroup[i].yIn,
+            transition = easing.outSine
+        })
     end
     timer.performWithDelay(400, addButtonTouchListeners)
 end
@@ -74,14 +72,12 @@ end
 
 local function transitionOutToOther(scene)
     for i = 1, #buttonGroup do
-        if (i % 2 == 0) then
-            transition.to(
-                buttonGroup[i],
-                {time = 400, x = display.contentWidth + 0.51 * buttonGroup[i].width, transition = easing.inSine}
-            )
-        else
-            transition.to(buttonGroup[i], {time = 400, x = -0.51 * buttonGroup[i].width, transition = easing.inSine})
-        end
+        transition.to(buttonGroup[i], {
+            time = 400,
+            x = buttonGroup[i].xOut,
+            y = buttonGroup[i].yOut,
+            transition = easing.inSine
+        })
     end
     timer.performWithDelay(
         400,
@@ -97,11 +93,11 @@ end
 local function buttonReleasedWithinBounds(event)
     local eventX = event.x
     local eventY = event.y
-    local button = event.target.parent
-    local halfBtnW = 0.5 * button.width * button.xScale / button.parent.xScale
-    local halfBtnH = 0.5 * button.height * button.yScale / button.parent.yScale
-    return eventX > button.x - halfBtnW and eventX < button.x + halfBtnW and eventY > button.y - halfBtnH and
-        eventY < button.y + halfBtnH
+    local group = event.target.parent
+    return eventX > group.leftEdge
+    and eventX < group.rightEdge
+    and eventY > group.topEdge
+    and eventY < group.bottomEdge
 end
 
 local function buttonListener(event)
@@ -223,10 +219,6 @@ end
 
 function v.setButtonFocalX(x)
     buttonFocalX = x
-end
-
-function v.buttonListener(event)
-    buttonListener(event)
 end
 
 function v.getFillImages()
