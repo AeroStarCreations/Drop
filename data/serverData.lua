@@ -42,17 +42,31 @@ local function getFormattedGameNetworkAlias()
     end
     return gameNetworkAlias
 end
+
+---isFailure: boolean,
+---name: string,
+---data: table (optional)
+---alwaysPrintData: boolean (optional) Print data even if isSuccess
+local function printResultMessage(isFailure, name, data, alwaysPrintData)
+    local message
+    if isFailure then
+        message = "Failure: "..name
+    else
+        message = "Success: "..name
+    end
+    if (isFailure or alwaysPrintData) and type(data) == "table" then
+        message = message.."\n"..json.prettify(data)
+    end
+    print(TAG, message)
+end
 -------------------------------------------------------------------------------]
 
 -- Leaderboards ---------------------------------------------------------------[
-local function getAllLeaderboardValuesSuccessListener(result)
-    print(TAG, "Loaded all Leaderboard values")
-    getAllLeaderboardValuesCallback(result)
-end
-
-local function getAllLeaderboardValuesFailureListener(error)
-    print(TAG, "Failed to load all Leaderboard values")
-    print(TAG, json.prettify(error))
+local function getAllLeaderboardValuesListener(result)
+    if not result.error then
+        getAllLeaderboardValuesCallback(result)
+    end
+    printResultMessage(result.error, "get leaderboard values", result)
 end
 
 local function getAllLeaderboardValues()
@@ -62,18 +76,15 @@ local function getAllLeaderboardValues()
     for k, board in pairs(highScoresModel.getLeaderboardNames()) do
         table.insert(request.StatisticNames, board.name)
     end
-    playFab.GetPlayerStatistics(request, getAllLeaderboardValuesSuccessListener, getAllLeaderboardValuesFailureListener)
+    playFab.GetPlayerStatistics(request, getAllLeaderboardValuesListener, getAllLeaderboardValuesListener)
 end
 
-local function updateLeaderboardSuccessListener(result)
-    print(TAG, "updateLeaderboard SUCCESS")
-    print(TAG, json.prettify(result))
-    updateLeaderboardCallback(result.FunctionResult)
-end
-
-local function updateLeaderboardFailureListener(error)
-    print(TAG, "updateLeaderboard FAILURE")
-    print(TAG, json.prettify(error))
+local function updateLeaderboardListener(result)
+    local isFailure = result.Error or result.error
+    if not isFailure then
+        updateLeaderboardCallback(result.FunctionResult)
+    end
+    printResultMessage(isFailure, "update leaderboard", result)
 end
 
 --- params = {
@@ -101,18 +112,14 @@ local function updateLeaderboard(params)
             }
         }
     }
-    playFab.ExecuteCloudScript(request, updateLeaderboardSuccessListener, updateLeaderboardFailureListener)
+    playFab.ExecuteCloudScript(request, updateLeaderboardListener, updateLeaderboardListener)
 end
 
-local function getLeaderboardSuccessListener(result)
-    print(TAG, "Leaderboard SUCCESS")
-    print(TAG, json.prettify(result))
-    getLeaderboardCallback(result.Leaderboard)
-end
-
-local function getLeaderboardFailureListener(error)
-    print(TAG, "Leaderboard FAILURE")
-    print(TAG, json.prettify(error))
+local function getLeaderboardListener(result)
+    if not result.error then
+        getLeaderboardCallback(result.Leaderboard)
+    end
+    printResultMessage(result.error, "get leaderboard", result)
 end
 
 --- params = {
@@ -133,9 +140,9 @@ local function getLeaderboard(params)
         StatisticName = name
     }
     if params.isTop then
-        playFab.GetLeaderboard(request, getLeaderboardSuccessListener, getLeaderboardFailureListener)
+        playFab.GetLeaderboard(request, getLeaderboardListener, getLeaderboardListener)
     else
-        playFab.GetLeaderboardAroundPlayer(request, getLeaderboardSuccessListener, getLeaderboardFailureListener)
+        playFab.GetLeaderboardAroundPlayer(request, getLeaderboardListener, getLeaderboardListener)
     end
 end
 -------------------------------------------------------------------------------]
@@ -151,16 +158,13 @@ end
 --     },
 --     DataVersion = 1
 -- }
-local function getUserDataSuccessListener(result)
-    print(TAG, "get user data SUCCESS")
-    -- print(TAG, json.prettify(result))
-    getGameStatsCallback(result.Data)
-end
-
-local function getUserDataFailureListener(error)
-    print(TAG, "get user data FAILURE")
-    -- print(TAG, json.prettify(error))
-    getGameStatsCallback(error)
+local function getUserDataListener(result)
+    if result.error then
+        getGameStatsCallback(result)
+    else
+        getGameStatsCallback(result.Data)
+    end
+    printResultMessage(result.error, "get user data", result)
 end
 
 --- params = {
@@ -170,23 +174,15 @@ local function getGameStats(params)
     local request = {
         Keys = params.keys
     }
-    playFab.GetUserData(request, getUserDataSuccessListener, getUserDataFailureListener)
+    playFab.GetUserData(request, getUserDataListener, getUserDataListener)
 end
 
-local function updateGameStatsAndAchievementsSuccessListener(result)
-    if result.Error then
-        print(TAG, "update user data FAILURE\n")--..getJson(result))
-    else
-        print(TAG, "update user data SUCCESS\n")--..getJson(result))
-        if updateGameStatsAndAchievementsCallback then
-            updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
-        end
+local function updateGameStatsAndAchievementsListener(result)
+    local isFailure = result.Error or result.error
+    if not isFailure and updateGameStatsAndAchievementsCallback then
+        updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
     end
-end
-
-local function updateGameStatsAndAchievementsFailureListener(error)
-    print(TAG, "update user data FAILURE")
-    -- print(TAG, json.prettify(error))
+    printResultMessage(isFailure, "update user data", result)
 end
 
 --- params = {
@@ -199,23 +195,15 @@ local function updateGameStatsAndAchievements(params)
             Data = params.gameStats
         }
     }
-    playFab.ExecuteCloudScript(
-        request,
-        updateGameStatsAndAchievementsSuccessListener,
-        updateGameStatsAndAchievementsFailureListener
-    )
+    playFab.ExecuteCloudScript(request, updateGameStatsAndAchievementsListener, updateGameStatsAndAchievementsListener)
 end
 -------------------------------------------------------------------------------]
 
 -- Achievements ---------------------------------------------------------------[
-local function claimAchievementRewardSuccessListener(result)
-    print(TAG, "claim achievement reward SUCCESS")
+local function claimAchievementRewardListener(result)
     claimAchievementRewardCallback(result)
-end
-
-local function claimAchievementRewardFailureListener(error)
-    print(TAG, "claim achievement reward FAILURE")
-    claimAchievementRewardCallback(error)
+    local isFailure = result.Error or result.error
+    printResultMessage(isFailure, "claim achievement reward", result)
 end
 
 --- params = {
@@ -228,11 +216,7 @@ local function claimAchievementReward(params)
             achievementId = params.achievementId
         }
     }
-    playFab.ExecuteCloudScript(
-        request,
-        claimAchievementRewardSuccessListener,
-        claimAchievementRewardFailureListener
-    )
+    playFab.ExecuteCloudScript(request, claimAchievementRewardListener, claimAchievementRewardListener)
 end
 -------------------------------------------------------------------------------]
 
@@ -267,35 +251,21 @@ end
 --     }
 -- }
 
-local function getProductInfoSuccessListener(result)
-    print(TAG, "get product info SUCCESS")
-    getProductInfoCallback(result)
-end
-
-local function getProductInfoFailureListener(error)
-    print(TAG, "get product info FAILURE")
-    getProductInfoCallback(error)
+local function getProductInfoListener(result)
+    claimAchievementRewardCallback(result)
+    printResultMessage(result.error, "get product info", result)
 end
 
 local function getProductInfo()
     local request = {
         CatalogVersion = nil  --this gets the default catalog
     }
-    playFab.GetCatalogItems(
-        request,
-        getProductInfoSuccessListener,
-        getProductInfoFailureListener
-    )
+    playFab.GetCatalogItems(request, getProductInfoListener, getProductInfoListener)
 end
 
-local function validateReceiptSuccessListener(result)
-    print(TAG, "validate receipt SUCCESS")
+local function validateReceiptListener(result)
     validateReceiptCallback(result)
-end
-
-local function validateReceiptFailureListener(error)
-    print(TAG, "validate receipt FAILURE")
-    validateReceiptCallback(error)
+    printResultMessage(result.error, "validate receipt", result)
 end
 
 --- params = {
@@ -311,11 +281,7 @@ local function validateGoogleReceipt(params)
         ReceiptJson = params.receipt,
         Signature = params.signature
     }
-    playFab.ValidateGooglePlayPurchase(
-        request,
-        validateReceiptSuccessListener,
-        validateReceiptFailureListener
-    )
+    playFab.ValidateGooglePlayPurchase(request, validateReceiptListener, validateReceiptListener)
 end
 
 --- params = {
@@ -329,11 +295,7 @@ local function validateAppleReceipt(params)
         PurchasePrice = params.purchasePrice,
         ReceiptData = params.receipt,
     }
-    playFab.ValidateIOSReceipt(
-        request,
-        validateReceiptSuccessListener,
-        validateReceiptFailureListener
-    )
+    playFab.ValidateIOSReceipt(request, validateReceiptListener, validateReceiptListener)
 end
 -------------------------------------------------------------------------------]
     
@@ -344,11 +306,7 @@ local function setupPlayFab()
 end
 
 local function setDisplayNameListener(result)
-    if result.error then
-        print(TAG, "set display name FAILURE\n"..json.prettify(result))
-    else
-        print(TAG, "set display name SUCCESS: "..result.DisplayName)
-    end
+    printResultMessage(result.error, "set display name", result)
 end
 
 local function setDisplayName(currentDisplayName)
@@ -375,33 +333,27 @@ local function setDisplayName(currentDisplayName)
     end
 end
 
-local function loginSuccessListener(result)
-    print(TAG, "PlayFab login SUCCESS: ")-- .. getJson(result))
-    local displayName = result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName
-    if displayName then
-        print(TAG, "Welcome: " .. displayName)
+local function loginListener(result)
+    if result.error then
+        if loginCallback and not loginCallbackParams then
+            loginCallback(error)
+        end
+        loginCallback = nil
     else
-        print(TAG, "Welcome: NO DISPLAY NAME")
-    end
-    setDisplayName(displayName)
-    isLoggedIn = true
-    if loginCallback then
-        if loginCallbackParams then
-            loginCallback(loginCallbackParams)
-        else
-            loginCallback(result)
+        local displayName = result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName
+        setDisplayName(displayName)
+        isLoggedIn = true
+        if loginCallback then
+            if loginCallbackParams then
+                loginCallback(loginCallbackParams)
+            else
+                loginCallback(result)
+            end
         end
     end
     loginCallback = nil
     loginCallbackParams = nil
-end
-
-local function loginFailureListener(error)
-    print(TAG, "PlayFab login FAILURE:\n" .. getJson(error))
-    if loginCallback and not loginCallbackParams then
-        loginCallback(error)
-    end
-    loginCallback = nil
+    printResultMessage(result.error, "login", result)
 end
 
 local function loginWithGameCenter(signature)
@@ -416,7 +368,7 @@ local function loginWithGameCenter(signature)
         InfoRequestParameters = {GetUserAccountInfo = true},
         TitleId = "C5B8B"
     }
-    playFab.LoginWithGameCenter(loginRequest, loginSuccessListener, loginFailureListener)
+    playFab.LoginWithGameCenter(loginRequest, loginListener, loginListener)
 end
 
 local function loginWithGoogle(signature)
@@ -425,7 +377,7 @@ local function loginWithGoogle(signature)
         ServerAuthCode = signature.serverAuthCode,
         InfoRequestParameters = {GetUserAccountInfo = true}
     }
-    playFab.LoginWithGoogleAccount(loginRequest, loginSuccessListener, loginFailureListener)
+    playFab.LoginWithGoogleAccount(loginRequest, loginListener, loginListener)
 end
 
 local function loginWithDeviceId()
@@ -454,8 +406,8 @@ local function authenticate(callback, params)
                 CreateAccount = true,
                 InfoRequestParameters = {GetUserAccountInfo = true}
             },
-            loginSuccessListener,
-            loginFailureListener
+            loginListener,
+            loginListener
         )
     else
         gameNetwork.login(gameNetworkCallback)
@@ -549,7 +501,7 @@ end
 
 function v.validateAppleReceipt(currencyCode, purchasePrice, receipt, callback)
     validateReceiptCallback = callback
-    completeTaskIfAuthenticated(validateGoogleReceipt, {
+    completeTaskIfAuthenticated(validateAppleReceipt, {
         currencyCode = currencyCode,
         purchasePrice = purchasePrice,
         receipt = receipt

@@ -29,7 +29,6 @@ local function completeTaskIfInitialized(functionToCall, eventName, params)
 end
 
 local function flurryListener(event)
-    print(TAG, "FLURRY LISTENER\n"..json.prettify(event))
     if (event.phase == "init") then  -- Successful initialization
         isInitialized = true
     end
@@ -44,7 +43,6 @@ local function flurryListener(event)
         printData.errorReason = event.data.reason
         status = "FAILURE"
     end
-    print(TAG, "Flurry "..status.."\n"..json.prettify(printData))
 end
 
 -- Initialization -------------------------------------------------------------[
