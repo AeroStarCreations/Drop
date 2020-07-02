@@ -79,7 +79,7 @@ local function handleAdCompletion( playbackEnded )
         ld.addInvincibility( 1 )
         ld.addVideoAdView()
         ld.setVideoAdLastViewTime()
-        native.showAlert( "You've earned 1 shield!", "You can view "..(5 - ld.getVideoAdViews()).." more video ads today.", { "Okay" } )
+        native.showAlert( "You've earned 1 shield!", "You can view "..(3 - ld.getVideoAdViews()).." more video ads today.", { "Okay" } )
     end
     if onCompleteListener ~= nil then 
         onCompleteListener() 

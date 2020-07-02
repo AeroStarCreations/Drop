@@ -10,6 +10,22 @@ local LOG_LEVEL = "default"             --default, debug, or all
 local isInitialized
 
 -- Private Members ------------------------------------------------------------[
+local function toString(data)
+    if type(data) == "table" then
+        for k, v in pairs(data) do
+            if type(v) ~= "string" then
+                if type(v) == "table" then
+                    data[k] = json.prettify(v)
+                else
+                    data[k] = tostring(v)
+                end
+            end
+        end
+        return data
+    end
+    return {}
+end
+
 local function logEvent(eventName, params)
     flurry.logEvent(eventName, params)
 end
@@ -19,12 +35,12 @@ local function startTimedEvent(eventName, params)
 end
 
 local function stopTimedEvent(eventName, params)
-    flurry.stopTimedEvent(eventName, params)
+    flurry.endTimedEvent(eventName, params)
 end
 
 local function completeTaskIfInitialized(functionToCall, eventName, params)
     if isInitialized then
-        functionToCall(eventName, params)
+        functionToCall(eventName, toString(params))
     end
 end
 
@@ -37,12 +53,13 @@ local function flurryListener(event)
         type = event.type,
         eventName = event.data.event
     }
-    local status = "SUCCESS"
+    local status = "Success"
     if (event.isError) then
         printData.errorCode = event.data.errorCode
         printData.errorReason = event.data.reason
-        status = "FAILURE"
+        status = "Failure"
     end
+    print(TAG, status.."\n"..json.prettify(printData))
 end
 
 -- Initialization -------------------------------------------------------------[
