@@ -12,11 +12,14 @@ local playFabClientPlugin = require("plugin.playfab.client")
 local gameNetwork = require("other.gameNetworkNew")
 local json = require("json")
 local highScoresModel = require("models.highScoresModel")
+local metrics = require("other.metrics")
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "serverData:"
 local playFab
 local gameNetworkAlias
+local isLoggedIn
+
 local loginCallback
 local loginCallbackParams
 local getLeaderboardCallback
@@ -27,7 +30,6 @@ local updateGameStatsAndAchievementsCallback
 local claimAchievementRewardCallback
 local getProductInfoCallback
 local validateReceiptCallback
-local isLoggedIn
 -------------------------------------------------------------------------------]
 
 -- Local Methods --------------------------------------------------------------[
@@ -55,9 +57,37 @@ local function printResultMessage(isFailure, name, data, alwaysPrintData)
         message = "Success: "..name
     end
     if (isFailure or alwaysPrintData) and type(data) == "table" then
-        message = message.."\n"..json.prettify(data)
+        message = message.."\n"..getJson(data)
     end
     print(TAG, message)
+end
+
+---request: (optional)
+local function startTimedMetric(eventId, playfabAPI, request)
+    local params = {
+        playfabAPI = playfabAPI
+    }
+    if request then
+        params.request = getJson(request)
+    end
+    metrics.startTimedEvent(eventId, params)
+end
+
+local function stopTimedMetric(eventId, result)
+    local params = {
+        isFailure = result.error or result.Error
+    }
+    if result.error then
+        params.httpStatus = result.status
+        params.playfabErrorCode = result.error
+        params.message = result.errorMessage
+        params.details = result.errorDetails
+    elseif result.Error then
+        params.errorCode = result.Error.Error
+        params.message = result.Error.Message
+        params.stackTrace = result.Error.StackTrace
+    end
+    metrics.stopTimedEvent(eventId, params)
 end
 -------------------------------------------------------------------------------]
 
@@ -66,6 +96,7 @@ local function getAllLeaderboardValuesListener(result)
     if not result.error then
         getAllLeaderboardValuesCallback(result)
     end
+    stopTimedMetric("playfab_getAllLeaderboardValues", result)
     printResultMessage(result.error, "get leaderboard values", result)
 end
 
@@ -77,6 +108,7 @@ local function getAllLeaderboardValues()
         table.insert(request.StatisticNames, board.name)
     end
     playFab.GetPlayerStatistics(request, getAllLeaderboardValuesListener, getAllLeaderboardValuesListener)
+    startTimedMetric("playfab_getAllLeaderboardValues", "GetPlayerStatistics", request)
 end
 
 local function updateLeaderboardListener(result)
@@ -84,6 +116,7 @@ local function updateLeaderboardListener(result)
     if not isFailure then
         updateLeaderboardCallback(result.FunctionResult)
     end
+    stopTimedMetric("playfab_updateLeaderboard", result)
     printResultMessage(isFailure, "update leaderboard", result)
 end
 
@@ -113,12 +146,14 @@ local function updateLeaderboard(params)
         }
     }
     playFab.ExecuteCloudScript(request, updateLeaderboardListener, updateLeaderboardListener)
+    startTimedMetric("playfab_updateLeaderboard", "ExecuteCloudScript", request)
 end
 
 local function getLeaderboardListener(result)
     if not result.error then
         getLeaderboardCallback(result.Leaderboard)
     end
+    stopTimedMetric("playfab_getLeaderboard", result)
     printResultMessage(result.error, "get leaderboard", result)
 end
 
@@ -139,11 +174,15 @@ local function getLeaderboard(params)
         MaxResultsCount = 100,
         StatisticName = name
     }
+    local apiName
     if params.isTop then
         playFab.GetLeaderboard(request, getLeaderboardListener, getLeaderboardListener)
+        apiName = "GetLeaderboard"
     else
         playFab.GetLeaderboardAroundPlayer(request, getLeaderboardListener, getLeaderboardListener)
+        apiName = "GetLeaderboardAroundPlayer"
     end
+    startTimedMetric("playfab_getLeaderboard", apiName, request)
 end
 -------------------------------------------------------------------------------]
 
@@ -164,6 +203,7 @@ local function getUserDataListener(result)
     else
         getGameStatsCallback(result.Data)
     end
+    stopTimedMetric("playfab_getGameStats", result)
     printResultMessage(result.error, "get user data", result)
 end
 
@@ -175,6 +215,7 @@ local function getGameStats(params)
         Keys = params.keys
     }
     playFab.GetUserData(request, getUserDataListener, getUserDataListener)
+    startTimedMetric("playfab_getGameStats", "GetUserData", request)
 end
 
 local function updateGameStatsAndAchievementsListener(result)
@@ -182,6 +223,7 @@ local function updateGameStatsAndAchievementsListener(result)
     if not isFailure and updateGameStatsAndAchievementsCallback then
         updateGameStatsAndAchievementsCallback(result.FunctionResult.CompletedAchievements)
     end
+    stopTimedMetric("playfab_updateGameStatsAndAchievements", result)
     printResultMessage(isFailure, "update user data", result)
 end
 
@@ -196,6 +238,7 @@ local function updateGameStatsAndAchievements(params)
         }
     }
     playFab.ExecuteCloudScript(request, updateGameStatsAndAchievementsListener, updateGameStatsAndAchievementsListener)
+    startTimedMetric("playfab_updateGameStatsAndAchievements", "ExecuteCloudScript", request)
 end
 -------------------------------------------------------------------------------]
 
@@ -203,6 +246,7 @@ end
 local function claimAchievementRewardListener(result)
     claimAchievementRewardCallback(result)
     local isFailure = result.Error or result.error
+    stopTimedMetric("playfab_claimAchievementReward", result)
     printResultMessage(isFailure, "claim achievement reward", result)
 end
 
@@ -217,6 +261,7 @@ local function claimAchievementReward(params)
         }
     }
     playFab.ExecuteCloudScript(request, claimAchievementRewardListener, claimAchievementRewardListener)
+    startTimedMetric("playfab_claimAchievementReward", "ExecuteCloudScript", request)
 end
 -------------------------------------------------------------------------------]
 
@@ -252,7 +297,8 @@ end
 -- }
 
 local function getProductInfoListener(result)
-    claimAchievementRewardCallback(result)
+    getProductInfoCallback(result)
+    stopTimedMetric("playfab_getProductInfo", result)
     printResultMessage(result.error, "get product info", result)
 end
 
@@ -261,10 +307,12 @@ local function getProductInfo()
         CatalogVersion = nil  --this gets the default catalog
     }
     playFab.GetCatalogItems(request, getProductInfoListener, getProductInfoListener)
+    startTimedMetric("playfab_getProductInfo", "GetCatalogItems", request)
 end
 
 local function validateReceiptListener(result)
     validateReceiptCallback(result)
+    stopTimedMetric("playfab_validateReceipt", result)
     printResultMessage(result.error, "validate receipt", result)
 end
 
@@ -282,6 +330,7 @@ local function validateGoogleReceipt(params)
         Signature = params.signature
     }
     playFab.ValidateGooglePlayPurchase(request, validateReceiptListener, validateReceiptListener)
+    startTimedMetric("playfab_validateReceipt", "ValidateGooglePlayPurchase", request)
 end
 
 --- params = {
@@ -296,6 +345,7 @@ local function validateAppleReceipt(params)
         ReceiptData = params.receipt,
     }
     playFab.ValidateIOSReceipt(request, validateReceiptListener, validateReceiptListener)
+    startTimedMetric("playfab_validateReceipt", "ValidateIOSReceipt", request)
 end
 -------------------------------------------------------------------------------]
     
@@ -306,6 +356,7 @@ local function setupPlayFab()
 end
 
 local function setDisplayNameListener(result)
+    stopTimedMetric("playfab_setDisplayName", result)
     printResultMessage(result.error, "set display name", result)
 end
 
@@ -323,13 +374,11 @@ local function setDisplayName(currentDisplayName)
     end
 
     if newDisplayName then
-        playFab.UpdateUserTitleDisplayName(
-            {
-                DisplayName = newDisplayName
-            },
-            setDisplayNameListener,
-            setDisplayNameListener
-        )
+        local request = {
+            DisplayName = newDisplayName
+        }
+        playFab.UpdateUserTitleDisplayName(request, setDisplayNameListener, setDisplayNameListener)
+        startTimedMetric("playfab_setDisplayName", "UpdateUserTitleDisplayName", request)
     end
 end
 
@@ -353,6 +402,7 @@ local function loginListener(result)
     end
     loginCallback = nil
     loginCallbackParams = nil
+    stopTimedMetric("playfab_login", result)
     printResultMessage(result.error, "login", result)
 end
 
@@ -369,6 +419,7 @@ local function loginWithGameCenter(signature)
         TitleId = "C5B8B"
     }
     playFab.LoginWithGameCenter(loginRequest, loginListener, loginListener)
+    startTimedMetric("playfab_login", "LoginWithGameCenter", loginRequest)
 end
 
 local function loginWithGoogle(signature)
@@ -378,6 +429,7 @@ local function loginWithGoogle(signature)
         InfoRequestParameters = {GetUserAccountInfo = true}
     }
     playFab.LoginWithGoogleAccount(loginRequest, loginListener, loginListener)
+    startTimedMetric("playfab_login", "LoginWithGoogleAccount", loginRequest)
 end
 
 local function loginWithDeviceId()
@@ -400,15 +452,13 @@ local function authenticate(callback, params)
     loginCallbackParams = params
     setupPlayFab()
     if system.getInfo("environment") == "simulator" then
-        playFab.LoginWithCustomID(
-            {
-                CustomId = "TestCustomId",
-                CreateAccount = true,
-                InfoRequestParameters = {GetUserAccountInfo = true}
-            },
-            loginListener,
-            loginListener
-        )
+        local request = {
+            CustomId = "TestCustomId",
+            CreateAccount = true,
+            InfoRequestParameters = {GetUserAccountInfo = true}
+        }
+        playFab.LoginWithCustomID(request, loginListener, loginListener)
+        startTimedMetric("playfab_login", "LoginWithCustomID", request)
     else
         gameNetwork.login(gameNetworkCallback)
     end
