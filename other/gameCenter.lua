@@ -2,6 +2,7 @@ local gameNetwork = require( "gameNetwork" )
 local idVerify = require( "plugin.idVerifySig" )
 local json = require( "json" )
 local ld = require( "data.localData" )
+local metrics = require("other.metrics")
 
 -- Local variables ------------------------------------------------------------[
 local TAG = "gameCenter:"
@@ -32,17 +33,26 @@ end
 local function getPlayerInfo()
     gameNetwork.request( "loadLocalPlayer", { listener = function(player)
         print(TAG, "getPlayerInfo():"..tostring(player))
-        if player then
+        local params = {
+            isFailure = player.data == nil
+        }
+        if player.data then
             -- testText.text = json.prettify(player) -- this works
             print(TAG, json.prettify(player))
             signature.playerId = player.data.playerID
             signature.alias = player.data.alias
             ld.setAlias( player.data.alias )
             -- callbackFunction( signature )
+            params.playerId = player.playerId
+            params.alias = player.alias
+            params.isAuthenticated = player.isAuthenticated
+            params.isUnderage = player.isUnderage
         else
             print(TAG, "gameNetwork could not get player")
+
         end
         callbackFunction( "gamecenter", signature )
+        metrics.stopTimedEvent("gameCenter_getPlayerInfo", params)
     end})
 end
 
@@ -59,11 +69,13 @@ local function verifyListener( event )
     print(TAG, "*** verifyListener ***")
     signature = event
     if not signature.isError then
-        print(TAG, "Verify Signature SUCCESS:\n"..json.prettify(event))
+        print(TAG, "Success: Verify Signature\n"..json.prettify(event))
         getPlayerInfo()
+        metrics.startTimedEvent("gameCenter_getPlayerInfo")
     else
-        print(TAG, "Verify Signature ERROR" )
+        print(TAG, "Failure: Verify Signature" )
     end
+    metrics.logEvent("gameCenter_idVerify", { isFailure = signature.isError })
 end
 
 local function gamecenterCallback( event )
@@ -78,6 +90,7 @@ local function gamecenterCallback( event )
         print( "GameCenter FAILURE" )
         showAccountAlert()
     end
+    metrics.logEvent("gameCenter_init", { isFailure = (not event.data) })
 end
 -------------------------------------------------------------------------------]
 
