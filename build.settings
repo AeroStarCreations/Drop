@@ -42,7 +42,8 @@ settings =
             
             --FacebookAppID = "",
 
-            --CFBundleIdentifier = "com.appledts.GKTapper", -- Apple's GameCenter test bed
+            --This must be here for testing Appodeal
+            CFBundleIdentifier = "com.appledts.GKTapper", -- Apple's GameCenter test bed
             
             CFBundleURLTypes =
             {
