@@ -1,12 +1,12 @@
-#Drop
-Hello, World!
-My feet are FREEZING!
+# Drop
 
-##Business
+One of these days I'll finish this game.
+
+### Business
 Update billing addresses:
-*Appodeal
-*iTunes Connect
+* Appodeal
+* iTunes Connect
 
-Before publishing:
-*Check for TODO items
-*Update app version number (i.e. build.settings)
+### Before publishing:
+* Check for TODO items
+* Update app version number (i.e. build.settings)
