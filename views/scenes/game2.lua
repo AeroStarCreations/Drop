@@ -12,6 +12,7 @@ local highScores = require( "data.highScores" )
 local sounds = require( "other.sounds" )
 local metrics = require( "other.metrics" )
 local fonts = require("other.fonts")
+local colors = require("other.colors")
 
 local arrowIsWorking = false
 
@@ -663,7 +664,7 @@ function scene:create( event )
     
     storm = display.newText( stormOptions )
     storm.x = -storm.width
-    storm:setFillColor( unpack( g.purple ) )
+    storm:setFillColor( colors.purple:unpack() )
     storm.anchorX, storm.anchorY = 0.5, 0.5
     storm:toBack()
     ---------------------------------------------------------------------------]

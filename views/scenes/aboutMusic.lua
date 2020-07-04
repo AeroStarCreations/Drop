@@ -5,6 +5,7 @@ local widget = require( "widget" )
 local g = require( "other.globalVariables" )
 local logoModule = require( "other.logoModule" )
 local fonts = require("other.fonts")
+local colors = require("other.colors")
 
 function scene:create( event )
 
@@ -46,7 +47,7 @@ function scene:create( event )
 
     ----------------------"Jeffrey Emerson Gaiser"
     local jeg = display.newText( group, "Jeffrey Emerson Gaiser", display.contentCenterX, 0, fonts.getBold(), 70, "center")
-    jeg:setFillColor( unpack(g.purple) )
+    jeg:setFillColor( colors.purple:unpack() )
     jeg.y = drop.y + drop.height + 0.7 * jeg.height
     while jeg.width > 0.95 * display.contentWidth do
         jeg.size = jeg.size - 0.5
@@ -60,7 +61,7 @@ function scene:create( event )
     -----------------------------------------Lines
     local lineTopY = jeg.y - 0.5 * jeg.height
     local lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
-    lineTop:setStrokeColor( unpack( g.purple ) )
+    lineTop:setStrokeColor( colors.purple:unpack() )
     lineTop.strokeWidth = 2
     lineTop.xIn = 0
     lineTop.xOut = display.contentWidth
@@ -69,7 +70,7 @@ function scene:create( event )
 
     local lineBottomY = lineTopY + jeg.height
     local lineBottom = display.newLine( group, 0, lineBottomY, display.contentWidth, lineBottomY )
-    lineBottom:setStrokeColor( unpack( g.purple ) )
+    lineBottom:setStrokeColor( colors.purple:unpack() )
     lineBottom.strokeWidth = 2
     lineBottom.xIn = 0
     lineBottom.xOut = -display.contentWidth

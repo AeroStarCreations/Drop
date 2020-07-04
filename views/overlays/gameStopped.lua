@@ -3,6 +3,7 @@ local g = require( "other.globalVariables" )
 local widget = require( "widget" )
 local controller = require( "controllers.gameStoppedController" )
 local fonts = require("other.fonts")
+local colors = require("other.colors")
 
 local scene = cp.newScene()
 
@@ -50,7 +51,7 @@ function scene:create( event )
     message.yOut = 0.25 * display.actualContentHeight
     message.x = message.xOut
     message.y = message.yOut
-    message:setFillColor( unpack( g.purple ) )
+    message:setFillColor( unpack( colors.purple ) )
     message.anchorY = 0.5
     message.id = "message"
     controller.addGamePausedObject( message )
@@ -197,7 +198,7 @@ function scene:create( event )
         display.contentWidth,
         statsFocal + 0.5 * statsAreaH
     )
-    statsLine1:setStrokeColor( unpack( g.purple ) )
+    statsLine1:setStrokeColor( unpack( colors.purple ) )
     statsLine1.strokeWidth = 2
     statsLine1.alpha = 0
     statsLine1.id = "line1"
@@ -211,7 +212,7 @@ function scene:create( event )
         display.contentCenterX - 0.5 * wh,
         display.actualContentHeight
     )
-    statsLine2:setStrokeColor( unpack( g.purple ) )
+    statsLine2:setStrokeColor( unpack( colors.purple ) )
     statsLine2.strokeWidth = 2
     statsLine2.alpha = 0
     statsLine2.id = "line2"
@@ -225,7 +226,7 @@ function scene:create( event )
         display.contentCenterX + 0.5 * wh,
         display.contentHeight
     )
-    statsLine3:setStrokeColor( unpack( g.purple ) )
+    statsLine3:setStrokeColor( unpack( colors.purple ) )
     statsLine3.strokeWidth = 2
     statsLine3.alpha = 0
     statsLine3.id = "line3"
@@ -247,7 +248,7 @@ function scene:create( event )
     categoryText.yOut = categoryText.yIn
     categoryText.x = categoryText.xOut
     categoryText.y = categoryText.yOut
-    categoryText:setFillColor( unpack( g.orange ) )
+    categoryText:setFillColor( colors.orange:unpack() )
     categoryText.anchorX = 1
     categoryText.id = "categoryText"
     controller.addGameOverObject( categoryText )
@@ -265,7 +266,7 @@ function scene:create( event )
     valuesText.yOut = valuesText.yIn
     valuesText.x = valuesText.yOut
     valuesText.y = valuesText.yOut
-    valuesText:setFillColor( unpack( g.orange ) )
+    valuesText:setFillColor( colors.purple:unpack() )
     valuesText.anchorX = 0
     valuesText.id = "valuesText"
     controller.addGameOverObject( valuesText )
@@ -287,7 +288,7 @@ function scene:create( event )
     highScoreText.yOut = display.actualContentHeight + 0.5 * highScoreText.height
     highScoreText.x = highScoreText.xOut
     highScoreText.y = highScoreText.yOut
-    highScoreText:setFillColor( unpack( g.purple ) )
+    highScoreText:setFillColor( unpack( colors.purple ) )
     highScoreText.id = "highScoreText"
     controller.addGameOverObject( highScoreText )
 
@@ -307,7 +308,7 @@ function scene:create( event )
     highTimeText.yOut = highScoreText.y
     highTimeText.x = highTimeText.xOut
     highTimeText.y = highTimeText.yOut
-    highTimeText:setFillColor( unpack( g.purple ) )
+    highTimeText:setFillColor( unpack( colors.purple ) )
     highTimeText.id = "highTimeText"
     controller.addGameOverObject( highTimeText )
     ---------------------------------------------------------------------------]

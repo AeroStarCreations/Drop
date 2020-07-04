@@ -9,6 +9,7 @@ local ld = require( "data.localData" )
 local social = require("other.socialNetworks")
 local metrics = require("other.metrics")
 local fonts = require("other.fonts")
+local colors = require("other.colors")
 
 -- Precalls
 local TAG = "center.lua: "
@@ -25,7 +26,7 @@ function scene:create( event )
     asc.yIn = display.contentHeight - 30
     asc.yOut = display.contentHeight + 50
     asc.y = asc.yOut
-    asc:setFillColor( unpack(g.purple) )
+    asc:setFillColor( colors.purple:unpack() )
     group:insert(asc)
     controller.linkASC(asc)
     ---------------------------------------------------------------

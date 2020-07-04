@@ -8,6 +8,7 @@ local logoModule = require( "other.logoModule" )
 local social = require( "other.socialNetworks" )
 local metrics = require("other.metrics")
 local fonts = require("other.fonts")
+local colors = require("other.colors")
 
 --Precalls
 local TAG = "aboutASC.lua: "
@@ -52,7 +53,7 @@ function scene:create( event )
 
     -------------------------"Aero Star Creations"
     local asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, fonts.getBold(), 70, "center")
-    asc:setFillColor( unpack(g.purple) )
+    asc:setFillColor( colors.purple:unpack() )
     asc.y = drop.y + drop.height + 0.7 * asc.height
     asc.alphaIn = 1
     asc.alphaOut = 0
@@ -63,7 +64,7 @@ function scene:create( event )
     -----------------------------------------Lines
     local lineTopY = asc.y - 0.5 * asc.height
     local lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
-    lineTop:setStrokeColor( unpack( g.purple ) )
+    lineTop:setStrokeColor( colors.purple:unpack() )
     lineTop.strokeWidth = 2
     lineTop.xIn = 0
     lineTop.xOut = display.contentWidth
@@ -72,7 +73,7 @@ function scene:create( event )
 
     local lineBottomY = lineTopY + asc.height
     local lineBottom = display.newLine( group, 0, lineBottomY, display.contentWidth, lineBottomY )
-    lineBottom:setStrokeColor( unpack( g.purple ) )
+    lineBottom:setStrokeColor( colors.purple:unpack() )
     lineBottom.strokeWidth = 2
     lineBottom.xIn = 0
     lineBottom.xOut = -display.contentWidth

@@ -7,6 +7,8 @@ local g = require( "other.globalVariables" )
 local t = require( "other.transitions" )
 local ld = require( "data.localData" )
 local fonts = require("other.fonts")
+local colors = require("other.colors")
+local Switch = require("views.other.Switch")
 
 
 --Precalls
@@ -68,7 +70,7 @@ function scene:create( event )
     for i=1, numberOfSettings do
        local ypos = focal + (i-1)*((display.contentHeight - focal)/numberOfSettings)
        lineTable[i] = display.newLine( lineGroup, 0, ypos, display.contentWidth, ypos )
-       lineTable[i]:setStrokeColor( unpack( g.purple ) )
+       lineTable[i]:setStrokeColor( colors.purple:unpack() )
        lineTable[i].strokeWidth = 2
     end
     group:insert( lineGroup )
@@ -90,7 +92,7 @@ function scene:create( event )
     }
     
     local volText = display.newText(volTextOpt)
-    volText:setFillColor( unpack( g.purple ) )
+    volText:setFillColor( colors.purple:unpack() )
     volText.anchorX = 0.5; volText.anchorY = 0.5
     
     local volText2Opt = {
@@ -105,7 +107,7 @@ function scene:create( event )
     }
     
     local volText2 = display.newText(volText2Opt)
-    volText2:setFillColor( unpack( g.purple ) )
+    volText2:setFillColor( colors.purple:unpack() )
     volText2.anchorX = 0.5; volText2.anchorY = 1
 
     local function setVolumeText()
@@ -147,7 +149,7 @@ function scene:create( event )
         align = "center",
     }
     local specialText = display.newText(specialTextOpt)
-    specialText:setFillColor( unpack( g.purple ) )
+    specialText:setFillColor( colors.purple:unpack() )
     specialText.anchorX = 0.5; specialText.anchorY = 0.5
     ----------------------------------------------
 
@@ -164,7 +166,7 @@ function scene:create( event )
     }
     
     local senseText = display.newText(senseTextOpt)
-    senseText:setFillColor( unpack( g.purple ) )
+    senseText:setFillColor( colors.purple:unpack() )
     senseText.anchorX = 0.5; senseText.anchorY = 0.5
     
     local senseText2Opt = {
@@ -179,7 +181,7 @@ function scene:create( event )
     }
     
     local senseText2 = display.newText(senseText2Opt)
-    senseText2:setFillColor( unpack( g.purple ) )
+    senseText2:setFillColor( colors.purple:unpack() )
     senseText2.anchorX = 0.5; senseText2.anchorY = 1
     
     local function sensitivityLevel()
@@ -211,7 +213,7 @@ function scene:create( event )
         align = "center",
     }
     local methodText = display.newText(methodTextOpt)
-    methodText:setFillColor( unpack( g.purple ) )
+    methodText:setFillColor( colors.purple:unpack() )
     methodText.anchorX = 0.5; methodText.anchorY = 0.5
     ----------------------------------------------
     -----------------------------------------------------------------------------------------------
@@ -277,7 +279,7 @@ function scene:create( event )
         end
     end
     
-    local bgSwitch = g.onOffSwitch({
+    local bgSwitch = Switch:new({
         parent = groupBackground,
         x = 0.7 * display.actualContentWidth,
         y = bgText.y,
@@ -301,7 +303,7 @@ function scene:create( event )
         end
     end
     
-    local specialSwitch = g.onOffSwitch({
+    local specialSwitch = Switch:new({
         parent = groupSpecial,
         x = 0.7 * display.actualContentWidth,
         y = specialText.y,
@@ -355,7 +357,7 @@ function scene:create( event )
         print( "Tilt method set to " .. tostring(ld.getTiltControlEnabled()) )
     end
     
-    local methodSwitch = g.onOffSwitch({
+    local methodSwitch = Switch:new({
         parent = groupMethod,
         x = 0.7 * display.actualContentWidth,
         y = methodText.y,

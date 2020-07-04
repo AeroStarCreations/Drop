@@ -8,7 +8,7 @@ local sd = require( "data.serverData" )
 local colors = require( "other.colors" )
 local logoModule = require( "other.logoModule" )
 local fonts = require("other.fonts")
-
+local colors = require("other.colors")
 
 --Precalls
 local TAG = "leaderboardsScene.lua:"
@@ -345,11 +345,11 @@ function scene:create( event )
     local line2Y = scoreButton.y + 0.5 * scoreButton.height + 0.5 * lineStrokeWidth
         
     -- line1 = display.newLine( group, 0, line1Y, display.contentWidth, line1Y )
-    -- line1:setStrokeColor( unpack( g.purple ) )
+    -- line1:setStrokeColor( colors.purple:unpack() )
     -- line1.strokeWidth = lineStrokeWidth
 
     -- line2 = display.newLine( group, 0, line2Y, display.contentWidth, line2Y )
-    -- line2:setStrokeColor( unpack( g.purple ) )
+    -- line2:setStrokeColor( colors.purple:unpack() )
     -- line2.strokeWidth = lineStrokeWidth
     ----------------------------------------------
 
