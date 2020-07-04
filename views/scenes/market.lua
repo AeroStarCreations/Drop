@@ -5,6 +5,7 @@ local g = require( "other.globalVariables" )
 local colors = require( "other.colors" )
 local logoModule = require( "other.logoModule" )
 local controller = require( "controllers.marketController" )
+local fonts = require("other.fonts")
 
 ----------
 
@@ -62,7 +63,7 @@ function scene:create( event )
         x = display.contentCenterX,
         y = display.contentCenterY,
         width = 0.6 * display.actualContentWidth,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 45,
         align = "center"
     })
@@ -143,7 +144,7 @@ function scene:create( event )
             y = button.y + 7,
             width = button.width - 57,
             height = 0, -- this allows the height to auto-adjust
-            font = g.comRegular,
+            font = fonts.getRegular(),
             fontSize = 50,
             align = "right"
         })
@@ -155,7 +156,7 @@ function scene:create( event )
             x = button.x - 35,
             y = button.y + 35,
             height = 0, -- this allows the height to auto-adjust
-            font = g.comRegular,
+            font = fonts.getRegular(),
             fontSize = 55,
             align = "center"
         })
@@ -168,7 +169,7 @@ function scene:create( event )
             x = button.x - 220,
             y = lifeValue.y,
             height = 0, -- this allows the height to auto-adjust
-            font = g.comRegular,
+            font = fonts.getRegular(),
             fontSize = 55,
             align = "center"
         })
@@ -199,7 +200,7 @@ function scene:create( event )
                 label = "#",
                 labelYOffset = 0,
                 labelColor = { default={ 0, 0, 0, 1 }, over={ 0, 0, 0, 1 } },
-                font = g.comRegular,
+                font = fonts.getRegular(),
                 fontSize = 38,
                 defaultFile = controller.getButtonFileName(index),
                 onEvent = controller.buttonListener
@@ -214,7 +215,7 @@ function scene:create( event )
                 y = button.y + 70,
                 width = button.width,
                 height = 0, -- this allows the height to auto-adjust
-                font = g.comBold,
+                font = fonts.getBold(),
                 fontSize = 40,
                 align = "center"
             })

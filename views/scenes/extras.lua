@@ -4,6 +4,7 @@ local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "other.globalVariables" )
 local logoModule = require( "other.logoModule" )
+local fonts = require("other.fonts")
 
 function scene:create( event )
     
@@ -81,7 +82,7 @@ function scene:create( event )
         squares[i].fill = { type="image", filename=fill[i] }
         squares[i].isEnabled = true;
         
-        label[i] = display.newText( { parent=buttonGroup[i], text=labelText[i], x=squares[i].x, y=squares[i].y+0.5*h-50, width=w, height=h, font=g.comRegular, fontSize=50, align="center" } )
+        label[i] = display.newText( { parent=buttonGroup[i], text=labelText[i], x=squares[i].x, y=squares[i].y+0.5*h-50, width=w, height=h, font=fonts.getRegular(), fontSize=50, align="center" } )
         
         logo[i] = display.newImageRect( buttonGroup[i], logoFile[i], 66, 66 )
         logo[i].y = 0.25 * h
@@ -119,7 +120,7 @@ function scene:create( event )
         text = " ",
         x = 0,
         y = -0.3 * squares[5].height,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 50,
         align = "center",
     }

@@ -188,7 +188,7 @@ local function mainButtonListenerAfterAd()
 end
 
 local function mainButtonListener()
-    ads.show(false, mainButtonListenerAfterAd)
+    ads.showNormalAd(mainButtonListenerAfterAd)
     metrics.logEvent("gameStopped_main_click")
 end
 
@@ -200,7 +200,7 @@ end
 
 local function restartButtonListener()
     sceneHideCallback = parentScene.startGame
-    ads.show(false, restartButtonListenerAfterAd)
+    ads.showNormalAd(restartButtonListenerAfterAd)
     metrics.logEvent("gameStopped_restart_click")
 end
 

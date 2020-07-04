@@ -2,6 +2,7 @@
 local g = require( "other.globalVariables" )
 local widget = require( "widget" )
 local colors = require( "other.colors" )
+local fonts = require("other.fonts")
 
 local TAG = "Alert.lua: "
 
@@ -32,7 +33,7 @@ local function createView( alert )
         x = 0,
         y = 0,
         width = w * 0.9,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 30
     })
     messageBoxLabel:setFillColor(0, 0, 0)
@@ -61,7 +62,7 @@ local function createView( alert )
         text = alert.title,
         x = 0,
         y = titleBoxImage.y,
-        font = g.comBold,
+        font = fonts.getBold(),
         fontSize = 40,
     })
     titleBoxLabel:setFillColor(0, 0, 0)
@@ -93,7 +94,7 @@ local function createView( alert )
             label = alert.buttonLabels[index],
             labelYOffset = buttonLabelOffset,
             labelColor = { default={0, 0, 0}, over=colors.red },
-            font = g.comRegular,
+            font = fonts.getRegular(),
             fontSize = 30
         })
         alert.viewGroup:insert(button)

@@ -2,6 +2,7 @@
 local g = require("other.globalVariables")
 local widget = require("widget")
 local GGTwitter = require( "thirdParty.GGTwitter" )
+local fonts = require("other.fonts")
 local metrics = require("other.metrics")
 
 --Precalls
@@ -109,7 +110,7 @@ local function openAscOnFacebook(displayGroup)
         onRelease = removeAllObjects,
         label = "Close",
         labelYOffset = 7,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 60,
         labelColor = {default = {1, 1, 1}, over = {0.8, 0.8, 1}},
         defaultFile = "images/buttonGreen.png"

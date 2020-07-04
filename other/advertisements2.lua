@@ -10,33 +10,40 @@
 --
 -- *has rewarded video
 
+-- THIS MODULE USES APPODEAL
+-- Appodeal loads ads automatically in the background
+
 --TODO: provide billing info on appodeal.com
 
-local appodeal = require( "plugin.appodeal" )
-local ld = require( "data.localData" )
-local colors = require( "other.colors" )
+local appodeal = require("plugin.appodeal")
+local ld = require("data.localData")
+local metrics = require("other.metrics")
 local Spinner = require("views.other.Spinner")
+local TimerBank = require("other.TimerBank"):new()
 
-local platformName = system.getInfo( "platform" )
+--TODO: set testMode to false before deploying
+local IS_TEST_MODE = true
 local TAG = "advertisements2.lua: "
+local PLATFORM = system.getInfo("platform")
+--TODO: this is the Drop Testing key. Switch for the non-testing key
+local IOS_APP_KEY = "90fd4f1ec310a6898d57032199061bbb2b34bf57c8d81c7a"
+local ANDROID_APP_KEY = "9f72f301cd38796f7996457c9cab7372ce815fa740b99cd4"
+
 local gamesBetweenAds = 2
 local gamesPlayed = 0
-local appKey
 local isRewarded
 local onCompleteListener
--- Timer
 local loadWaitTime = 5000
-local timerIterationDuration = 100
-local timerIterations = loadWaitTime / timerIterationDuration
+local timerDuration = 100
+local timerIterations = loadWaitTime / timerDuration
 local adTimer
--- Spinner
 local spinner
 
-if platformName == "ios" then
-    --TODO: this is the Drop Testing key. Switch for the non-testing key
-    appKey = "90fd4f1ec310a6898d57032199061bbb2b34bf57c8d81c7a"
-elseif platformName == "android" then
-    appKey = "9f72f301cd38796f7996457c9cab7372ce815fa740b99cd4"
+-- Private Members ------------------------------------------------------------[
+local function callOnCompleteListener()
+    if onCompleteListener then
+        onCompleteListener()
+    end
 end
 
 local function showAlert()
@@ -44,106 +51,134 @@ local function showAlert()
     if isRewarded then
         message = "Unable to show ad. Please check your network connection and try again."
     end
-    native.showAlert( "Oops!", message, { "Okay" } )
+    native.showAlert("Bummer.", message, {"Okay"}, callOnCompleteListener)
 end
 
--- Returns true if the ad is loaded, false otherwise
-local function showRewardedVideoIfLoaded()
-    --TODO: remove outer environment condition
-    if system.getInfo("environment") == "device" and appodeal.isLoaded("rewardedVideo") then
-        appodeal.show( "rewardedVideo" )
-        return true
-    end
-    return false
-end
-
-local function timerListener( event )
-    if showRewardedVideoIfLoaded() then
-        timer.cancel( adTimer )
-    elseif event.count == timerIterations then
+local function cleanUp()
+    TimerBank:cancel(adTimer)
+    if spinner then
         spinner:delete()
+    end
+end
+
+local function canShowAd()
+    return appodeal.canShow("rewardedVideo")
+end
+
+local function showAd()
+    appodeal.show("rewardedVideo")
+end
+
+local function timerListener(event)
+    if canShowAd() then
+        metrics.stopTimedEvent("ads_load_wait", { isFailure = false })
+        showAd()
+        cleanUp()
+    elseif event.count == timerIterations then
+        metrics.stopTimedEvent("ads_load_wait", { isFailure = true })
+        cleanUp()
         showAlert()
     end
 end
 
 local function startTimerForAd()
-    if not showRewardedVideoIfLoaded() then
-        spinner = spinner or Spinner:new(true)
-        spinner:show()
-        adTimer = timer.performWithDelay( timerIterationDuration, timerListener, timerIterations )
-    end
+    spinner = spinner or Spinner:new(true)
+    spinner:show()
+    adTimer = TimerBank:createTimer(timerDuration, timerListener, timerIterations)
+    metrics.startTimedEvent("ads_load_wait")
 end
 
-local function handleAdCompletion( playbackEnded )
-    if playbackEnded and isRewarded then
-        ld.addInvincibility( 1 )
-        ld.addVideoAdView()
-        ld.setVideoAdLastViewTime()
-        native.showAlert( "You've earned 1 shield!", "You can view "..(3 - ld.getVideoAdViews()).." more video ads today.", { "Okay" } )
-    end
-    if onCompleteListener ~= nil then 
-        onCompleteListener() 
-    end
-end
-
-local function adListener( event )
-    local phase = event.phase
-    print(TAG .. "adListener event.phase: " .. phase)
-
-    if phase == "init" then
-
-    elseif phase == "loaded" then
-
-    elseif phase == "displayed" then
-
-    elseif phase == "clicked" then
-
-    elseif phase == "failed" then
-        showAlert()
-        -- destroyBackground()
-    elseif phase == "playbackBegan" then
-
-    elseif phase == "playbackEnded" then
-        -- destroyBackground()
-        handleAdCompletion( true )
-    elseif phase == "closed" then
-        -- destroyBackground()
-        handleAdCompletion( false )
-    elseif phase == "dataReceived" then
-
-    end
-end
-
-local v = {}
-
--- adIsRewarded indicates the an award should be given at the end of the ad
--- listener is the function to call at the end of the process
-function v.show( adIsRewarded, listener )
-    isRewarded = adIsRewarded
-    onCompleteListener = listener
-
-    -- Ads are shown either for a reward or after a game is completed
-    if isRewarded then
+local function showAdOrWaitForLoad(isRewarded, callback)
+    if canShowAd() then
+        showAd()
+    else
         startTimerForAd()
-        return true
+    end
+end
+
+local function initiateShowAd()
+    if isRewarded then
+        showAdOrWaitForLoad()
     else
         gamesPlayed = gamesPlayed + 1
+        if gamesPlayed >= gamesBetweenAds then
+            gamesPlayed = 0
+            showAdOrWaitForLoad()
+        else
+            callOnCompleteListener()
+        end
+    end
+    metrics.logEvent("ads_request", { isRewarded = isRewarded })
+end
+
+local function handleAdCompletion(playbackEnded)
+    if playbackEnded and isRewarded then
+        ld.addInvincibility(1)
+        ld.addVideoAdView()
+        ld.setVideoAdLastViewTime()
+        native.showAlert(
+            "You've earned 1 shield!",
+            "You can view " .. (3 - ld.getVideoAdViews()) .. " more video ads today.",
+            {"Okay"},
+            callOnCompleteListener
+        )
+    else
+        callOnCompleteListener()
+    end
+end
+
+local function adListener(event)
+    local phase = event.phase
+    print(TAG, "Appodeal phase: " .. phase)
+
+    if phase == "init" then
+    elseif phase == "loaded" then
+    elseif phase == "displayed" then
+    elseif phase == "clicked" then
+    elseif phase == "failed" then
+        cleanUp()
+        showAlert()
+    elseif phase == "playbackBegan" then
+    elseif phase == "playbackEnded" then
+        handleAdCompletion(true)
+    elseif phase == "closed" then
+        handleAdCompletion(false)
+    elseif phase == "dataReceived" then
     end
 
-    if gamesPlayed >= gamesBetweenAds then
-        startTimerForAd()
-        gamesPlayed = 0
-    elseif listener ~= nil then
-        listener()
-    end
+    metrics.logEvent("ads_"..phase)
+end
+
+-- Initialization -------------------------------------------------------------[
+local function init()
+    local appKey = (PLATFORM == "ios" and IOS_APP_KEY) or ANDROID_APP_KEY
+    appodeal.init(
+        adListener,
+        {
+            appKey = appKey,
+            testMode = IS_TEST_MODE,
+            supportedAdTypes = {"rewardedVideo"}
+        }
+    )
+end
+
+-- Public Members -------------------------------------------------------------[
+local v = {}
+
+function v.showRewardedAd(callback)
+    isRewarded = true
+    onCompleteListener = callback
+    initiateShowAd()
+end
+
+function v.showNormalAd(callback)
+    isRewarded = false
+    onCompleteListener = callback
+    initiateShowAd()
 end
 
 function v.init()
-    --TODO: set testMode to false before deploying
-    appodeal.init( adListener, {
-        appKey = appKey,
-        testMode = true
-    })
+    init()
 end
 
 return v

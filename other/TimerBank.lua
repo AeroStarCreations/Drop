@@ -6,7 +6,7 @@ local TimerBank
 -- Local Values --------------------------------------------------------------[
 local function onComplete(event)
     local tmr = event.source.params
-    tmr.listener()
+    tmr.listener(event)
     if event.count == tmr.iterations then
         tmr.status = "expired"
         tmr.parentBank:cancel(event.source)

@@ -4,6 +4,7 @@ local scene = cp.newScene()
 local widget = require( "widget" )
 local g = require( "other.globalVariables" )
 local logoModule = require( "other.logoModule" )
+local fonts = require("other.fonts")
 
 function scene:create( event )
 
@@ -44,7 +45,7 @@ function scene:create( event )
     ----------------------------------------------
 
     ----------------------"Jeffrey Emerson Gaiser"
-    local jeg = display.newText( group, "Jeffrey Emerson Gaiser", display.contentCenterX, 0, g.comBold, 70, "center")
+    local jeg = display.newText( group, "Jeffrey Emerson Gaiser", display.contentCenterX, 0, fonts.getBold(), 70, "center")
     jeg:setFillColor( unpack(g.purple) )
     jeg.y = drop.y + drop.height + 0.7 * jeg.height
     while jeg.width > 0.95 * display.contentWidth do
@@ -77,7 +78,7 @@ function scene:create( event )
     ----------------------------------------------
 
     ------------------------------------------Text
-    local bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, g.comRegular, 30, "center")
+    local bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, fonts.getRegular(), 30, "center")
     bio:setFillColor( 0, 0, 0 )
     bio.anchorY = 0
     bio.text = "\n\n\tJeffrey Emerson Gaiser is an award-winning composer who specializes in working with film, video games, and other visual media. Jeffrey has scored numerous independent short films, games, and advertisements—garnering universal acclaim and millions of views on projects such as Masque; a finalist in Lionsgate’s The Storytellers: New Voices of the Twilight Saga competition. While attending the prestigious Berklee College of Music in Boston, Massachusetts, Jeffrey was also the Grand Prize-Winning Composer for Berklee’s own Scoring and Sound Design Contest two years in a row, and his work has been heard in festivals around the globe including The Cannes Film Festival, The Cleveland International Film Festival, and the Boston Science Fiction Film Festival."

@@ -8,6 +8,7 @@ local logoModule = require( "other.logoModule" )
 local ld = require( "data.localData" )
 local social = require("other.socialNetworks")
 local metrics = require("other.metrics")
+local fonts = require("other.fonts")
 
 -- Precalls
 local TAG = "center.lua: "
@@ -20,7 +21,7 @@ function scene:create( event )
     g.create()
 
     --------------------------------------------Aero Star Creations
-    local asc = display.newText( "Aero Star Creations", display.contentCenterX, 0, g.comBold, 30)
+    local asc = display.newText( "Aero Star Creations", display.contentCenterX, 0, fonts.getBold(), 30)
     asc.yIn = display.contentHeight - 30
     asc.yOut = display.contentHeight + 50
     asc.y = asc.yOut
@@ -184,7 +185,7 @@ function scene:create( event )
         text = " ",
         y = livesImage.y,
         x = livesImage.x,
-        font = g.comBold,
+        font = fonts.getBold(),
         fontSize = 40
     })
     livesText:setFillColor(0, 0, 0)
@@ -197,7 +198,7 @@ function scene:create( event )
         text = " ",
         y = livesImage.y,
         x = invincibilitesImage.x,
-        font = g.comBold,
+        font = fonts.getBold(),
         fontSize = 40
     })
     invincibilitesText:setFillColor(0, 0, 0)
@@ -212,7 +213,7 @@ function scene:create( event )
         onRelease = controller.achievementButtonListener,
         label = ld.unawardedAchievementCount(),
         labelColor = { default={ 1, 1, 1 }, over={ 0.9, 0.9, 0.9 } },
-        font = g.comBold,
+        font = fonts.getBold(),
         fontSize = 40,
         shape = "circle",
         radius = circleRadius,

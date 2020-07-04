@@ -11,6 +11,7 @@ local json = require( "json" )
 local highScores = require( "data.highScores" )
 local sounds = require( "other.sounds" )
 local metrics = require( "other.metrics" )
+local fonts = require("other.fonts")
 
 local arrowIsWorking = false
 
@@ -589,7 +590,7 @@ function scene:create( event )
         text = "0",
         x = 15,
         y = 0.55 * header1.height,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 38,
     }
     scoreText.anchorX = 0
@@ -601,7 +602,7 @@ function scene:create( event )
         text = "0:00",
         x = display.contentWidth-15,
         y = scoreText.y,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 38,
     }
     playTime.anchorX = 1
@@ -623,7 +624,7 @@ function scene:create( event )
         text = ld.getLives(),
         x = iconLives.x,
         y = iconLives.y,
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 32
     }
     iconLivesText.anchorX = 0
@@ -640,7 +641,7 @@ function scene:create( event )
         text = ld.getInvincibility(),
         x = iconInvince.x,
         y = iconInvince.y,
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 32
     }
     iconInvinceText.anchorX = 1
@@ -655,7 +656,7 @@ function scene:create( event )
         x = 0,
         y = display.contentCenterY,
         width = display.contentWidth, --required for multi-line and alignment
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 100,
         align = "center",
     }

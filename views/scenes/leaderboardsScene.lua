@@ -7,6 +7,7 @@ local json = require( "json" )
 local sd = require( "data.serverData" )
 local colors = require( "other.colors" )
 local logoModule = require( "other.logoModule" )
+local fonts = require("other.fonts")
 
 
 --Precalls
@@ -118,7 +119,7 @@ local function onRowRenderListener( event )
         text = params.rank,
         x = bg.x - bg.width * 0.5 + 30,
         y = bg.y + 0.5 * bg.height,
-        font = g.comBold,
+        font = fonts.getBold(),
         fontSize = 40
     })
     rank:setFillColor( 1 )
@@ -130,7 +131,7 @@ local function onRowRenderListener( event )
         text = params.name,
         x = bg.x,
         y = rank.y,
-        font = g.comBold,
+        font = fonts.getBold(),
         fontSize = 40
     })
     name:setFillColor( 1 )
@@ -147,7 +148,7 @@ local function onRowRenderListener( event )
         text = valueText,
         x = bg.x + bg.width * 0.5 - 30,
         y = rank.y,
-        font = g.comBold,
+        font = fonts.getBold(),
         fontSize = 40
     })
     value:setFillColor( 1 )
@@ -238,7 +239,7 @@ function scene:create( event )
         labelAlign = "center",
         labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
         labelYOffset = labelOffsetY,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 40,
         defaultFile = "images/squareGreen.jpg",
         onRelease = buttonListener
@@ -256,7 +257,7 @@ function scene:create( event )
         labelAlign = "center",
         labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
         labelYOffset = labelOffsetY,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 40,
         defaultFile = "images/squareOrange.jpg",
         onRelease = buttonListener
@@ -274,7 +275,7 @@ function scene:create( event )
         labelAlign = "center",
         labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
         labelYOffset = labelOffsetY,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 40,
         defaultFile = "images/squareBlue.jpg",
         onRelease = buttonListener
@@ -292,7 +293,7 @@ function scene:create( event )
         labelAlign = "center",
         labelColor = { default={ 0, 0, 0, 0.7 }, over={ 0, 0, 0, 0.5 } },
         labelYOffset = labelOffsetY,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 40,
         defaultFile = "images/squareRed.jpg",
         onRelease = buttonListener

@@ -268,7 +268,7 @@
 --         text = "0",
 --         x = 15,
 --         y = display.topStatusBarContentHeight + display.actualContentHeight * 0.01,
---         font = g.comRegular,
+--         font = fonts.getRegular(),
 --         fontSize = 38,
 --     }
 --     scoreText.anchorX, scoreText.anchorY = 0, 0.5
@@ -280,7 +280,7 @@
 --         text = "0:00",
 --         x = display.contentWidth-15,
 --         y = scoreText.y,
---         font = g.comRegular,
+--         font = fonts.getRegular(),
 --         fontSize = 38,
 --     }
 --     playTime.anchorX, playTime.anchorY = 1, 0.5
@@ -475,23 +475,23 @@
 --     statsBG.width = display.contentWidth
 --     statsBG.alpha = 0.8
     
---     sText1 = display.newText( group, "Score: ", 0, 0, g.comRegular, 85 ) -------
+--     sText1 = display.newText( group, "Score: ", 0, 0, fonts.getRegular(), 85 ) -------
 --     sText1:setFillColor( unpack( g.orange ) )
 --     local where = 0.33*(0.5*g.statsAreaH - 2*sText1.height)
 --     sText1.y = g.statsFocal + where + 7
 --     sText1.anchorX, sText1.anchorY = 1, 0
     
---     sText2 = display.newText( group, " ", display.contentWidth, 0, g.comBold, 85 ) --
+--     sText2 = display.newText( group, " ", display.contentWidth, 0, fonts.getBold(), 85 ) --
 --     sText2:setFillColor( unpack( g.orange ) )
 --     sText2.y = sText1.y - 0.16*sText2.height
 --     sText2.anchorX, sText2.anchorY = 0, sText1.anchorY
     
---     tText1 = display.newText ( group, "Time: ", 0, 0, g.comRegular, 85 ) -------
+--     tText1 = display.newText ( group, "Time: ", 0, 0, fonts.getRegular(), 85 ) -------
 --     tText1:setFillColor( unpack( g.orange ) )
 --     tText1.y = g.statsFocal + 0.5*g.statsAreaH - where + 7
 --     tText1.anchorX, tText1.anchorY = 1, 1
     
---     tText2 = display.newText ( group, " ", display.contentWidth, 0, g.comBold, 85 ) --
+--     tText2 = display.newText ( group, " ", display.contentWidth, 0, fonts.getBold(), 85 ) --
 --     tText2:setFillColor( unpack( g.orange ) )
 --     tText2.y = tText1.y - 0.05*tText2.height
 --     tText2.anchorX, tText2.anchorY = 0, tText1.anchorY
@@ -517,7 +517,7 @@
 --         width = 0.5*display.contentWidth,
 --         height = 0,
 --         x = 0.5*statsLine2.x,
---         font = g.comRegular,
+--         font = fonts.getRegular(),
 --         fontSize = 40,
 --         align = "center",
 --     }
@@ -533,7 +533,7 @@
 --         width = 0.5*display.contentWidth,
 --         height = 0,
 --         x = display.contentWidth - sHighText.x,
---         font = g.comRegular,
+--         font = fonts.getRegular(),
 --         fontSize = 40,
 --         align = "center",
 --     }

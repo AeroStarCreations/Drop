@@ -2,6 +2,7 @@ local cp = require( "composer" )
 local g = require( "other.globalVariables" )
 local widget = require( "widget" )
 local controller = require( "controllers.gameStoppedController" )
+local fonts = require("other.fonts")
 
 local scene = cp.newScene()
 
@@ -38,7 +39,7 @@ function scene:create( event )
         parent = group,
         text = "",
         width = display.actualContentWidth,
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 100,
         align = "center"
     }
@@ -64,7 +65,7 @@ function scene:create( event )
         defaultFile = "images/buttonGreen.png",
         labelYOffset = 8,
         labelColor = { default={ 0, 0.5, 0.36 }, over={ 0, 0.5, 0.36, 0.7 } },
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 59,
         isEnabled = false,
         onRelease = controller.resumeButtonListener
@@ -88,7 +89,7 @@ function scene:create( event )
         label = controller.getMainButtonLabel(),
         labelYOffset = 8,
         labelColor = { default={ 0.63, 0.10, 0.14 }, over={ 0.63, 0.10, 0.14, 0.7 } },
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 50,
         isEnabled = false,
         onRelease = controller.mainButtonListener
@@ -113,7 +114,7 @@ function scene:create( event )
         label = controller.getRestartButtonLabel(),
         labelYOffset = 8,
         labelColor = { default={ 0.11, 0.46, 0.74 }, over={ 0.11, 0.46, 0.74, 0.7 } },
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 50,
         isEnabled = false,
         onRelease = controller.restartButtonListener,
@@ -236,7 +237,7 @@ function scene:create( event )
     categoryText = display.newText({
         parent = group,
         text = controller.getCategoryText(),
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 85,
         align = "right"
     })
@@ -254,7 +255,7 @@ function scene:create( event )
     valuesText = display.newText({
         parent = group,
         text = " ",
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 85,
         align = "left"
     })
@@ -276,7 +277,7 @@ function scene:create( event )
         width = 0.5 * (display.actualContentWidth - wh),
         height = 0,
         x = 0.5 * statsLine2.x,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 40,
         align = "center"
     })
@@ -296,7 +297,7 @@ function scene:create( event )
         width = highScoreText.width,
         height = 0,
         x = display.actualContentWidth - highScoreText.x,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 40,
         align = "center",
     })

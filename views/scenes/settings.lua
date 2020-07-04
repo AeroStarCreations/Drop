@@ -6,6 +6,7 @@ local widget = require( "widget" )
 local g = require( "other.globalVariables" )
 local t = require( "other.transitions" )
 local ld = require( "data.localData" )
+local fonts = require("other.fonts")
 
 
 --Precalls
@@ -83,7 +84,7 @@ function scene:create( event )
         width = 215,
         x = 0.3*display.contentWidth,
         y = lineGroup[1].y+0.5*(lineGroup[2].y-lineGroup[1].y),
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 60,
         align = "center",
     }
@@ -98,7 +99,7 @@ function scene:create( event )
         y = volText.y-15,
         x = 0.7*display.contentWidth,
         width = 200,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 45,
         align = "center",
     }
@@ -124,7 +125,7 @@ function scene:create( event )
         width = 385,
         x = 0.3*display.contentWidth,
         y = lineGroup[2].y+0.5*(lineGroup[3].y-lineGroup[2].y),
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 60,
         align = "center",
     }
@@ -141,7 +142,7 @@ function scene:create( event )
         width = 385,
         x = 0.3*display.contentWidth,
         y = lineGroup[3].y+0.5*(lineGroup[4].y-lineGroup[3].y),
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 60,
         align = "center",
     }
@@ -157,7 +158,7 @@ function scene:create( event )
         width = 310,
         x = 0.3*display.contentWidth,
         y = lineGroup[4].y+0.5*(lineGroup[5].y-lineGroup[4].y),
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 60,
         align = "center",
     }
@@ -172,7 +173,7 @@ function scene:create( event )
         y = senseText.y-15,
         x = 0.7*display.contentWidth,
         width = 200,
-        font = g.comRegular,
+        font = fonts.getRegular(),
         fontSize = 45,
         align = "center",
     }
@@ -205,7 +206,7 @@ function scene:create( event )
         width = 285,
         x = 0.3*display.contentWidth,
         y = lineGroup[5].y-0.5*(lineGroup[4].y-lineGroup[5].y),
-        font = g.comLight,
+        font = fonts.getLight(),
         fontSize = 60,
         align = "center",
     }

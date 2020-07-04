@@ -2,9 +2,6 @@
 
 local cp = require( "composer" )
 local widget = require( "widget" )
-local ads = require( "ads" )
-local GGData = require( "thirdParty.GGData" )
-local ld = require( "data.localData" )
 
 local v = {}
 
@@ -30,23 +27,6 @@ v.destroy = function()
     
 end
 --------------------------------------------------------------
-
---The following is the font information
-v.GGFont = require( "thirdParty.GGFont" )
-v.fontManager = v.GGFont:new()
-
-v.fontManager:add( "chalkDuster", "Chalkduster", "Chalkduster.ttf" )
-v.chalk = v.fontManager:get("chalkDuster")
-
-v.fontManager:add( "Comfortaa Light", "Comfortaa-Light", "Comfortaa-Light.ttf" )
-v.comLight = v.fontManager:get("Comfortaa Light")
-
-v.fontManager:add( "Comfortaa Regular", "Comfortaa", "Comfortaa-Regular.ttf" )
-v.comRegular = v.fontManager:get("Comfortaa Regular")
-
-v.fontManager:add( "Comfortaa Bold", "Comfortaa-Bold", "Comfortaa-Bold.ttf" )
-v.comBold = v.fontManager:get("Comfortaa Bold")
------------------------------------------
 
 --The following are specified app colors
 v.purple = { 0.4, 0.176, 0.569 }

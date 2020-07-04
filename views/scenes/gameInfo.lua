@@ -5,8 +5,8 @@ local g = require( "other.globalVariables" )
 local ld = require( "data.localData" )
 local logoModule = require( "other.logoModule" )
 local colors = require( "other.colors" )
-local ld = require( "data.localData" )
 local Drop = require( "views.other.Drop" )
+local fonts = require("other.fonts")
 
 
 --Precalls
@@ -59,10 +59,10 @@ local function createLine(parent, x1, y1, x2, y2, isBold)
 end
 
 local function createText(parent, text, x, y, horizontalSpace, color, isTitle)
-    local font = g.comRegular
+    local font = fonts.getRegular()
     local yOffset = 6
     if isTitle then 
-        font = g.comBold 
+        font = fonts.getBold() 
         yOffset = 0
     end
     local text = display.newText({

@@ -125,7 +125,7 @@ local function buttonListener(event)
                 transitionOutToOther("views.scenes.aboutMusic")
             elseif id == "ad" then
                 event.target.isEnabled = false
-                ads.show(true)
+                ads.showRewardedAd()
             elseif id == "gameInfo" then
                 transitionOutToOther("views.scenes.gameInfo")
             end

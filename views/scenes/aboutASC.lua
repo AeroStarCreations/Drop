@@ -7,6 +7,7 @@ local g = require( "other.globalVariables" )
 local logoModule = require( "other.logoModule" )
 local social = require( "other.socialNetworks" )
 local metrics = require("other.metrics")
+local fonts = require("other.fonts")
 
 --Precalls
 local TAG = "aboutASC.lua: "
@@ -50,7 +51,7 @@ function scene:create( event )
     ----------------------------------------------
 
     -------------------------"Aero Star Creations"
-    local asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, g.comBold, 70, "center")
+    local asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, fonts.getBold(), 70, "center")
     asc:setFillColor( unpack(g.purple) )
     asc.y = drop.y + drop.height + 0.7 * asc.height
     asc.alphaIn = 1
@@ -80,7 +81,7 @@ function scene:create( event )
     ----------------------------------------------
 
     ------------------------------------------Text
-    local bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, g.comRegular, 26, "center")
+    local bio = display.newText( group, "Joe Shmoe", display.contentCenterX, lineBottom.y, 0.9*display.contentWidth, 0, fonts.getRegular(), 26, "center")
     bio:setFillColor( 0, 0, 0 )
     bio.anchorY = 0
     bio.text = "\n\n\tHello!  I'm Nathan, the little man behind Aero Star Creations.  I hope you've enjoyed Drop so far!  I had an incredible time developing the game.  Now here's a bit about myself:\n\n\tWhen I was 15 (5 years ago) I began teaching myself how to develop mobile applications using Corona Labs.  I have quite a few hobbies, including soccer and ukulele, and app developing is one of my favorites.  I originally planned on pursuing a future in aeronautical engineering, but my little big randevu with app developing changed my mind.  Now I'm a second-year Computer Science and Engineering undergrad at The Ohio State University.  No regrets!  I have a long way to go, but I'm loving it thus far.  Mobile app development is completely separate from my schooling, so I have to make time for both. However, I won't be stopping either any time soon!  Like my page on Facebook or follow me on Twitter to stay up-to-date on the latest ASC news such as upcoming updates and apps.  Also feel free to contact me with suggestions!  I love hearing back from users.  It's the best way to make the best apps. \n\n\t\tThank you!\n\t\t\tNathan Balli"
