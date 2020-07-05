@@ -61,7 +61,7 @@ end
 
 local function goToScene( scene )
     if scene == "game" then
-        cp.gotoScene( "views.scenes.game2" )
+        cp.gotoScene( "views.scenes.game" )
     elseif scene == "extras" then
         cp.gotoScene( "views.scenes.extras" )
     elseif scene == "settings" then
@@ -237,7 +237,7 @@ local function transitionIn()
     
     if gameWasJustOpened() then
         transition.to( arrow, { time=900, xScale=arrow.xScaleIn, yScale=arrow.yScaleIn, transition=easing.outBack } )
-    elseif cp.getSceneName( "previous" ) == "views.scenes.game2" then --TODO: or gameStopped ???
+    elseif cp.getSceneName( "previous" ) == "views.scenes.game" then --TODO: or gameStopped ???
         arrow.x = g.arrowX
         transition.to( arrow, { time=1200, transition=easing.outBack, x=arrow.xIn, y=arrow.yIn, xScale=arrow.xScaleIn, yScale=arrow.yScaleIn, rotation=0 })
     else

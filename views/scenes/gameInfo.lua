@@ -7,6 +7,7 @@ local logoModule = require( "other.logoModule" )
 local colors = require( "other.colors" )
 local Drop = require( "views.other.Drop" )
 local fonts = require("other.fonts")
+local stringUtils = require("other.stringUtils")
 
 
 --Precalls
@@ -179,11 +180,11 @@ function scene:create( event )
     local x = w / 6
     createText(group, "Score", x, nextY, w/3, colors.blue, true)
 
-    local text = g.commas( ld.getHighScore("HIGH_SCORE_SCORER") )
+    local text = stringUtils.addCommasToNumber( ld.getHighScore("HIGH_SCORE_SCORER") )
     createText(group, text, display.contentCenterX, nextY, w/3, colors.purple, false)
 
     x = w / 6 * 5
-    text = g.commas( ld.getHighScore("HIGH_SCORE_TRICKY_SCORER") )
+    text = stringUtils.addCommasToNumber( ld.getHighScore("HIGH_SCORE_TRICKY_SCORER") )
     createText(group, text, x, nextY, w/3, colors.purple, false)
 
     incrementNextY()
@@ -193,11 +194,11 @@ function scene:create( event )
     x = w / 6
     createText(group, "Time", x, nextY, w/3, colors.blue, true)
 
-    text = g.timeFormat( ld.getHighScore("HIGH_TIME_SCORER") )
+    text = stringUtils.formatTime( ld.getHighScore("HIGH_TIME_SCORER") )
     createText(group, text, display.contentCenterX, nextY, w/3, colors.purple, false)
 
     x = w / 6 * 5
-    text = g.timeFormat( ld.getHighScore("HIGH_TIME_TRICKY_SCORER") )
+    text = stringUtils.formatTime( ld.getHighScore("HIGH_TIME_TRICKY_SCORER") )
     createText(group, text, x, nextY, w/3, colors.purple, false)
 
     incrementNextY()
@@ -219,10 +220,10 @@ function scene:create( event )
 
     createLine(group, 0, nextY, w, nextY, false)
 
-    text = g.commas( ld.getGamesPlayed() )
+    text = stringUtils.addCommasToNumber( ld.getGamesPlayed() )
     createText(group, text, x, nextY, w/2, colors.purple, false)
 
-    text = g.commas( ld.getDeaths() )
+    text = stringUtils.addCommasToNumber( ld.getDeaths() )
     createText(group, text, x*3, nextY, w/2, colors.purple, false)
 
     incrementNextY()

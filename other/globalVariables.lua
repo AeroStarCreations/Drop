@@ -1,7 +1,6 @@
 --Global Variables
 
 local cp = require( "composer" )
-local widget = require( "widget" )
 
 local v = {}
 
@@ -190,57 +189,6 @@ end
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-
--------------------------------------------Format a number string to have commas
-local function insertCommas( num, acc )
-    local len = string.len( num )
-    if len > 3 then
-        acc = "," .. num:sub( len-2, len ) .. acc
-        num = num:sub( 1, len-3 )
-        return insertCommas( num, acc )
-    else
-        return num .. acc
-    end
-end
-
-function v.commas( num )
-    local numString = tostring( num )
-
-    local isNegative = num < 0
-    if isNegative then
-        numString = numString:sub( 2, string.len( num ) )
-    end
-    
-    numString = insertCommas( numString, "" )
-
-    if isNegative then
-        return "-" .. numString
-    end
-    return numString
-
-end
---------------------------------------------------------------------------------
-
----------------------------------------------------------------Formats the Clock
-function v.timeFormat( t )
-    local hour = math.floor( t/3600 )
-    local minute = math.floor( (t-hour*3600)/60 )
-    local second = math.floor( t-hour*3600-minute*60 )
-    if minute < 10 and hour > 0 then
-        minute = "0"..minute
-    end
-    if second < 10 then
-        second = "0"..second
-    end
-    local text
-    if hour > 0 then
-        text = hour..":"..minute..":"..second
-    else
-        text = minute..":"..second
-    end
-    return text
-end
 --------------------------------------------------------------------------------
 
 return v

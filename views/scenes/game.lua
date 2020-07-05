@@ -13,6 +13,7 @@ local sounds = require( "other.sounds" )
 local metrics = require( "other.metrics" )
 local fonts = require("other.fonts")
 local colors = require("other.colors")
+local stringUtils = require("other.stringUtils")
 
 local arrowIsWorking = false
 
@@ -25,8 +26,7 @@ local arrowShapeLarge
 local arrowShape
 local lvlParams = g.level1AParams
 local headerGroup
-local header1
--- local header2
+local header
 local storm
 local gravityPower
 local windForce
@@ -63,7 +63,7 @@ end
 
 local function headerGroupTransitionIn()
     local function listener()
-        header1:setEnabled( true )
+        header:setEnabled( true )
     end
 
     headerGroup.y = -headerGroup.height -- starting position
@@ -297,7 +297,7 @@ end
 
 local function gameTimerListener()
     totalGameTime = totalGameTime + 1
-    playTime.text = g.timeFormat( totalGameTime )
+    playTime.text = stringUtils.formatTime( totalGameTime )
 end
 
 local function startGameTimer()
@@ -306,7 +306,7 @@ end
 
 local function scoreTimerListener()
     score = score + scoreMultiplier
-    scoreText.text = g.commas( score )
+    scoreText.text = stringUtils.addCommasToNumber( score )
 end
 
 local function startScoreTimer()
@@ -419,7 +419,7 @@ function scene:startGame()
     iconLivesText.text = ld.getLives()
 
     -- Set Visibility/Enabled
-    -- header1.isVisible = true
+    -- header.isVisible = true
     -- header2.isVisible = false
     system.setIdleTimer( false )
 
@@ -444,7 +444,7 @@ end
 
 function scene:resumeGame()
     system.setIdleTimer( false )
-    -- header1.isVisible = true
+    -- header.isVisible = true
     -- header2.isVisible = false
     addEventListeners()
     timerBank:resumeAllTimers()
@@ -459,7 +459,7 @@ end
 
 local function gameStopped( isPaused )
     system.setIdleTimer( true )
-    -- header1.isVisible = false
+    -- header.isVisible = false
     -- header2.isVisible = true
     system.setAccelerometerInterval( 30 )
     removeEventListeners()
@@ -520,7 +520,7 @@ function scene:create( event )
     -- Arrow Setup ------------------------------------------------------------[
     arrow = display.newImageRect(group, "images/arrow.png", 352, 457)
     arrow.id = "arrow"
-    arrowScale = 0.33
+    local arrowScale = 0.33
     arrow.x = display.contentCenterX
     arrow.y = display.contentHeight-150 * arrowScale
     arrow.xScale = arrowScale
@@ -560,29 +560,17 @@ function scene:create( event )
     group:insert( headerGroup )
 
     -- Play/Pause buttons -----------------------------------------------------[
-    header1 = widget.newButton {
+    header = widget.newButton {
         id = "header",
         width = 1000,
         height = 260,
         defaultFile = "images/header.png",
         onPress = scene.pauseGame,
     }
-    header1.x = display.contentCenterX
-    header1.y = 0.5 * header1.height
-    headerGroup:insert(header1)
-    header1:setEnabled( false )
-    
-    -- header2 = widget.newButton {
-    --     parent = headerGroup,
-    --     id = "header2",
-    --     width = 1000,
-    --     height = 260,
-    --     defaultFile = "images/header2.png",
-    --     onPress = scene.resumeGame,
-    -- }
-    -- header2.x, header2.y = header1.x, header1.y
-    -- headerGroup:insert(header2)
-    -- header2.isVisible = false
+    header.x = display.contentCenterX
+    header.y = 0.5 * header.height
+    headerGroup:insert(header)
+    header:setEnabled( false )
     ---------------------------------------------------------------------------]
 
     -- Score text -------------------------------------------------------------[
@@ -590,7 +578,7 @@ function scene:create( event )
         parent = headerGroup,
         text = "0",
         x = 15,
-        y = 0.55 * header1.height,
+        y = 0.55 * header.height,
         font = fonts.getRegular(),
         fontSize = 38,
     }
@@ -677,7 +665,7 @@ function scene:create( event )
         display.actualContentHeight
     )
     touchPad.x = display.contentCenterX
-    touchPad.y = header1.y + 0.5 * header1.height
+    touchPad.y = header.y + 0.5 * header.height
     touchPad.anchorY = 0
     -- touchPad.touch = touchPadListener
     ---------------------------------------------------------------------------]

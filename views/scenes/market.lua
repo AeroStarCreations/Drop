@@ -67,7 +67,7 @@ function scene:create( event )
         fontSize = 45,
         align = "center"
     })
-    message:setFillColor(unpack(colors.purple))
+    message:setFillColor(colors.purple:unpack())
     message.isVisible = false
     controller.linkMessage(message)
     ----------------------------------------------
@@ -219,7 +219,7 @@ function scene:create( event )
                 fontSize = 40,
                 align = "center"
             })
-            price:setFillColor(unpack(colors.green))
+            price:setFillColor(colors.green:unpack())
             buttonGroups[buttonId].priceText = price
         end
         buttonY = buttonY + margin + buttonHeight

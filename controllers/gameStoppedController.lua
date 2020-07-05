@@ -6,6 +6,7 @@ local ld = require( "data.localData" )
 local social = require( "other.socialNetworks" )
 local model = require( "models.gameStoppedModel" )
 local metrics = require("other.metrics")
+local colors = require("other.colors")
 
 local TAG = "gameStoppedController:"
 

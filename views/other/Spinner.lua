@@ -40,7 +40,7 @@ local function getNewSpinnerArm(parent)
         20,
         10
     )
-    arm:setFillColor(unpack(colors.purple_xl))
+    arm:setFillColor(colors.purple_xl:unpack())
     return arm
 end
 ------------------------------------------------------------------------------]

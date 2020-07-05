@@ -239,7 +239,7 @@ function scene:show( event )
         
         g.show()
         
-        cp.loadScene( "views.scenes.game2" )
+        cp.loadScene( "views.scenes.game" )
 
         controller.syncGameStatsAndAchievements()
         

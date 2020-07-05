@@ -5,6 +5,7 @@ local widget = require( "widget" )
 local g = require( "other.globalVariables" )
 local logoModule = require( "other.logoModule" )
 local fonts = require("other.fonts")
+local colors = require("other.colors")
 
 function scene:create( event )
     

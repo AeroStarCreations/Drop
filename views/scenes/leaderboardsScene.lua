@@ -9,6 +9,7 @@ local colors = require( "other.colors" )
 local logoModule = require( "other.logoModule" )
 local fonts = require("other.fonts")
 local colors = require("other.colors")
+local stringUtils = require("other.stringUtils")
 
 --Precalls
 local TAG = "leaderboardsScene.lua:"
@@ -106,11 +107,11 @@ local function onRowRenderListener( event )
     bg.strokeWidth = 7
 
     if row.index % 2 == 0 then
-        bg:setFillColor( unpack(colors.purple_xs) )
-        bg:setStrokeColor( unpack(colors.purple) )
+        bg:setFillColor( colors.purple_xs:unpack() )
+        bg:setStrokeColor( colors.purple:unpack() )
     else
-        bg:setFillColor( unpack(colors.purple_s) )
-        bg:setStrokeColor( unpack(colors.purple_l) )
+        bg:setFillColor( colors.purple_s:unpack() )
+        bg:setStrokeColor( colors.purple_l:unpack() )
     end
 
     ----- Rank
@@ -139,9 +140,9 @@ local function onRowRenderListener( event )
     ----- Value
     local valueText
     if isScore then
-        valueText = g.commas(params.value)
+        valueText = stringUtils.addCommasToNumber(params.value)
     else
-        valueText = g.timeFormat(params.value)
+        valueText = stringUtils.formatTime(params.value)
     end
     local value = display.newText({
         parent = row,
@@ -308,7 +309,7 @@ function scene:create( event )
 
     scoreRect = display.newRect(scoreButton.x, scoreButton.y, rectWidth, rectHeight)
     scoreRect.strokeWidth = rectStrokeWidth
-    scoreRect:setStrokeColor( unpack(colors.darkGreen) )
+    scoreRect:setStrokeColor( colors.darkGreen:unpack() )
     scoreRect:setFillColor( 0, 0, 0, 0 )
     scoreRect.anchorX = 0
     scoreRect.isVisible = isScore
@@ -316,7 +317,7 @@ function scene:create( event )
 
     timeRect = display.newRect(timeButton.x, timeButton.y, rectWidth, rectHeight)
     timeRect.strokeWidth = rectStrokeWidth
-    timeRect:setStrokeColor( unpack(colors.darkOrange) )
+    timeRect:setStrokeColor( colors.darkOrange:unpack() )
     timeRect:setFillColor( 0, 0, 0, 0 )
     timeRect.anchorX = 0
     timeRect.isVisible = not isScore
@@ -324,7 +325,7 @@ function scene:create( event )
 
     specialRect = display.newRect(specialButton.x, specialButton.y, rectWidth, rectHeight)
     specialRect.strokeWidth = rectStrokeWidth
-    specialRect:setStrokeColor( unpack(colors.darkBlue) )
+    specialRect:setStrokeColor( colors.darkBlue:unpack() )
     specialRect:setFillColor( 0, 0, 0, 0 )
     specialRect.anchorX = 0
     specialRect.isVisible = not isTricky
@@ -332,7 +333,7 @@ function scene:create( event )
 
     leadersRect = display.newRect(leadersButton.x, leadersButton.y, rectWidth, rectHeight)
     leadersRect.strokeWidth = rectStrokeWidth
-    leadersRect:setStrokeColor( unpack(colors.darkRed) )
+    leadersRect:setStrokeColor( colors.darkRed:unpack() )
     leadersRect:setFillColor( 0, 0, 0, 0 )
     leadersRect.anchorX = 0
     leadersRect.isVisible = isLeaders

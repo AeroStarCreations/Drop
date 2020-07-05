@@ -9,6 +9,7 @@ local g = require("other.globalVariables")
 local ads = require("other.advertisements2")
 local json = require("json")
 local metrics = require("other.metrics")
+local stringUtils = require("other.stringUtils")
 
 -- View Objects
 local backArrow
@@ -176,7 +177,7 @@ local function adTimerListener()
                 adButton.alpha = 0.4
                 adButton.isEnabled = false
             end
-            countDown.text = g.timeFormat(timeBetweenViews - timeDifference)
+            countDown.text = stringUtils.formatTime(timeBetweenViews - timeDifference)
         end
     else
         adButton.isEnabled = false
