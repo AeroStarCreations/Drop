@@ -66,8 +66,8 @@ end
 function GGFont:get( name, platform )
 
 	if not platform then
-		platform = system.getInfo( "platformName" )		
-	end	
+		platform = system.getInfo( "platformName" )
+	end
 
 	if platform == "Android" then
 		platform = "android"

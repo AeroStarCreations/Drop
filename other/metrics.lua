@@ -4,7 +4,6 @@ local json = require( "json" )
 local TAG = "metrics.lua: "
 local API_KEY = "JCWN6HJD7BYZXXX4JB4K"
 local CRASH_REPORTING_ENABLED = true
---TODO: set to default
 local LOG_LEVEL = "default"             --default, debug, or all
 
 local isInitialized

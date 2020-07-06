@@ -385,7 +385,7 @@ end
 local function loginListener(result)
     if result.error then
         if loginCallback and not loginCallbackParams then
-            loginCallback(error)
+            loginCallback(result.error)
         end
         loginCallback = nil
     else

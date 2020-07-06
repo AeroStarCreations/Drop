@@ -51,7 +51,7 @@ local function createLine(parent, x1, y1, x2, y2, isBold)
         color = colors.purple
     end
     local line = display.newLine(parent, x1, y1, x2, y2)
-    line:setStrokeColor( unpack(color) )
+    line:setStrokeColor( color:unpack() )
     line.strokeWidth = thickness
     line.alpha = 0
     if not isBold then line:toBack() end
@@ -63,7 +63,7 @@ local function createText(parent, text, x, y, horizontalSpace, color, isTitle)
     local font = fonts.getRegular()
     local yOffset = 6
     if isTitle then 
-        font = fonts.getBold() 
+        font = fonts.getBold()
         yOffset = 0
     end
     local text = display.newText({
@@ -73,7 +73,7 @@ local function createText(parent, text, x, y, horizontalSpace, color, isTitle)
         y = y + 0.5 * rowHeight + yOffset,
         font = font,
     })
-    text:setFillColor( unpack(color) )
+    text:setFillColor( color:unpack() )
     setFontSize(text, horizontalSpace)
     text.xScale = 0.001
     text.yScale = 0.001

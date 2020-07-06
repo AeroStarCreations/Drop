@@ -19,7 +19,6 @@ local function validateReceiptCallback(result)
     else
         result.status = "validationSuccess"
          -- On Google, consume purchase if it's not the AdsBundle
-        --TODO: move to correct location. should be called after GameSparks says the purchase is valid
         if targetAppStore == "google" and latestTransaction.productIdentifier ~= model.getProductId(1) then
             store.consumePurchase( latestTransaction.productIdentifier )
         end
@@ -96,12 +95,13 @@ local function getCentesimalPrice(formattedPrice)
 end
 
 -- This method creates a table where the keys are product IDs and
--- the values are tables with the localized price, price locale, 
+-- the values are tables with the localized price, price locale,
 -- and centesimal price
 local function loadProductsListener(event)
+    print(TAG, "loadProductsListener event", json.prettify(event))
     local result = {}
     result.products = {}
-    products.error = #event.products > 0
+    result.error = #event.products == 0
     for k, product in pairs(event.products) do
         result.products[product.productIdentifier] = {
             localizedPrice = product.localizedPrice,

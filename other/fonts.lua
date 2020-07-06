@@ -8,7 +8,7 @@ local BOLD_FONT_NAME = "comfortaaBold"
 -- Private Members ------------------------------------------------------------[
 
 -- Initialization -------------------------------------------------------------[
-FONT_MANAGER:add( REGULAR_FONT_NAME, "Comfortaa", "Comfortaa-Regular.ttf" )
+FONT_MANAGER:add( REGULAR_FONT_NAME, "Comfortaa-Regular", "Comfortaa-Regular.ttf" )
 FONT_MANAGER:add( LIGHT_FONT_NAME, "Comfortaa-Light", "Comfortaa-Light.ttf" )
 FONT_MANAGER:add( BOLD_FONT_NAME, "Comfortaa-Bold", "Comfortaa-Bold.ttf" )
 

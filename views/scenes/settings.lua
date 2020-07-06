@@ -50,7 +50,7 @@ function scene:create( event )
         id = "backArrow",
         x = 90,
         y = 0,
-        width = 100*g.arrowRatio,
+        width = 100 * g.arrowRatio,
         height = 100,
         defaultFile = "images/arrow.png",
         overFile = "images/arrowD.png",
@@ -133,7 +133,7 @@ function scene:create( event )
     }
     
     local bgText = display.newText(bgTextOpt)
-    bgText:setFillColor( unpack ( g.purple ) )
+    bgText:setFillColor( colors.purple:unpack() )
     bgText.anchorX = 0.5; bgText.anchorY = 0.5
     ----------------------------------------------
 

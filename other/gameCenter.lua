@@ -7,10 +7,6 @@ local metrics = require("other.metrics")
 -- Local variables ------------------------------------------------------------[
 local TAG = "gameCenter:"
 
-local gamesparks
-local platformType
-local networkType
-local isGamesparksAvailable
 local callbackFunction
 local signature
 -------------------------------------------------------------------------------]
