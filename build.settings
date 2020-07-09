@@ -2,7 +2,7 @@ settings =
 {
     orientation =
     {
-        default ="portrait",
+        default = "portrait",
         content = "portrait",
         supported =
         {
@@ -42,8 +42,10 @@ settings =
             
             --FacebookAppID = "",
 
-            --This must be here for testing Appodeal
-            CFBundleIdentifier = "com.appledts.GKTapper", -- Apple's GameCenter test bed
+            --This must be here for testing Appodeal.
+            --Uncomment to test ads
+            --Comment to test other features such as PlayFab
+            --CFBundleIdentifier = "com.appledts.GKTapper", -- Apple's GameCenter test bed
             
             CFBundleURLTypes =
             {

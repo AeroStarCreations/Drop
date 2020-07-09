@@ -34,7 +34,6 @@ local function loginCallback( result )
     --get stats?
 end
 
-sd.init(loginCallback)
 ld.init(Drop.types)
 bg.init()
 ads.init()
@@ -45,3 +44,16 @@ cp.recycleOnSceneChange = false
 cp.gotoScene( "views.scenes.center" )
 ------------------------------------------------------------------------------]
 
+-- Application Events --------------------------------------------------------[
+local function onSystemEvent( event )
+    if event.type == "applicationStart" then
+        sd.init(loginCallback)
+    elseif event.type == "applicationResume" then
+        print("APPLICATION RESUME")
+    elseif event.type == "applicationSuspend" then
+        print("APPLICATION SUSPEND")
+    end
+end
+
+Runtime:addEventListener( "system", onSystemEvent )
+------------------------------------------------------------------------------]

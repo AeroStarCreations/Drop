@@ -403,29 +403,29 @@ local function loginListener(result)
     loginCallback = nil
     loginCallbackParams = nil
     stopTimedMetric("playfab_login", result)
-    printResultMessage(result.error, "login", result)
+    printResultMessage(result.error, "login", result, true)
 end
 
-local function loginWithGameCenter(signature)
+local function loginWithGameCenter(playerData)
     --Out of all the members of 'signature', playerId is at least needed to log in
     local loginRequest = {
         CreateAccount = true,
-        -- PublicKeyUrl = signature.keyURL,
-        -- Salt = signature.salt,
-        -- Signature = signature.signature,
-        -- Timestamp = signature.timestamp,
-        PlayerId = signature.playerId,
+        PublicKeyUrl = playerData.keyURL,
+        Salt = playerData.salt,
+        Signature = playerData.signature,
+        Timestamp = playerData.timestamp,
+        PlayerId = playerData.playerId,
         InfoRequestParameters = {GetUserAccountInfo = true},
-        TitleId = "C5B8B"
+        TitleId = playFab.settings.titleId
     }
     playFab.LoginWithGameCenter(loginRequest, loginListener, loginListener)
     startTimedMetric("playfab_login", "LoginWithGameCenter", loginRequest)
 end
 
-local function loginWithGoogle(signature)
+local function loginWithGoogle(playerData)
     local loginRequest = {
         CreateAccount = true,
-        ServerAuthCode = signature.serverAuthCode,
+        ServerAuthCode = playerData.serverAuthCode,
         InfoRequestParameters = {GetUserAccountInfo = true}
     }
     playFab.LoginWithGoogleAccount(loginRequest, loginListener, loginListener)
@@ -435,15 +435,15 @@ end
 local function loginWithDeviceId()
 end
 
-local function gameNetworkCallback(type, signature)
-    print(TAG, "gameNetworkCallback()\n".."type: "..type.."\n".."signature:"..json.prettify(signature))
-    gameNetworkAlias = signature.alias
-    if signature.playerId == nil then
+local function gameNetworkCallback(type, playerData)
+    print(TAG, "gameNetworkCallback()\n".."type: "..type.."\n".."playerData:"..json.prettify(playerData))
+    gameNetworkAlias = playerData.alias
+    if playerData.playerId == nil then
         loginWithDeviceId()
     elseif type == "gamecenter" then
-        loginWithGameCenter(signature)
+        loginWithGameCenter(playerData)
     elseif type == "google" then
-        loginWithGoogle(signature)
+        loginWithGoogle(playerData)
     end
 end
 
