@@ -42,6 +42,7 @@ settings =
             
             --FacebookAppID = "",
 
+            --TODO: comment before release
             --This must be here for testing Appodeal.
             --Uncomment to test ads
             --Comment to test other features such as PlayFab

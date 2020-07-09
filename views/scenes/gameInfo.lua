@@ -180,11 +180,11 @@ function scene:create( event )
     local x = w / 6
     createText(group, "Score", x, nextY, w/3, colors.blue, true)
 
-    local text = stringUtils.addCommasToNumber( ld.getHighScore("HIGH_SCORE_SCORER") )
+    local text = stringUtils.addCommasToNumber( ld.getHighScore("HighScore") )
     createText(group, text, display.contentCenterX, nextY, w/3, colors.purple, false)
 
     x = w / 6 * 5
-    text = stringUtils.addCommasToNumber( ld.getHighScore("HIGH_SCORE_TRICKY_SCORER") )
+    text = stringUtils.addCommasToNumber( ld.getHighScore("HighScoreTricky") )
     createText(group, text, x, nextY, w/3, colors.purple, false)
 
     incrementNextY()
@@ -194,11 +194,11 @@ function scene:create( event )
     x = w / 6
     createText(group, "Time", x, nextY, w/3, colors.blue, true)
 
-    text = stringUtils.formatTime( ld.getHighScore("HIGH_TIME_SCORER") )
+    text = stringUtils.formatTime( ld.getHighScore("HighTime") )
     createText(group, text, display.contentCenterX, nextY, w/3, colors.purple, false)
 
     x = w / 6 * 5
-    text = stringUtils.formatTime( ld.getHighScore("HIGH_TIME_TRICKY_SCORER") )
+    text = stringUtils.formatTime( ld.getHighScore("HighTimeTricky") )
     createText(group, text, x, nextY, w/3, colors.purple, false)
 
     incrementNextY()
