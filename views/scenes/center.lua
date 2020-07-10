@@ -214,6 +214,8 @@ function scene:create( event )
         onRelease = controller.achievementButtonListener,
         label = ld.unawardedAchievementCount(),
         labelColor = { default={ 1, 1, 1 }, over={ 0.9, 0.9, 0.9 } },
+        labelYOffset = 4,
+        labelXOffset = 2,
         font = fonts.getBold(),
         fontSize = 40,
         shape = "circle",

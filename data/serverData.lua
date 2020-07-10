@@ -389,11 +389,11 @@ local function loginListener(result)
         end
         loginCallback = nil
     else
+        isLoggedIn = true
         local displayName = result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName
         setDisplayName(displayName)
-        isLoggedIn = true
         if loginCallback then
-            if loginCallbackParams then
+            if loginCallbackParams then --This occurs when a normal PlayFab method was called but we needed to login to a game network first
                 loginCallback(loginCallbackParams)
             else
                 loginCallback(result)

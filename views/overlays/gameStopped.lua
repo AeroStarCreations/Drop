@@ -51,7 +51,7 @@ function scene:create( event )
     message.yOut = 0.25 * display.actualContentHeight
     message.x = message.xOut
     message.y = message.yOut
-    message:setFillColor( unpack( colors.purple ) )
+    message:setFillColor( colors.purple:unpack() )
     message.anchorY = 0.5
     message.id = "message"
     controller.addGamePausedObject( message )
@@ -64,7 +64,7 @@ function scene:create( event )
         width = 550,
         height = 100,
         defaultFile = "images/buttonGreen.png",
-        labelYOffset = 8,
+        labelYOffset = 4,
         labelColor = { default={ 0, 0.5, 0.36 }, over={ 0, 0.5, 0.36, 0.7 } },
         font = fonts.getLight(),
         fontSize = 59,
@@ -88,7 +88,7 @@ function scene:create( event )
         height = 100,
         defaultFile = "images/buttonRed.png",
         label = controller.getMainButtonLabel(),
-        labelYOffset = 8,
+        labelYOffset = 4,
         labelColor = { default={ 0.63, 0.10, 0.14 }, over={ 0.63, 0.10, 0.14, 0.7 } },
         font = fonts.getLight(),
         fontSize = 50,
@@ -113,7 +113,7 @@ function scene:create( event )
         height = 100,
         defaultFile = "images/buttonBlue.png",
         label = controller.getRestartButtonLabel(),
-        labelYOffset = 8,
+        labelYOffset = 4,
         labelColor = { default={ 0.11, 0.46, 0.74 }, over={ 0.11, 0.46, 0.74, 0.7 } },
         font = fonts.getLight(),
         fontSize = 50,
@@ -198,7 +198,7 @@ function scene:create( event )
         display.contentWidth,
         statsFocal + 0.5 * statsAreaH
     )
-    statsLine1:setStrokeColor( unpack( colors.purple ) )
+    statsLine1:setStrokeColor( colors.purple:unpack() )
     statsLine1.strokeWidth = 2
     statsLine1.alpha = 0
     statsLine1.id = "line1"
@@ -212,7 +212,7 @@ function scene:create( event )
         display.contentCenterX - 0.5 * wh,
         display.actualContentHeight
     )
-    statsLine2:setStrokeColor( unpack( colors.purple ) )
+    statsLine2:setStrokeColor( colors.purple:unpack() )
     statsLine2.strokeWidth = 2
     statsLine2.alpha = 0
     statsLine2.id = "line2"
@@ -226,7 +226,7 @@ function scene:create( event )
         display.contentCenterX + 0.5 * wh,
         display.contentHeight
     )
-    statsLine3:setStrokeColor( unpack( colors.purple ) )
+    statsLine3:setStrokeColor( colors.purple:unpack() )
     statsLine3.strokeWidth = 2
     statsLine3.alpha = 0
     statsLine3.id = "line3"
@@ -288,7 +288,7 @@ function scene:create( event )
     highScoreText.yOut = display.actualContentHeight + 0.5 * highScoreText.height
     highScoreText.x = highScoreText.xOut
     highScoreText.y = highScoreText.yOut
-    highScoreText:setFillColor( unpack( colors.purple ) )
+    highScoreText:setFillColor( colors.purple:unpack() )
     highScoreText.id = "highScoreText"
     controller.addGameOverObject( highScoreText )
 
@@ -308,7 +308,7 @@ function scene:create( event )
     highTimeText.yOut = highScoreText.y
     highTimeText.x = highTimeText.xOut
     highTimeText.y = highTimeText.yOut
-    highTimeText:setFillColor( unpack( colors.purple ) )
+    highTimeText:setFillColor( colors.purple:unpack() )
     highTimeText.id = "highTimeText"
     controller.addGameOverObject( highTimeText )
     ---------------------------------------------------------------------------]

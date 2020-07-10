@@ -160,6 +160,16 @@ local function resumeMusic()
     TIMERS:resumeAllTimers()
 end
 
+---Starts a timer than indicates to play the next track upon completion.
+-- @duration The duration in milliseconds before the next track should begin.
+-- 1 second is subtracted to handle slight variances in timers/durations. We
+-- can subtract any amount less than the length of the track.
+local function startNextPhaseTimer(duration)
+    TIMERS:createTimer(duration - 1000, function(event)
+        shouldGoToNextPhase = true
+    end)
+end
+
 -- Initialization -------------------------------------------------------------[
 audio.reserveChannels(2)
 soundTable = {
@@ -170,8 +180,9 @@ soundTable = {
 -- Public Members -------------------------------------------------------------[
 local v = {}
 
-function v.playMusic()
+function v.playMusic(phaseDuration)
     playMusicFromBeginning()
+    startNextPhaseTimer(phaseDuration)
 end
 
 function v.stopMusic()
@@ -187,8 +198,10 @@ function v.resumeMusic()
     resumeMusic()
 end
 
-function v.nextPhase()
-    shouldGoToNextPhase = true
+function v.nextPhase(phaseDuration)
+    if phaseDuration then
+        startNextPhaseTimer(phaseDuration)
+    end
 end
 
 return v

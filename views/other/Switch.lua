@@ -77,8 +77,8 @@ function Switch:new(params)
         label = params.label1,
         font = fonts.getRegular(),
         fontSize = 28,
-        labelYOffset = params.height*0.06,
-        labelColor = { default = colors.lightBlue },
+        labelYOffset = params.height*0.03,
+        labelColor = { default = colors.lightBlue.rgb },
         onRelease = buttonListener,
     }
     displayGroup:insert(fill1)
@@ -94,8 +94,8 @@ function Switch:new(params)
         label = params.label2,
         font = fonts.getRegular(),
         fontSize = 28,
-        labelYOffset = params.height*0.06,
-        labelColor = { default = colors.lightBlue },
+        labelYOffset = params.height*0.03,
+        labelColor = { default = colors.orange.rgb },
         onRelease = buttonListener,
     }
     displayGroup:insert(fill2)

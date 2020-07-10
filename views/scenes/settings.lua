@@ -12,6 +12,8 @@ local Switch = require("views.other.Switch")
 
 
 --Precalls
+local DESCRIPTION_FONT_SIZE = 45
+
 local drop
 local backArrow
 local lineGroup = display.newGroup()
@@ -87,7 +89,7 @@ function scene:create( event )
         x = 0.3*display.contentWidth,
         y = lineGroup[1].y+0.5*(lineGroup[2].y-lineGroup[1].y),
         font = fonts.getLight(),
-        fontSize = 60,
+        fontSize = DESCRIPTION_FONT_SIZE,
         align = "center",
     }
     
@@ -128,7 +130,7 @@ function scene:create( event )
         x = 0.3*display.contentWidth,
         y = lineGroup[2].y+0.5*(lineGroup[3].y-lineGroup[2].y),
         font = fonts.getLight(),
-        fontSize = 60,
+        fontSize = DESCRIPTION_FONT_SIZE,
         align = "center",
     }
     
@@ -145,7 +147,7 @@ function scene:create( event )
         x = 0.3*display.contentWidth,
         y = lineGroup[3].y+0.5*(lineGroup[4].y-lineGroup[3].y),
         font = fonts.getLight(),
-        fontSize = 60,
+        fontSize = DESCRIPTION_FONT_SIZE,
         align = "center",
     }
     local specialText = display.newText(specialTextOpt)
@@ -161,7 +163,7 @@ function scene:create( event )
         x = 0.3*display.contentWidth,
         y = lineGroup[4].y+0.5*(lineGroup[5].y-lineGroup[4].y),
         font = fonts.getLight(),
-        fontSize = 60,
+        fontSize = DESCRIPTION_FONT_SIZE,
         align = "center",
     }
     
@@ -209,7 +211,7 @@ function scene:create( event )
         x = 0.3*display.contentWidth,
         y = lineGroup[5].y-0.5*(lineGroup[4].y-lineGroup[5].y),
         font = fonts.getLight(),
-        fontSize = 60,
+        fontSize = DESCRIPTION_FONT_SIZE,
         align = "center",
     }
     local methodText = display.newText(methodTextOpt)

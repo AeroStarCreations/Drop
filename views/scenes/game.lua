@@ -271,7 +271,7 @@ local function levelStartListener()
 
     if lvlParams.mode == 1 then
         updateGravityY()
-        sounds.nextPhase()
+        sounds.nextPhase(g.getStormDuration(lvlParams.phase))
         if ld.getChangingBackgroundsEnabled() then
             bg.fadeInNext()
         end
@@ -434,7 +434,7 @@ function scene:startGame()
     startScoreTimer()
     displayStormName()
     bg.fadeOutToDefault()
-    sounds.playMusic()
+    sounds.playMusic(g.getStormDuration(lvlParams.phase))
 
     -- Metrics
     metrics.logEvent("game_started", {

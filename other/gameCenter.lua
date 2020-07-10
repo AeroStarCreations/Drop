@@ -65,7 +65,6 @@ end
 --     "isError":false
 -- }
 local function verifyListener(event)
-    print(TAG, "*** verifyListener ***")
     if not event.isError then
         playerData.keyURL = event.keyURL
         playerData.salt = event.salt
@@ -81,20 +80,19 @@ local function verifyListener(event)
 end
 
 local function gamecenterCallback(event)
-    print(TAG, "*** gamecenterCallback ***\n" .. json.prettify(event))
     if event.data then -- Success
-        print(TAG, "GameCenter SUCCESS")
         if event.type == "init" then
+            print(TAG, "Success: GameCenter initialized")
             gameNetwork.request("loadLocalPlayer", {listener = getPlayerInfoCallback})
             idVerify.getSignature()
             metrics.startTimedEvent("gameCenter_getPlayerInfo")
             metrics.startTimedEvent("gameCenter_getSignature")
         end
     elseif event.errorCode then -- Network failure
-        print("GameCenter ERROR: " .. event.errorMessage)
+        print(TAG, "Failure: GameCenter error: "..event.errorMessage)
         showErrorAlert()
     else -- General failure
-        print("GameCenter FAILURE")
+        print(TAG, "Failure: GameCenter error")
         showAccountAlert()
     end
 

@@ -30,6 +30,8 @@ end
 --------------------------------------------------------------------------------
 ----------------------------------------------------------------Level Parameters
 --------------------------------------------------------------------------------
+-- There's an addition 6 seconds (3*2) for storm name transitions
+local stormNameTransitionTime = 6000
 local singleTime = 30000
 local doubleTime = 12000
 local n = 1
@@ -159,7 +161,9 @@ v.level7AParams = {
 function v.nextLevelParams( phase )
     n = phase
     local p
-    if n == 1 then
+    if n == 0 then
+        p = v.level1AParams
+    elseif n == 1 then
         p = v.level1BParams
     elseif n == 2 then
         p = v.level2AParams
@@ -185,6 +189,20 @@ function v.nextLevelParams( phase )
         p = v.level7AParams
     end
     return p
+end
+
+---Get total duration of the storm (mode 1 and 2)
+function v.getStormDuration(phase)
+    if phase < 1 or phase > 12 then
+        return nil
+    end
+    local phase2
+    if phase % 2 == 0 then
+        phase2 = phase - 1
+    else
+        phase2 = phase + 1
+    end
+    return v.nextLevelParams(phase-1).duration + v.nextLevelParams(phase2-1).duration + stormNameTransitionTime
 end
 
 --------------------------------------------------------------------------------

@@ -175,6 +175,17 @@ settings =
         {
             publisherId = "com.coronalabs"
         },
+        ["plugin.playfab.client"] = 
+        { 
+            publisherId = "com.playfab"
+        },
+        -- Secure GameCenter login with PlayFab
+        -- https://github.com/agramonte/idVerifySig-corona-plugin
+        ["plugin.idVerifySig"] =
+        {
+            publisherId = "com.cabagomez",
+            supportedPlatforms = { iphone=true }
+        },
         -- advertisements.lua
         -- ["CoronaProvider.ads.vungle"] =
         -- {
@@ -217,17 +228,6 @@ settings =
         -- ['plugin.appodeal.beta.Tapjoy'] = { publisherId = 'com.coronalabs' },
         -- ['plugin.appodeal.beta.TwitterMoPub'] = { publisherId = 'com.coronalabs' },
         ----------------------------------------------------------------------------
-        -- The following blocks are for PlayFab
-        ["plugin.playfab.client"] = 
-        { 
-            publisherId = "com.playfab"
-        },
-        -- https://github.com/agramonte/idVerifySig-corona-plugin
-        ["plugin.idVerifySig"] =
-        {
-            publisherId = "com.cabagomez",
-            supportedPlatforms = { iphone=true }
-        },
     },
 }
 -- http://docs.coronalabs.com/guide/distribution/buildSettings/index.html

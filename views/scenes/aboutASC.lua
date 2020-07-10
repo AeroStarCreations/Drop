@@ -54,7 +54,7 @@ function scene:create( event )
     -------------------------"Aero Star Creations"
     local asc = display.newText( group, "Aero Star Creations", display.contentCenterX, 0, fonts.getBold(), 70, "center")
     asc:setFillColor( colors.purple:unpack() )
-    asc.y = drop.y + drop.height + 0.7 * asc.height
+    asc.y = drop.y + drop.height + 0.75 * asc.height
     asc.alphaIn = 1
     asc.alphaOut = 0
     asc.alpha = asc.alphaOut
@@ -62,7 +62,7 @@ function scene:create( event )
     ----------------------------------------------
 
     -----------------------------------------Lines
-    local lineTopY = asc.y - 0.5 * asc.height
+    local lineTopY = asc.y - 0.53 * asc.height
     local lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
     lineTop:setStrokeColor( colors.purple:unpack() )
     lineTop.strokeWidth = 2

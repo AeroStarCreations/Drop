@@ -50,7 +50,7 @@ function scene:create( event )
     -----------------------------------------Line
     local lineTopY = drop.y + 1.2 * drop.height
     local lineTop = display.newLine( group, 0, lineTopY, display.contentWidth, lineTopY )
-    lineTop:setStrokeColor( unpack( colors.purple ) )
+    lineTop:setStrokeColor( colors.purple:unpack() )
     lineTop.strokeWidth = 0
     lineTop.strokeWidthIn = 10
     controller.linkLineTop(lineTop)
