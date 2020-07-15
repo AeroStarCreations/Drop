@@ -6,6 +6,7 @@ local ld = require( "data.localData" )
 local social = require( "other.socialNetworks" )
 local model = require( "models.gameStoppedModel" )
 local metrics = require("other.metrics")
+local stringUtils = require("other.stringUtils")
 local colors = require("other.colors")
 
 local TAG = "gameStoppedController:"
@@ -263,6 +264,26 @@ local function transitionAndSetupSceneBasedOnGameState()
     end
 end
 
+local function getHighScoreText()
+    local key = "HighScore"
+    if not ld.getSpecialDropsEnabled then
+        key = key.."Tricky"
+    end
+    local label = model.getHighScoreText()
+    local score = ld.getHighScore(key)
+    return label..stringUtils.addCommasToNumber(score)
+end
+
+local function getHighTimeText()
+    local key = "HighTime"
+    if not ld.getSpecialDropsEnabled then
+        key = key.."Tricky"
+    end
+    local label = model.getHighTimeText()
+    local time = ld.getHighScore(key)
+    return label..stringUtils.formatTime(time)
+end
+
 -- Public Members -------------------------------------------------------------[
 local v = {}
 
@@ -387,11 +408,11 @@ function v.getCategoryText()
 end
 
 function v.getHighScoreText()
-    return model.getHighScoreText()
+    return getHighScoreText()
 end
 
 function v.getHighTimeText()
-    return model.getHighTimeText()
+    return getHighTimeText()
 end
 
 return v
