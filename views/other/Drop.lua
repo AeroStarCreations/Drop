@@ -66,9 +66,8 @@ local function getDropSpawnX()
 end
 
 local function getID()
-    local id = tostring( dropCounter )
     dropCounter = dropCounter + 1
-    return id
+    return dropCounter
 end
 -------------------------------------------------------------------------------]
 
@@ -129,7 +128,8 @@ end
 function Drop:delete()
     local drop = dropSet[self.id]
     if drop then
-        dropSet[self.id].image:removeSelf()
+        drop.image:removeSelf()
+        drop.image = nil
         dropSet[self.id] = nil
     end
     return drop
@@ -139,30 +139,29 @@ function Drop:deleteWithAnimation()
     local function listener()
         self:delete()
     end
-    transition.to( self.image, { 
-        time = 80, 
-        alpha = 0, 
-        width = self.image.width*2,
-        height = self.image.height*2,
+    transition.to( self.image, {
+        time = 80,
+        alpha = 0,
+        width = self.image.width * 2,
+        height = self.image.height * 2,
         onComplete = listener
     })
 end
 
 function Drop:deleteAll()
-    for k,v in pairs(dropSet) do
-        v:delete()
+    for _,drop in pairs(dropSet) do
+        drop:delete()
     end
     dropSet = {}
 end
 
 function Drop:deleteAllWithAnimation()
-    local interval = 200
+    local interval = 150
     local delay = interval
-    for k,v in pairs(dropSet) do
-        timer.performWithDelay( delay, function() v:deleteWithAnimation() end)
+    for _,drop in pairs(dropSet) do
+        timer.performWithDelay(delay, function() drop:deleteWithAnimation() end)
         delay = delay + interval
     end
-    dropSet = {}
 end
 
 -- converts short code to drop type

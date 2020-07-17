@@ -403,7 +403,7 @@ local function loginListener(result)
     loginCallback = nil
     loginCallbackParams = nil
     stopTimedMetric("playfab_login", result)
-    printResultMessage(result.error, "login", result, true)
+    printResultMessage(result.error, "login", result)
 end
 
 local function loginWithGameCenter(playerData)
