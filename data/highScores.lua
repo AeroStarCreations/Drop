@@ -21,7 +21,7 @@ local function checkHighScore( score, time )
     local leaderboards = model.getLeaderboardNames()
     local isTricky = not ld.getSpecialDropsEnabled()
 
-    for k, board in pairs(leaderboards) do
+    for _, board in pairs(leaderboards) do
         if isTricky == board.isTricky then
             local value = score
             if board.type == "time" then
@@ -29,7 +29,7 @@ local function checkHighScore( score, time )
             end
             if ld.isHighScore(board.name, value) then
                 sd.updateLeaderboard(score, time, isTricky, sendToLeaderboardCallback)
-                break -- We break here because sd.updateLeaderboard() will send all value to PlayFab
+                break -- We break here because sd.updateLeaderboard() will send all values (score and time) to PlayFab
             end
         end
     end
