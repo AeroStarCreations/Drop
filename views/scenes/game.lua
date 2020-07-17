@@ -15,7 +15,7 @@ local fonts = require("other.fonts")
 local colors = require("other.colors")
 local stringUtils = require("other.stringUtils")
 
-local arrowIsWorking = false
+local arrowIsWorking = true
 
 --Precalls
 local arrow
@@ -452,6 +452,7 @@ function scene:resumeGame()
     transition.resume()
     physics.start()
     system.setAccelerometerInterval( 50 )
+    iconLivesText.text = ld.getLives()
 
     -- Metrics
     metrics.logEvent("game_resumed")
