@@ -15,7 +15,7 @@ local fonts = require("other.fonts")
 local colors = require("other.colors")
 local stringUtils = require("other.stringUtils")
 
-local arrowIsWorking = true
+local arrowIsWorking = false
 
 --Precalls
 local arrow
@@ -417,6 +417,7 @@ function scene:startGame()
     scoreText.text = "0"
     playTime.text = "0:00"
     iconLivesText.text = ld.getLives()
+    iconInvinceText.text = ld.getInvincibility()
 
     -- Set Visibility/Enabled
     -- header.isVisible = true
@@ -453,6 +454,7 @@ function scene:resumeGame()
     physics.start()
     system.setAccelerometerInterval( 50 )
     iconLivesText.text = ld.getLives()
+    iconInvinceText.text = ld.getInvincibility()
 
     -- Metrics
     metrics.logEvent("game_resumed")
